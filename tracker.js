@@ -39,7 +39,7 @@ const d = date instanceof Date ? date : new Date(date);
 return `${d.getUTCMonth()+1}/${d.getUTCDate()}/${d.getUTCFullYear()}`;
 }
 function formatHoldDate(str) {
-if (!str) return '\u2014';
+if (!str) return '—';
 const [y,m,d] = str.split('-');
 return `${parseInt(m)}/${parseInt(d)}/${y}`;
 }
@@ -50,7 +50,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
+// ── Auto-setup: check if repo exists, create it + seed data files ──
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -60,7 +60,7 @@ return res.ok;
 }
 async function bootstrapRepo(statusCb) {
 // 1) Create private repo
-statusCb('Creating your private data repo\u2026');
+statusCb('Creating your private data repo…');
 const createRes = await fetch('https://api.github.com/user/repos', {
 method: 'POST',
 headers: {
@@ -85,10 +85,10 @@ await new Promise(r => setTimeout(r, 1500));
 const seeds = [
 { path: PATHS.prospects, data: [],  msg: 'Seed prospects.json' },
 { path: PATHS.focus,     data: [],  msg: 'Seed focus.json' },
-{ path: PATHS.settings,  data: { initialScanComplete: false },  msg: 'Seed settings.json' }
+{ path: PATHS.settings,  data: { initialScanStartDate: null },  msg: 'Seed settings.json' }
 ];
 for (const seed of seeds) {
-statusCb(`Creating ${seed.path}\u2026`);
+statusCb(`Creating ${seed.path}…`);
 const content = btoa(unescape(encodeURIComponent(JSON.stringify(seed.data, null, 2))));
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}/contents/${seed.path}`,
@@ -107,7 +107,7 @@ const txt = await res.text();
 throw new Error(`Failed to create ${seed.path}: ${txt}`);
 }
 }
-statusCb('Setup complete \u2014 loading tracker\u2026');
+statusCb('Setup complete — loading tracker…');
 }
 async function ghRead(path) {
 const res = await fetch(
@@ -172,13 +172,13 @@ const errEl       = document.getElementById('setupError');
 errEl.classList.remove('visible');
 // Validate @gusto.com email
 if (!workEmail.toLowerCase().endsWith('@gusto.com')) {
-errEl.textContent = '\u274C Please use your @gusto.com work email address.';
+errEl.textContent = '❌ Please use your @gusto.com work email address.';
 errEl.classList.add('visible');
 return;
 }
 // Validate Salesforce ID format (starts with 005, 15 or 18 chars)
 if (!/^005[a-zA-Z0-9]{12,15}$/.test(sfId)) {
-errEl.textContent = '\u274C Salesforce User ID should start with "005" and be 15\u201318 characters. Click the ? for help finding it.';
+errEl.textContent = '❌ Salesforce User ID should start with "005" and be 15–18 characters. Click the ? for help finding it.';
 errEl.classList.add('visible');
 return;
 }
@@ -189,7 +189,7 @@ const showStatus = (msg) => { if (statusEl) { statusEl.textContent = msg; status
 const hideStatus = ()    => { if (statusEl) { statusEl.style.display = 'none'; } };
 try {
 // Check whether the data repo already exists
-showStatus('Checking GitHub connection\u2026');
+showStatus('Checking GitHub connection…');
 const repoExists = await checkRepoExists();
 if (!repoExists) {
 // Auto-create repo + seed files for first-time users
@@ -208,7 +208,7 @@ hideSetupScreen();
 renderAll();
 } catch (err) {
 hideStatus();
-errEl.textContent = '\u274C ' + err.message + ' \u2014 Check your username and token, then try again.';
+errEl.textContent = '❌ ' + err.message + ' — Check your username and token, then try again.';
 errEl.classList.add('visible');
 _owner = '';
 _token = '';
@@ -227,7 +227,7 @@ localStorage.removeItem('pt_owner');
 location.reload();
 }
 async function loadAll() {
-setSyncStatus('saving', 'Loading\u2026');
+setSyncStatus('saving', 'Loading…');
 const [p, f, s] = await Promise.all([
 ghRead(PATHS.prospects),
 ghRead(PATHS.focus),
@@ -239,7 +239,7 @@ dailyFocus  = f.data;
 _fSHA       = f.sha;
 appSettings = { ...defaultSettings(), ...s.data };
 _sSHA       = s.sha;
-setSyncStatus('saved', 'Synced \u2713');
+setSyncStatus('saved', 'Synced ✓');
 }
 function normalizeProspect(p) {
 return { ...p, date: new Date(p.date + 'T00:00:00Z'), priority: p.priority || 0 };
@@ -255,12 +255,12 @@ salesforceId:  ''
 };
 }
 function scheduleSave() {
-setSyncStatus('saving', 'Saving\u2026');
+setSyncStatus('saving', 'Saving…');
 clearTimeout(_saveTimer);
 _saveTimer = setTimeout(doSaveProspects, 2000);
 }
 function scheduleFocusSave() {
-setSyncStatus('saving', 'Saving\u2026');
+setSyncStatus('saving', 'Saving…');
 clearTimeout(_focusSaveT);
 _focusSaveT = setTimeout(doSaveFocus, 2000);
 }
@@ -271,9 +271,9 @@ const serialized = prospects.map(p => ({
 date: p.date.toISOString().split('T')[0]
 }));
 _pSHA = await ghWrite(PATHS.prospects, serialized, _pSHA, 'Update prospects');
-setSyncStatus('saved', 'Saved \u2713');
+setSyncStatus('saved', 'Saved ✓');
 } catch (err) {
-setSyncStatus('error', '\u26A0 Save failed \u2014 click to retry');
+setSyncStatus('error', '⚠ Save failed — click to retry');
 document.getElementById('syncBadge').onclick = doSaveProspects;
 console.error(err);
 }
@@ -281,9 +281,9 @@ console.error(err);
 async function doSaveFocus() {
 try {
 _fSHA = await ghWrite(PATHS.focus, dailyFocus, _fSHA, 'Update daily focus');
-setSyncStatus('saved', 'Saved \u2713');
+setSyncStatus('saved', 'Saved ✓');
 } catch (err) {
-setSyncStatus('error', '\u26A0 Save failed \u2014 click to retry');
+setSyncStatus('error', '⚠ Save failed — click to retry');
 document.getElementById('syncBadge').onclick = doSaveFocus;
 console.error(err);
 }
@@ -409,7 +409,7 @@ row.innerHTML = `
 <div style="font-weight:600;">${esc(p.name)}</div>
 <div style="font-size:11px;color:var(--text-secondary);">${esc(p.company||'')} ${p.email ? '\u00B7 ' + esc(p.email) : ''}</div>
 </td>
-<td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '\u2014'}</td>
+<td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '—'}</td>
 <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
@@ -617,7 +617,7 @@ return { allowed: false, reason: 'No Salesforce ID configured for this tracker. 
 if (trackerOwner.toLowerCase() !== (leadOwnerId || '').toLowerCase()) {
 return {
 allowed: false,
-reason: `\u26A0 Ownership mismatch: this tracker belongs to "${trackerOwner}" but the Salesforce lead is owned by "${leadOwnerId}". Task creation blocked.`
+reason: `⚠ Ownership mismatch: this tracker belongs to "${trackerOwner}" but the Salesforce lead is owned by "${leadOwnerId}". Task creation blocked.`
 };
 }
 return { allowed: true, reason: 'Ownership verified.' };
@@ -641,7 +641,7 @@ renderAll();
 showSetupScreen();
 document.getElementById('setupOwner').value = _owner;
 const errEl = document.getElementById('setupError');
-errEl.textContent = '\u26A0 Session expired or token invalid. Please reconnect.';
+errEl.textContent = '⚠ Session expired or token invalid. Please reconnect.';
 errEl.classList.add('visible');
 }
 })();

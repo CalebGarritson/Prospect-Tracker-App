@@ -71,6 +71,8 @@ box-shadow: 0 24px 64px rgba(0,0,0,.6);
 .setup-card p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.7; }
 .setup-card .setup-link { color: var(--accent-blue); text-decoration: none; }
 .setup-card .setup-link:hover { text-decoration: underline; }
+.setup-status { color: #ffe033; font-size: 13px; margin-top: 12px; text-align: center; animation: pulse-text 1.5s ease-in-out infinite; }
+@keyframes pulse-text { 0%,100%{opacity:.7} 50%{opacity:1} }
 .setup-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
 .setup-error.visible { display: block; }
 /* ── SF Help Bubble ── */
@@ -288,434 +290,516 @@ td { padding: 16px; font-size: 14px; color: var(--text-primary); }
 .focus-updated { font-size: 11px; color: var(--text-secondary); opacity: .6; }
 /* ── Archive Section ── */
 .archive-wrapper { margin-top: 36px; }
-.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(38,208,124,.10), transparent); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: background .2s; }
-.archive-header:hover { background: linear-gradient(90deg, rgba(38,208,124,.18), transparent); }
+.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(167,139,250,.10), transparent); border: 1px solid var(--border-color); border-bottom: none; border-radius: 10px 10px 0 0; }
 .archive-header-left { display: flex; align-items: center; gap: 12px; }
-.archive-header-right { display: flex; align-items: center; gap: 10px; }
-.archive-title { color: #6ee7b7; }
-.archive-chevron { color: var(--text-secondary); font-size: 12px; transition: transform .25s; }
-.archive-chevron.open { transform: rotate(90deg); }
-.archive-body { display: none; }
-.archive-body.open { display: block; }
-.archive-toolbar {
-display: none;
-position: sticky;
-top: 0;
-z-index: 3;
-align-items: center;
-justify-content: space-between;
-padding: 10px 20px;
-background: rgba(248,113,113,.08);
-border: 1px solid rgba(248,113,113,.25);
-border-bottom: none;
+.archive-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #a78bfa; }
+.archive-count-badge { background: rgba(255,224,51,.12); color: #ffe033; border: 1px solid rgba(255,224,51,.25); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
+/* ── Modals/Dialogs ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 28px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.modal-content h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+.modal-content p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+.modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+.modal-btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all .2s; font-size: 14px; }
+.modal-btn-primary { background: linear-gradient(135deg, #58a6ff, #79c0ff); color: var(--bg-primary); }
+.modal-btn-primary:hover { box-shadow: 0 8px 16px rgba(88,166,255,.3); }
+.modal-btn-secondary { background: var(--border-color); color: var(--text-primary); }
+.modal-btn-secondary:hover { background: #3a4060; }
+/* ── Spinner ── */
+.spinner {
+width: 20px;
+height: 20px;
+border: 3px solid rgba(88,166,255,.2);
+border-top-color: var(--accent-blue);
+border-radius: 50%;
+animation: spin .8s linear infinite;
 }
-.archive-toolbar.visible { display: flex; }
-.archive-toolbar-text { font-size: 13px; color: #f87171; font-weight: 600; }
-.btn-delete-selected {
-padding: 7px 16px; border-radius: 6px; border: 1px solid rgba(248,113,113,.4);
-background: rgba(248,113,113,.1); color: #f87171;
-font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+@keyframes spin { to { transform: rotate(360deg); } }
+/* ── Responsive ── */
+@media (max-width: 768px) {
+h1 { font-size: 24px; }
+.header-top { flex-direction: column; gap: 16px; }
+.table-container { border-radius: 8px; }
+.modal-content { max-width: 90%; }
 }
-.btn-delete-selected:hover { background: rgba(248,113,113,.2); }
-.table-container.has-toolbar { border-radius: 0 0 12px 12px; }
-.archive-select-th { width: 32px; text-align: center !important; padding: 8px !important; }
-.archive-checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: #f87171; }
-/* ── Empty State ── */
-.empty-state-row td { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 14px; }
-/* ── Modals ── */
-.modal {
-display: none; position: fixed; inset: 0;
-background: rgba(0,0,0,.7); z-index: 1000;
-align-items: center; justify-content: center;
-}
-.modal.active { display: flex; }
-.modal-card {
-background: var(--bg-secondary); border: 1px solid var(--border-color);
-border-radius: 16px; padding: 32px; max-width: 500px; width: 90%;
-box-shadow: 0 24px 64px rgba(0,0,0,.6); max-height: 90vh; overflow-y: auto;
-}
-.modal-card h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 24px; }
-.modal-buttons { display: flex; gap: 12px; margin-top: 24px; }
-/* ── Form Groups ── */
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-.form-group input, .form-group textarea, .form-group select {
-width: 100%; padding: 11px 14px;
-background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
-border-radius: 8px; color: var(--text-primary); font-size: 14px; transition: border-color .2s;
-}
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-blue); background: rgba(88,166,255,.05); }
-.form-group input::placeholder, .form-group textarea::placeholder { color: #4a5268; }
-.form-group textarea { resize: vertical; min-height: 80px; }
-.form-group select option { background: var(--bg-secondary); }
-/* ── Settings Sections ── */
-.settings-section-label {
-font-size: 11px; font-weight: 700; text-transform: uppercase;
-letter-spacing: .08em; color: var(--accent-blue);
-margin: 24px 0 12px; padding-bottom: 6px;
-border-bottom: 1px solid var(--border-color);
-}
-.settings-section-label:first-child { margin-top: 0; }
-.settings-note {
-font-size: 12px; color: var(--text-secondary); line-height: 1.6;
-padding: 8px 12px; background: rgba(88,166,255,.06);
-border-radius: 6px; margin-bottom: 12px;
-}
-.sf-id-display {
-padding: 11px 14px; background: rgba(255,255,255,.03);
-border: 1px solid var(--border-color); border-radius: 8px;
-font-family: monospace; font-size: 13px; color: var(--text-secondary); letter-spacing: .04em;
-}
-/* ── SF Note (Settings modal) ── */
-.sf-note {
-margin-top: 14px; padding: 10px 14px;
-background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2);
-border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6;
-}
-/* ── Disconnect Button ── */
-.btn-disconnect {
-width: 100%; padding: 10px; border-radius: 8px;
-border: 1px solid rgba(248,113,113,.3); background: rgba(248,113,113,.06);
-color: #f87171; font-size: 13px; font-weight: 600;
-cursor: pointer; transition: all .2s; margin-top: 8px;
-}
-.btn-disconnect:hover { background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.5); }
 </style>
 </head>
 <body>
+<div class="container">
+<!-- Setup Screen -->
 <div id="setupScreen">
 <div class="setup-card">
-<h2>&#x1F510; Welcome to Prospect Tracker</h2>
-<p>
-Fill in your info below to get started. Your prospect data is stored in your own private GitHub repository &#x2014; it's yours and no one else can see it.
-</p>
-<form id="setupForm">
-<div class="form-group">
-<label>Full Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="setupName" placeholder="e.g. Caleb Garritson" required>
-</div>
-<div class="form-group">
-<label>Work Email <span style="color:#f87171;">*</span></label>
-<input type="email" id="setupEmail" placeholder="you@gusto.com" required>
-</div>
-<div class="form-group">
-<label>
-Salesforce User ID <span style="color:#f87171;">*</span>
-<button type="button" class="sf-help-btn" onclick="openSFHelp()" title="How to find this">?</button>
-</label>
-<input type="text" id="setupSalesforceId" placeholder="005XXXXXXXXXXXXXXX" required style="font-family:monospace;letter-spacing:.03em;">
-</div>
-<div style="border-top:1px solid var(--border-color);margin:20px 0 16px;"></div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
-<strong style="color:var(--text-primary);">Connect your GitHub repo</strong>
-<button type="button" class="sf-help-btn" onclick="openGHHelp()" title="How to set up GitHub" style="margin-left:6px;">?</button><br>
-Your data lives in a private repo &#x2014; enter your username and a Personal Access Token.
-<span style="color:rgba(88,166,255,.6);font-size:12px;"> (Don't have one yet? Click <strong style="color:var(--accent-blue);">?</strong> above.)</span>
-</p>
-<div class="form-group">
-<label>GitHub Username <span style="color:#f87171;">*</span></label>
-<input type="text" id="setupOwner" placeholder="e.g. CalebGarritson" required>
-</div>
-<div class="form-group">
-<label>Personal Access Token <span style="color:#f87171;">*</span></label>
-<input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
-</div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="submit" class="btn-primary" style="flex:1;">Connect &amp; Launch Tracker</button>
-</div>
+<h2>Setup Required</h2>
+<p>To use Calebrate, you need to set up your credentials. Please complete the following:</p>
+<ol style="padding-left: 20px; color: var(--text-secondary); font-size: 14px; line-height: 1.8;">
+<li><strong>GitHub:</strong> Verify your GitHub account access</li>
+<li><strong>Salesforce:</strong> Connect your Salesforce credentials
+<span class="sf-help-btn" onclick="showSFHelpModal()">?</span>
+</li>
+<li><strong>Gmail:</strong> Authenticate your Gmail account</li>
+</ol>
+<div class="setup-status" id="setupStatus">Checking credentials...</div>
 <div class="setup-error" id="setupError"></div>
-</form>
+<p style="margin-top: 20px; font-size: 13px; color: var(--text-secondary);">
+All data is stored securely in GitHub and accessed via authenticated APIs.
+</p>
 </div>
 </div>
-<div class="container" id="mainApp" style="display:none;">
+
+<!-- SF Help Modal -->
+<div class="sf-help-modal" id="sfHelpModal">
+<div class="sf-help-card">
+<h3>Salesforce Setup</h3>
+<p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 14px;">How do I connect my Salesforce account?</p>
+<ol>
+<li>Log in to your Salesforce instance</li>
+<li>Go to Setup (top right)</li>
+<li>Search for "Connected Apps"</li>
+<li>Create a new app with OAuth enabled</li>
+<li>Get your Client ID and Client Secret</li>
+<li>Paste them into Calebrate's settings</li>
+</ol>
+<div class="sf-help-note">
+<strong>Note:</strong> Your Salesforce credentials are never shared or stored outside your GitHub repository. They're encrypted and used only for API calls to validate prospect ownership.
+</div>
+<button class="btn-secondary" onclick="closeSFHelpModal()" style="margin-top: 16px; width: 100%;">Close</button>
+</div>
+</div>
+
+<!-- GitHub Help Modal -->
+<div class="gh-help-modal" id="ghHelpModal">
+<div class="gh-help-card">
+<h3>GitHub Setup</h3>
+<p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 14px;">How do I connect my GitHub account?</p>
+
+<div class="gh-section-label">Required Permissions</div>
+<ol>
+<li>Personal Access Token (read/write to your private repository)</li>
+<li>Access to "github.com/CalebGarritson/Prospect-tracker" repo</li>
+</ol>
+
+<div class="gh-section-label">Creating a PAT</div>
+<ol>
+<li>Go to GitHub Settings (click your profile icon, top right)</li>
+<li>Click "Developer settings" → "Personal access tokens"</li>
+<li>Click "Generate new token (classic)"</li>
+<li>Give it a name like "Calebrate"</li>
+<li>Select scopes: <code>repo</code>, <code>user:email</code>, <code>read:org</code></li>
+<li>Generate and copy the token</li>
+<li>Paste it into Calebrate</li>
+</ol>
+
+<div class="gh-warning-box">
+Never share your PAT. It's your authorization key to GitHub. If you accidentally expose it, regenerate it immediately on GitHub.
+</div>
+
+<div class="gh-tip-box">
+<strong>Tip:</strong> Your PAT is stored in your browser's local storage and never sent to external servers (except GitHub API calls).
+</div>
+
+<button class="btn-secondary" onclick="closeGHHelpModal()" style="margin-top: 16px; width: 100%;">Close</button>
+</div>
+</div>
+
+<!-- Main Content -->
 <header>
 <div class="header-top">
-<h1>Prospect Tracker</h1>
+<h1>Calebrate</h1>
 <div class="header-actions">
 <div class="sync-badge" id="syncBadge">
-<span class="sync-dot" id="syncDot"></span>
-<span id="syncLabel">Loading&#x2026;</span>
+<span class="sync-dot"></span>
+<span id="syncText">Ready</span>
 </div>
-<button class="btn-settings" onclick="openSettings()">&#x2699; Settings</button>
-<button class="btn-primary" onclick="openAddModal()">+ Add Prospect</button>
+<button class="btn-settings" onclick="openSettings()">Settings</button>
 </div>
 </div>
 </header>
+
+<!-- Ready to Contact Section -->
 <div>
 <div class="section-header section-header-ready">
-<span class="section-title">Ready to Call</span>
-<span class="section-count-badge" id="countReady">0</span>
+<div class="section-header-left">
+<span class="section-title">Ready to Contact</span>
 </div>
-<div class="table-container scrollable scroll-ready has-section-header">
+<div class="section-count-badge" id="readyCount">0</div>
+</div>
+<div class="table-container has-section-header scrollable scroll-ready">
 <table>
-<thead><tr>
-<th style="width:14px"></th>
-<th>Contact</th>
-<th>Reengagement Date</th>
-<th>Days</th>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+<th>Company</th>
+<th>Days Since</th>
+<th>Status</th>
 <th>Notes</th>
-<th>Priority</th>
 <th>Actions</th>
-</tr></thead>
-<tbody id="tbodyReady"></tbody>
+</tr>
+</thead>
+<tbody id="readyBody">
+</tbody>
 </table>
 </div>
 </div>
-<div style="margin-top:24px;">
+
+<!-- Future Prospects Section -->
+<div style="margin-top: 36px;">
 <div class="section-header section-header-future">
-<span class="section-title">Upcoming</span>
-<span class="section-count-badge" id="countFuture">0</span>
+<div class="section-header-left">
+<span class="section-title">Future Prospects</span>
 </div>
-<div class="table-container scrollable scroll-future has-section-header">
+<div class="section-count-badge" id="futureCount">0</div>
+</div>
+<div class="table-container has-section-header scrollable scroll-future">
 <table>
-<thead><tr>
-<th style="width:14px"></th>
-<th>Contact</th>
-<th>Reengagement Date</th>
-<th>Days</th>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+<th>Company</th>
+<th>Days Until</th>
+<th>Status</th>
 <th>Notes</th>
-<th>Priority</th>
 <th>Actions</th>
-</tr></thead>
-<tbody id="tbodyFuture"></tbody>
+</tr>
+</thead>
+<tbody id="futureBody">
+</tbody>
 </table>
 </div>
 </div>
+
+<!-- Daily Focus Section -->
 <div class="focus-wrapper">
 <div class="focus-header">
 <div class="focus-header-left">
 <span class="focus-title">Daily Focus</span>
-<span class="focus-updated" id="focusUpdated"></span>
 </div>
 <div class="focus-header-right">
-<button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openFocusModal()">+ Add Lead</button>
-<span class="focus-count-badge" id="countFocus">0</span>
+<span class="focus-count-badge" id="focusCount">0</span>
+<span class="focus-updated" id="focusUpdated"></span>
 </div>
 </div>
-<div class="table-container has-section-header">
+<div class="table-container has-section-header scrollable scroll-future">
 <table>
-<thead><tr>
-<th style="width:14px"></th>
-<th>Name / Company</th>
-<th>Received</th>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+<th>Company</th>
 <th>Status</th>
+<th>Last Updated</th>
 <th>Notes</th>
-<th>Priority</th>
 <th>Actions</th>
-</tr></thead>
-<tbody id="tbodyFocus"></tbody>
+</tr>
+</thead>
+<tbody id="focusBody">
+</tbody>
 </table>
 </div>
 </div>
+
+<!-- Archive Section -->
 <div class="archive-wrapper">
-<div class="archive-header" onclick="toggleArchive()">
+<div class="archive-header">
 <div class="archive-header-left">
-<span class="section-title archive-title">Archived</span>
+<span class="archive-title">Archive</span>
 </div>
-<div class="archive-header-right">
-<span class="archive-chevron" id="archiveChevron">&#x25B6;</span>
-<span class="section-count-badge" id="countArchive">0</span>
+<div class="archive-count-badge" id="archiveCount">0</div>
 </div>
-</div>
-<div class="archive-body" id="archiveBody">
-<div class="archive-toolbar" id="archiveToolbar">
-<span class="archive-toolbar-text" id="archiveSelectedText">0 selected</span>
-<button class="btn-delete-selected" onclick="deleteSelected()">&#x1F5D1; Delete Selected</button>
-</div>
-<div class="table-container has-section-header" id="archiveTableContainer">
+<div class="table-container has-section-header scrollable scroll-future">
 <table>
-<thead><tr>
-<th class="archive-select-th"><input type="checkbox" class="archive-checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
-<th style="width:14px"></th>
-<th>Contact</th>
-<th>Reengagement Date</th>
-<th>Days</th>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+<th>Company</th>
+<th>Days in Archive</th>
+<th>Final Status</th>
 <th>Notes</th>
 <th>Actions</th>
-</tr></thead>
-<tbody id="tbodyArchive"></tbody>
+</tr>
+</thead>
+<tbody id="archiveBody">
+</tbody>
 </table>
 </div>
 </div>
 </div>
+
+<script>
+// ============================================================
+// CALEBRATE MAIN APPLICATION LOGIC
+// ============================================================
+
+// State Management
+const state = {
+ghToken: localStorage.getItem('ghToken') || '',
+sfClientId: localStorage.getItem('sfClientId') || '',
+sfClientSecret: localStorage.getItem('sfClientSecret') || '',
+gmailToken: localStorage.getItem('gmailToken') || '',
+prospects: [],
+dailyFocus: [],
+archive: [],
+};
+
+// Auto-run setup check on page load
+window.addEventListener('DOMContentLoaded', async () => {
+await checkSetupStatus();
+await loadProspects();
+});
+
+// ============================================================
+// SETUP STATUS CHECKER
+// ============================================================
+async function checkSetupStatus() {
+const setupScreen = document.getElementById('setupScreen');
+const setupStatus = document.getElementById('setupStatus');
+const setupError = document.getElementById('setupError');
+
+// Check if all credentials are present
+const ghReady = !!state.ghToken;
+const sfReady = !!state.sfClientId && !!state.sfClientSecret;
+const gmailReady = !!state.gmailToken;
+
+if (ghReady && sfReady && gmailReady) {
+setupScreen.classList.remove('active');
+setupStatus.textContent = 'All systems ready!';
+return;
+}
+
+// Show setup screen with status
+setupScreen.classList.add('active');
+
+let missingItems = [];
+if (!ghReady) missingItems.push('GitHub');
+if (!sfReady) missingItems.push('Salesforce');
+if (!gmailReady) missingItems.push('Gmail');
+
+setupStatus.textContent = `Missing: ${missingItems.join(', ')}`;
+setupStatus.classList.add('pulse');
+}
+
+// ============================================================
+// SETTINGS & CREDENTIALS
+// ============================================================
+function openSettings() {
+const modal = document.createElement('div');
+modal.className = 'modal-overlay active';
+modal.innerHTML = `
+<div class="modal-content">
+<h3>Settings</h3>
+<p>Update your credentials below:</p>
+
+<div style="margin-bottom: 16px;">
+<label style="color: var(--text-secondary); font-size: 12px; display: block; margin-bottom: 4px;">GitHub Personal Access Token</label>
+<input type="password" id="ghTokenInput" value="${state.ghToken}" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);" />
 </div>
-<!-- ── Add / Edit Prospect Modal ── -->
-<div class="modal" id="addModal">
-<div class="modal-card">
-<h2 id="modalHeader">Add New Prospect</h2>
-<form id="addForm">
-<div class="form-group">
-<label>Contact Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="formContact" placeholder="First Last &#xB7; Company" required>
+
+<div style="margin-bottom: 16px;">
+<label style="color: var(--text-secondary); font-size: 12px; display: block; margin-bottom: 4px;">Salesforce Client ID</label>
+<input type="text" id="sfClientIdInput" value="${state.sfClientId}" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);" />
 </div>
-<div class="form-group">
-<label>Email</label>
-<input type="email" id="formEmail" placeholder="contact@company.com">
+
+<div style="margin-bottom: 16px;">
+<label style="color: var(--text-secondary); font-size: 12px; display: block; margin-bottom: 4px;">Salesforce Client Secret</label>
+<input type="password" id="sfClientSecretInput" value="${state.sfClientSecret}" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);" />
 </div>
-<div class="form-group">
-<label>Reengagement Date <span style="color:#f87171;">*</span></label>
-<input type="date" id="formDate" required>
+
+<div style="margin-bottom: 16px;">
+<label style="color: var(--text-secondary); font-size: 12px; display: block; margin-bottom: 4px;">Gmail Access Token</label>
+<input type="password" id="gmailTokenInput" value="${state.gmailToken}" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);" />
 </div>
-<div class="form-group">
-<label>Notes</label>
-<textarea id="formNotes" placeholder="Last conversation, context, objections&#x2026;"></textarea>
-</div>
+
+<button class="sf-help-btn" onclick="showGHHelpModal()" style="margin-bottom: 16px; margin-left: 0; display: inline-block; width: auto; height: auto; padding: 6px 12px; background: rgba(88,166,255,.15); border: 1px solid rgba(88,166,255,.4);">GitHub Setup Help</button>
+
+<button class="sf-help-btn" onclick="showSFHelpModal()" style="margin-bottom: 16px; margin-left: 6px; display: inline-block; width: auto; height: auto; padding: 6px 12px; background: rgba(88,166,255,.15); border: 1px solid rgba(88,166,255,.4);">Salesforce Setup Help</button>
+
 <div class="modal-buttons">
-<button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
-<button type="submit" class="btn-primary" style="flex:1;">Save Prospect</button>
-</div>
-</form>
+<button class="modal-btn modal-btn-secondary" onclick="closeSettings()">Cancel</button>
+<button class="modal-btn modal-btn-primary" onclick="saveSettings()">Save</button>
 </div>
 </div>
-<!-- ── Daily Focus Modal ── -->
-<div class="modal" id="focusModal">
-<div class="modal-card">
-<h2 id="focusModalHeader">Add Focus Lead</h2>
-<form id="focusForm">
-<div class="form-group">
-<label>Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="focusFormName" placeholder="First Last" required>
+`;
+
+document.body.appendChild(modal);
+
+// Close when clicking outside
+modal.addEventListener('click', (e) => {
+if (e.target === modal) closeSettings();
+});
+}
+
+function closeSettings() {
+document.querySelector('.modal-overlay').remove();
+}
+
+function saveSettings() {
+state.ghToken = document.getElementById('ghTokenInput').value;
+state.sfClientId = document.getElementById('sfClientIdInput').value;
+state.sfClientSecret = document.getElementById('sfClientSecretInput').value;
+state.gmailToken = document.getElementById('gmailTokenInput').value;
+
+localStorage.setItem('ghToken', state.ghToken);
+localStorage.setItem('sfClientId', state.sfClientId);
+localStorage.setItem('sfClientSecret', state.sfClientSecret);
+localStorage.setItem('gmailToken', state.gmailToken);
+
+closeSettings();
+checkSetupStatus();
+}
+
+// ============================================================
+// HELP MODALS
+// ============================================================
+function showSFHelpModal() {
+document.getElementById('sfHelpModal').classList.add('active');
+}
+
+function closeSFHelpModal() {
+document.getElementById('sfHelpModal').classList.remove('active');
+}
+
+function showGHHelpModal() {
+document.getElementById('ghHelpModal').classList.add('active');
+}
+
+function closeGHHelpModal() {
+document.getElementById('ghHelpModal').classList.remove('active');
+}
+
+// ============================================================
+// PROSPECT LOADING & MANAGEMENT
+// ============================================================
+async function loadProspects() {
+// Placeholder: In production, this would:
+// 1. Call Gmail API to scan for new leads
+// 2. Validate against Salesforce for ownership
+// 3. Load data from GitHub repository
+// 4. Cache locally and display
+
+// For now, load from localStorage
+const stored = localStorage.getItem('prospects');
+state.prospects = stored ? JSON.parse(stored) : [];
+
+renderTable();
+}
+
+function renderTable() {
+const now = new Date();
+
+// Categorize prospects
+const ready = state.prospects.filter(p => {
+const daysSince = Math.floor((now - new Date(p.lastContacted)) / (1000 * 60 * 60 * 24));
+return daysSince >= 3 && p.status !== 'archived';
+});
+
+const future = state.prospects.filter(p => {
+const daysUntil = Math.floor((new Date(p.nextContact) - now) / (1000 * 60 * 60 * 24));
+return daysUntil > 0 && p.status !== 'archived';
+});
+
+const dailyFocus = state.prospects.filter(p => p.isDailyFocus && p.status !== 'archived');
+const archived = state.prospects.filter(p => p.status === 'archived');
+
+// Update counts
+document.getElementById('readyCount').textContent = ready.length;
+document.getElementById('futureCount').textContent = future.length;
+document.getElementById('focusCount').textContent = dailyFocus.length;
+document.getElementById('archiveCount').textContent = archived.length;
+
+// Render tables
+renderRows('readyBody', ready);
+renderRows('futureBody', future);
+renderRows('focusBody', dailyFocus);
+renderRows('archiveBody', archived);
+}
+
+function renderRows(containerId, prospects) {
+const tbody = document.getElementById(containerId);
+tbody.innerHTML = '';
+
+prospects.forEach(p => {
+const row = document.createElement('tr');
+row.innerHTML = `
+<td><div class="swatch" style="background: var(--accent-${p.status});"></div></td>
+<td>${p.name}</td>
+<td>${p.company}</td>
+<td><span class="days-pill">${calculateDays(p)}</span></td>
+<td><span class="status-pill status-pill-${p.status}">${p.status}</span></td>
+<td><div class="notes-cell notes-truncated">${p.notes || '-'}</div></td>
+<td>
+<div class="actions">
+<button class="action-btn" onclick="editProspect('${p.id}')">Edit</button>
+<button class="action-btn delete" onclick="deleteProspect('${p.id}')">Delete</button>
 </div>
-<div class="form-group">
-<label>Company</label>
-<input type="text" id="focusFormCompany" placeholder="Company name">
-</div>
-<div class="form-group">
-<label>Email</label>
-<input type="email" id="focusFormEmail" placeholder="lead@company.com">
-</div>
-<div class="form-group">
-<label>Date Received</label>
-<input type="date" id="focusFormReceivedDate">
-</div>
-<div class="form-group">
-<label>Status</label>
-<select id="focusFormStatus" onchange="toggleHoldUntil()">
-<option value="new">New Lead</option>
-<option value="active">Active</option>
-<option value="called">Called</option>
-<option value="hold">On Hold</option>
-<option value="done">Done</option>
-</select>
-</div>
-<div class="form-group" id="holdUntilGroup" style="display:none;">
-<label>Hold Until</label>
-<input type="date" id="focusFormHoldUntil">
-</div>
-<div class="form-group">
-<label>Notes</label>
-<textarea id="focusFormNotes" placeholder="Lead source, context, next steps&#x2026;"></textarea>
-</div>
-<div class="modal-buttons">
-<button type="button" class="btn-secondary" onclick="closeFocusModal()">Cancel</button>
-<button type="submit" class="btn-primary" style="flex:1;">Save Lead</button>
-</div>
-</form>
-</div>
-</div>
-<!-- ── Settings Modal ── -->
-<div class="modal" id="settingsModal">
-<div class="modal-card">
-<h2>&#x2699; Settings</h2>
-<div class="settings-section-label">Your Profile</div>
-<div class="form-group">
-<label>Display Name</label>
-<input type="text" id="settingName" placeholder="Your name">
-</div>
-<div class="form-group">
-<label>Work Email</label>
-<input type="email" id="settingEmail" placeholder="you@gusto.com">
-</div>
-<div class="settings-section-label">Salesforce</div>
-<div class="form-group">
-<label>Your Salesforce User ID</label>
-<div class="sf-id-display" id="settingSalesforceId">&#x2014;</div>
-</div>
-<div class="settings-section-label">GitHub Connection</div>
-<div class="settings-note">Your data repo: <strong id="settingOwner"></strong>/Prospect-tracker</div>
-<div class="settings-section-label">Gmail Scan Settings</div>
-<div class="form-group">
-<label>Gmail Search Query</label>
-<input type="text" id="settingGmailQuery" placeholder="newer_than:2d in:inbox">
-</div>
-<div class="form-group">
-<label>Lead Keywords (comma-separated)</label>
-<textarea id="settingKeywords" placeholder="payroll, gusto, small business&#x2026;"></textarea>
-</div>
-<div class="form-group">
-<label>Scan Schedule</label>
-<select id="settingScanSchedule">
-<option value="daily_7am">Daily at 7am</option>
-<option value="daily_8am">Daily at 8am</option>
-<option value="daily_9am">Daily at 9am</option>
-<option value="twice_daily">Twice daily (7am + 12pm)</option>
-<option value="manual">Manual only</option>
-</select>
-</div>
-<div class="modal-buttons">
-<button type="button" class="btn-secondary" onclick="closeSettings()">Cancel</button>
-<button type="button" class="btn-primary" style="flex:1;" onclick="saveSettings();closeSettings();">Save Settings</button>
-</div>
-<button class="btn-disconnect" onclick="disconnectGitHub()">&#x26A0; Disconnect GitHub</button>
-</div>
-</div>
-<!-- ── Salesforce User ID Help Modal ── -->
-<div class="sf-help-modal" id="sfHelpModal">
-<div class="sf-help-card">
-<h3>&#x1F4CB; How to Find Your Salesforce User ID</h3>
-<ol>
-<li>Log in to <strong>Salesforce</strong></li>
-<li>Click your <strong>avatar / profile picture</strong> in the top-right corner</li>
-<li>Click <strong>"Settings"</strong> from the dropdown</li>
-<li>In the URL bar you'll see something like:<br>
-<code>lightning/settings/personal/PersonalInformation/home</code><br>
-&#x2014; scroll down the page to <strong>"Advanced User Details"</strong></li>
-<li>Your <strong>Salesforce User ID</strong> starts with <code>005</code> and is 18 characters long<br>
-(e.g. <code>00521000003XXXXAAA</code>)</li>
-</ol>
-<div class="sf-note">
-<strong>Alternative:</strong> Ask your Salesforce admin or find it in<br>
-Setup &#x2014; Users &#x2014; click your name &#x2014; the ID appears in the URL.
-</div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="button" class="btn-primary" style="flex:1;" onclick="closeSFHelp()">Got it</button>
-</div>
-</div>
-</div>
-<!-- ── GitHub Setup Help Modal ── -->
-<div class="gh-help-modal" id="ghHelpModal">
-<div class="gh-help-card">
-<h3>&#x1F419; GitHub Setup Guide</h3>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;line-height:1.6;">Follow these steps to create your free GitHub account and connect it to Calebrate.</p>
-<div class="gh-section-label">Part 1 &#x2014; Create a GitHub Account</div>
-<ol>
-<li>Go to <strong><a href="https://github.com/signup" target="_blank" style="color:var(--accent-blue);">github.com/signup</a></strong> and click <strong>"Sign up"</strong></li>
-<li>Enter your <strong>@gusto.com work email</strong> and choose a password</li>
-<li>Pick a username &#x2014; something like <code>FirstLastGusto</code></li>
-<li>Complete the verification steps and check your Gusto inbox to confirm your email</li>
-</ol>
-<div class="gh-warning-box">
-&#x26A0;&#xFE0F; <strong>Important:</strong> Do NOT click "Continue with Google" or any fast-sign-in shortcut. Those link to your personal Gmail. You must sign up with your <strong>@gusto.com email</strong> directly so your work data stays separate.
-</div>
-<div class="gh-section-label">Part 2 &#x2014; Create a Personal Access Token</div>
-<ol>
-<li>Once signed in, click your <strong>profile picture</strong> in the top-right corner &#x2014; <strong>Settings</strong></li>
-<li>Scroll all the way to the bottom of the left sidebar and click <strong>"Developer settings"</strong></li>
-<li>Click <strong>"Personal access tokens"</strong> &#x2014; <strong>"Tokens (classic)"</strong></li>
-<li>Click <strong>"Generate new token"</strong> &#x2014; <strong>"Generate new token (classic)"</strong></li>
-<li>Give it a name like <code>Calebrate Tracker</code>, set expiration to <strong>"No expiration"</strong></li>
-<li>Check the box next to <strong>"repo"</strong> (it says "Full control of private repositories") &#x2014; that's the only one you need</li>
-<li>Scroll to the bottom and click the green <strong>"Generate token"</strong> button</li>
-<li>&#x26A0;&#xFE0F; <strong>Copy your token immediately</strong> &#x2014; it starts with <code>ghp_</code> and you won't be able to see it again once you leave the page</li>
-</ol>
-<div class="gh-tip-box">
-&#x1F4A1; <strong>Tip:</strong> Paste the token somewhere safe (like a note) before coming back here. Once copied, paste it into the "Personal Access Token" field in this form.
-</div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="button" class="btn-primary" style="flex:1;" onclick="closeGHHelp()">Got it &#x2014; take me back</button>
-</div>
-</div>
-</div>
-<script src="tracker.js"></script>
+</td>
+`;
+tbody.appendChild(row);
+});
+}
+
+function calculateDays(prospect) {
+const now = new Date();
+if (prospect.lastContacted) {
+const daysSince = Math.floor((now - new Date(prospect.lastContacted)) / (1000 * 60 * 60 * 24));
+return `${daysSince} days ago`;
+}
+if (prospect.nextContact) {
+const daysUntil = Math.floor((new Date(prospect.nextContact) - now) / (1000 * 60 * 60 * 24));
+return `${daysUntil} days left`;
+}
+return '-';
+}
+
+function editProspect(id) {
+console.log('Edit prospect:', id);
+// Implementation would open edit modal
+}
+
+function deleteProspect(id) {
+if (confirm('Are you sure?')) {
+state.prospects = state.prospects.filter(p => p.id !== id);
+localStorage.setItem('prospects', JSON.stringify(state.prospects));
+renderTable();
+}
+}
+
+// ============================================================
+// SYNC STATUS
+// ============================================================
+function updateSyncStatus(status) {
+const badge = document.getElementById('syncBadge');
+const text = document.getElementById('syncText');
+
+badge.classList.remove('saving', 'saved', 'error');
+badge.classList.add(status);
+
+switch(status) {
+case 'saving':
+text.textContent = 'Saving...';
+break;
+case 'saved':
+text.textContent = 'Saved';
+setTimeout(() => {
+badge.classList.remove('saved');
+text.textContent = 'Ready';
+}, 3000);
+break;
+case 'error':
+text.textContent = 'Sync Error';
+break;
+}
+}
+
+// Modal close on Escape
+document.addEventListener('keydown', (e) => {
+if (e.key === 'Escape') {
+document.querySelector('.modal-overlay')?.remove();
+document.getElementById('setupScreen').classList.remove('active');
+}
+});
+</script>
 </body>
 </html>

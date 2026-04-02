@@ -22,9 +22,9 @@ let _owner = localStorage.getItem('pt_owner') || '';
 let prospects    = [];
 let dailyFocus   = [];
 let appSettings  = {};
-let _pSHA        = null;   // current SHA for prospects.json
-let _fSHA        = null;   // current SHA for focus.json
-let _sSHA        = null;   // current SHA for settings.json
+let _pSHA        = null;
+let _fSHA        = null;
+let _sSHA        = null;
 let _saveTimer   = null;
 let _focusSaveT  = null;
 const _now = new Date();
@@ -146,9 +146,6 @@ _token = '';
 function openSFHelp()  { document.getElementById('sfHelpModal').classList.add('active'); }
 function closeSFHelp() { document.getElementById('sfHelpModal').classList.remove('active'); }
 document.addEventListener('click', e => { if (e.target.id === 'sfHelpModal') closeSFHelp(); });
-function openGHHelp()  { document.getElementById('ghHelpModal').classList.add('active'); }
-function closeGHHelp() { document.getElementById('ghHelpModal').classList.remove('active'); }
-document.addEventListener('click', e => { if (e.target.id === 'ghHelpModal') closeGHHelp(); });
 function disconnectGitHub() {
 if (!confirm('Disconnect GitHub? You\'ll need to re-enter your token. Your data stays safe in GitHub.')) return;
 localStorage.removeItem('pt_token');
@@ -538,13 +535,6 @@ appSettings.scanSchedule = document.getElementById('settingScanSchedule').value;
 doSaveSettings();
 }
 document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
-/**
-* validateSalesforceOwnership(leadOwnerId)
-* Called by the Salesforce connector when creating a task.
-* Returns { allowed: boolean, reason: string }
-* RULE: Task creation is BLOCKED if leadOwnerId does not match
-*       the tracker owner's configured Salesforce ID.
-*/
 function validateSalesforceOwnership(leadOwnerId) {
 const trackerOwner = appSettings.salesforceId || '';
 if (!trackerOwner) {
@@ -565,8 +555,6 @@ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;
 (async () => {
 if (!_token || !_owner) {
 showSetupScreen();
-// Auto-open GitHub guide for first-time users (no stored credentials)
-openGHHelp();
 return;
 }
 try {

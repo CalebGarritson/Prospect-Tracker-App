@@ -146,6 +146,9 @@ _token = '';
 function openSFHelp()  { document.getElementById('sfHelpModal').classList.add('active'); }
 function closeSFHelp() { document.getElementById('sfHelpModal').classList.remove('active'); }
 document.addEventListener('click', e => { if (e.target.id === 'sfHelpModal') closeSFHelp(); });
+function openGHHelp()  { document.getElementById('ghHelpModal').classList.add('active'); }
+function closeGHHelp() { document.getElementById('ghHelpModal').classList.remove('active'); }
+document.addEventListener('click', e => { if (e.target.id === 'ghHelpModal') closeGHHelp(); });
 function disconnectGitHub() {
 if (!confirm('Disconnect GitHub? You\'ll need to re-enter your token. Your data stays safe in GitHub.')) return;
 localStorage.removeItem('pt_token');
@@ -258,15 +261,15 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
-<div class="priority-dot ${p.priority>=1?'active-1':''}"; onclick="setPriority(${p.id},1)"></div>
-<div class="priority-dot ${p.priority>=2?'active-2':''}"; onclick="setPriority(${p.id},2)"></div>
-<div class="priority-dot ${p.priority>=3?'active-3':''}"; onclick="setPriority(${p.id},3)"></div>
+<div class="priority-dot ${p.priority>=1?'active-1':''}"></div>
+<div class="priority-dot ${p.priority>=2?'active-2':''}"></div>
+<div class="priority-dot ${p.priority>=3?'active-3':''}"></div>
 </div>
 </td>
 <td onclick="event.stopPropagation()">
 <div class="actions">
-<button class="action-btn" onclick="editProspect(event,${p.id})">Edit</button>
-<button class="action-btn delete" onclick="deleteProspect(event,${p.id})">Delete</button>
+<button class="action-btn">Edit</button>
+<button class="action-btn delete">Delete</button>
 </div>
 </td>`;
 tb.appendChild(row);
@@ -296,7 +299,7 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="actions">
-<button class="action-btn" onclick="editProspect(event,${p.id})">Edit</button>
+<button class="action-btn">Edit</button>
 </div>
 </td>`;
 tbA.appendChild(row);
@@ -340,15 +343,15 @@ row.innerHTML = `
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
-<div class="priority-dot ${p.priority>=1?'active-1':''}"; onclick="setFocusPriority('${p.id}',1)"></div>
-<div class="priority-dot ${p.priority>=2?'active-2':''}"; onclick="setFocusPriority('${p.id}',2)"></div>
-<div class="priority-dot ${p.priority>=3?'active-3':''}"; onclick="setFocusPriority('${p.id}',3)"></div>
+<div class="priority-dot ${p.priority>=1?'active-1':''}"></div>
+<div class="priority-dot ${p.priority>=2?'active-2':''}"></div>
+<div class="priority-dot ${p.priority>=3?'active-3':''}"></div>
 </div>
 </td>
 <td onclick="event.stopPropagation()">
 <div class="actions">
-<button class="action-btn" onclick="editFocusProspect(event,'${p.id}')">Edit</button>
-<button class="action-btn delete" onclick="deleteFocusProspect(event,'${p.id}')">Delete</button>
+<button class="action-btn">Edit</button>
+<button class="action-btn delete">Delete</button>
 </div>
 </td>`;
 tbody.appendChild(row);
@@ -552,15 +555,11 @@ window.__sfOwnerCheck = validateSalesforceOwnership;
 function esc(str) {
 return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-function switchTab(tabName) {
-document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
-document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-document.getElementById(tabName).classList.add('active');
-event.target.classList.add('active');
-}
 (async () => {
 if (!_token || !_owner) {
 showSetupScreen();
+// Auto-open GitHub guide for first-time users (no stored credentials)
+openGHHelp();
 return;
 }
 try {

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     PROSPECT TRACKER
+     CALEBRATE
      Created by:  Caleb Garritson
      Email:       caleb.garritson@gusto.com
-     GitHub:      github.com/CalebGarritson/Prospect-Tracker-App
+     GitHub:      github.com/CalebGarritson/Prospect-tracker
      Created:     April 2026
      Description: A private, GitHub-backed prospect tracking tool
                   with automated Gmail lead scanning and Salesforce
@@ -14,8 +14,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="Caleb Garritson">
-<meta name="description" content="Prospect Tracker — Created by Caleb Garritson, caleb.garritson@gusto.com">
-<title>Prospect Tracker</title>
+<meta name="description" content="Calebrate — Created by Caleb Garritson, caleb.garritson@gusto.com">
+<title>Calebrate</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -47,6 +47,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 padding: 24px;
 line-height: 1.6;
 }
+/* ── Setup Screen ── */
 #setupScreen {
 display: none;
 position: fixed;
@@ -72,6 +73,7 @@ box-shadow: 0 24px 64px rgba(0,0,0,.6);
 .setup-card .setup-link:hover { text-decoration: underline; }
 .setup-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
 .setup-error.visible { display: block; }
+/* ── Sync Badge ── */
 .sync-badge {
 display: inline-flex;
 align-items: center;
@@ -92,6 +94,7 @@ background: rgba(255,255,255,.04);
 .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .sync-dot.pulse { animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+/* ── Container ── */
 .container { max-width: 1600px; margin: 0 auto; }
 header { margin-bottom: 40px; }
 .header-top {
@@ -102,6 +105,7 @@ margin-bottom: 32px;
 }
 h1 { font-size: 32px; font-weight: 700; color: #ffe033; }
 .header-actions { display: flex; gap: 10px; align-items: center; }
+/* ── Buttons ── */
 .btn-primary {
 background: linear-gradient(135deg, #58a6ff, #79c0ff);
 color: var(--bg-primary);
@@ -126,6 +130,7 @@ background: transparent; color: var(--text-primary);
 border-radius: 6px; cursor: pointer; font-weight: 600; transition: all .2s;
 }
 .btn-secondary:hover { border-color: var(--text-primary); background: rgba(226,232,240,.05); }
+/* ── Section Headers ── */
 .section-header {
 display: flex;
 align-items: center;
@@ -142,6 +147,7 @@ border-bottom: none;
 background: var(--accent-blue); color: var(--bg-primary);
 font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px;
 }
+/* ── Tables ── */
 .table-container {
 background: var(--bg-secondary);
 border: 1px solid var(--border-color);
@@ -164,12 +170,14 @@ tbody tr { border-bottom: 1px solid var(--border-color); transition: background 
 tbody tr:nth-child(odd) { background: rgba(26,29,46,.5); }
 tbody tr:hover { background: rgba(88,166,255,.08); cursor: pointer; }
 td { padding: 16px; font-size: 14px; color: var(--text-primary); }
+/* ── Priority Dots ── */
 .priority-dots { display: flex; gap: 6px; align-items: center; }
 .priority-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #3a4060; background: transparent; cursor: pointer; transition: all .18s; flex-shrink: 0; }
 .priority-dot:hover { border-color: #a8b2c1; }
 .priority-dot.active-1 { background: #4ade80; border-color: #4ade80; }
 .priority-dot.active-2 { background: #fbbf24; border-color: #fbbf24; }
 .priority-dot.active-3 { background: #a78bfa; border-color: #a78bfa; }
+/* ── Swatch ── */
 .swatch { width: 6px; border-radius: 3px; align-self: stretch; min-height: 40px; flex-shrink: 0; }
 .swatch.overdue        { background: linear-gradient(180deg, #7c3aed, #a78bfa); }
 .swatch.today          { background: linear-gradient(180deg, #d97706, #fbbf24); }
@@ -180,30 +188,36 @@ td { padding: 16px; font-size: 14px; color: var(--text-primary); }
 .swatch.focus-active   { background: linear-gradient(180deg, #0284c7, #38bdf8); }
 .swatch.focus-hold     { background: linear-gradient(180deg, #b45309, #fbbf24); }
 .swatch.focus-called   { background: linear-gradient(180deg, #065f46, #34d399); }
+/* ── Days Pill ── */
 .days-pill { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-align: center; min-width: 60px; color: white; }
 .days-pill.overdue        { background: var(--accent-red); }
 .days-pill.today          { background: var(--accent-orange); }
 .days-pill.upcoming-soon  { background: #0d9488; }
 .days-pill.upcoming-later { background: #536878; }
 .days-pill.archived       { background: #4b5563; }
+/* ── Status Pill (Daily Focus) ── */
 .status-pill { display: inline-block; padding: 5px 11px; border-radius: 20px; font-size: 12px; font-weight: 700; color: white; white-space: nowrap; }
 .status-pill.new-lead  { background: #9333ea; }
 .status-pill.active    { background: #0284c7; }
 .status-pill.called    { background: #059669; }
 .status-pill.hold      { background: #b45309; }
 .status-pill.done      { background: #4b5563; }
+/* ── Notes ── */
 .notes-cell { max-width: 300px; color: var(--text-secondary); font-size: 13px; }
 .notes-truncated { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ── Actions ── */
 .actions { display: flex; gap: 8px; }
 .action-btn { padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; background: rgba(88,166,255,.1); color: var(--accent-blue); }
 .action-btn:hover { background: rgba(88,166,255,.2); }
 .action-btn.delete { background: rgba(167,139,250,.1); color: var(--accent-red); }
 .action-btn.delete:hover { background: rgba(167,139,250,.2); }
+/* ── Expanded Row ── */
 .expanded-row { display: none; }
 .expanded-row.active { display: table-row; background: rgba(88,166,255,.05) !important; }
 .expanded-content { padding: 24px; }
 .expanded-content h3 { font-size: 14px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
 .expanded-content p { color: var(--text-primary); line-height: 1.8; font-size: 14px; }
+/* ── Daily Focus Section ── */
 .focus-wrapper { margin-top: 36px; }
 .focus-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(192,38,211,.10), transparent); border: 1px solid var(--border-color); border-bottom: none; border-radius: 10px 10px 0 0; }
 .focus-header-left { display: flex; align-items: center; gap: 12px; }
@@ -213,6 +227,7 @@ td { padding: 16px; font-size: 14px; color: var(--text-primary); }
 .focus-table-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0 0 12px 12px; overflow: hidden; }
 .btn-add-focus { background: rgba(192,38,211,.15); color: #e879f9; border: 1px solid rgba(192,38,211,.3); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn-add-focus:hover { background: rgba(192,38,211,.25); }
+/* ── Archive ── */
 .archive-wrapper { margin-top: 48px; }
 .archive-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; user-select: none; transition: background .2s; }
 .archive-header:hover { background: rgba(107,114,128,.15); }
@@ -231,6 +246,7 @@ td { padding: 16px; font-size: 14px; color: var(--text-primary); }
 .archive-checkbox { width: 15px; height: 15px; cursor: pointer; accent-color: #a78bfa; }
 .archive-table-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
 .archive-table-container.has-toolbar { border-radius: 0 0 12px 12px; }
+/* ── Modal ── */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; align-items: center; justify-content: center; }
 .modal.active { display: flex; }
 .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.5); max-height: 90vh; overflow-y: auto; }
@@ -245,12 +261,18 @@ font-size: 14px; font-family: inherit; transition: border-color .2s;
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-blue); background: rgba(88,166,255,.05); }
 .modal-buttons { display: flex; gap: 12px; margin-top: 24px; }
 .modal-buttons .btn-primary { flex: 1; }
+/* ── Settings Modal ── */
 .settings-section { margin-bottom: 28px; }
 .settings-section h3 { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+.settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.settings-label { font-size: 14px; color: var(--text-primary); }
+.settings-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .sf-stub-badge { display: inline-block; padding: 3px 10px; background: rgba(251,133,0,.15); color: #fb8500; border: 1px solid rgba(251,133,0,.3); border-radius: 20px; font-size: 11px; font-weight: 700; }
+/* ── Salesforce Warning Modal ── */
 .sf-warning { background: rgba(251,133,0,.08); border: 1px solid rgba(251,133,0,.3); border-radius: 10px; padding: 18px; margin-bottom: 20px; }
 .sf-warning-title { font-size: 15px; font-weight: 700; color: #fb8500; margin-bottom: 8px; }
 .sf-warning-body  { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+/* ── Empty State ── */
 .empty-state-row td { text-align: center; padding: 30px 20px; color: var(--text-secondary); }
 @media (max-width: 768px) {
 table { font-size: 12px; }
@@ -263,12 +285,29 @@ th, td { padding: 12px; }
 <div id="setupScreen">
 <div class="setup-card">
 <h2>🔐 Connect to GitHub</h2>
-<p>Your prospect data lives in your private GitHub repository. Enter your GitHub username and a Personal Access Token (PAT) to get started. Your data is never lost — even if you clear your browser cache.</p>
-<p><strong>Need a PAT?</strong> Go to <a class="setup-link" href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> → set expiration → check <strong>repo</strong> scope → click Generate.</p>
+<p>
+Your prospect data lives in your private GitHub repository.
+Enter your GitHub username and a Personal Access Token (PAT) to get started.
+Your data is never lost — even if you clear your browser cache.
+</p>
+<p>
+<strong>Need a PAT?</strong>
+Go to <a class="setup-link" href="https://github.com/settings/tokens/new" target="_blank">
+github.com/settings/tokens/new</a> → set expiration → check
+<strong>repo</strong> scope → click Generate.
+</p>
 <form id="setupForm">
-<div class="form-group"><label>GitHub Username</label><input type="text" id="setupOwner" placeholder="e.g. CalebGarritson" required></div>
-<div class="form-group"><label>Personal Access Token</label><input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required></div>
-<div class="modal-buttons" style="margin-top:20px;"><button type="submit" class="btn-primary" style="flex:1;">Connect & Load My Data</button></div>
+<div class="form-group">
+<label>GitHub Username</label>
+<input type="text" id="setupOwner" placeholder="e.g. CalebGarritson" required>
+</div>
+<div class="form-group">
+<label>Personal Access Token</label>
+<input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
+</div>
+<div class="modal-buttons" style="margin-top:20px;">
+<button type="submit" class="btn-primary" style="flex:1;">Connect & Load My Data</button>
+</div>
 <div class="setup-error" id="setupError"></div>
 </form>
 </div>
@@ -276,43 +315,257 @@ th, td { padding: 12px; }
 <div class="container" id="mainApp" style="display:none;">
 <header>
 <div class="header-top">
-<h1>Prospect Tracker</h1>
+<h1>Calebrate</h1>
 <div class="header-actions">
-<div class="sync-badge" id="syncBadge"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Loading…</span></div>
+<div class="sync-badge" id="syncBadge">
+<span class="sync-dot" id="syncDot"></span>
+<span id="syncLabel">Loading…</span>
+</div>
 <button class="btn-settings" onclick="openSettings()">⚙ Settings</button>
 <button class="btn-primary" onclick="openAddModal()">+ Add Prospect</button>
 </div>
 </div>
 </header>
 <div>
-<div class="section-header section-header-ready"><span class="section-title">Ready to Call</span><span class="section-count-badge" id="countReady">0</span></div>
-<div class="table-container scrollable scroll-ready has-section-header"><table><thead><tr><th style="width:14px"></th><th>Contact</th><th>Reengagement Date</th><th>Days</th><th>Notes</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="tbodyReady"></tbody></table></div>
+<div class="section-header section-header-ready">
+<span class="section-title">Ready to Call</span>
+<span class="section-count-badge" id="countReady">0</span>
+</div>
+<div class="table-container scrollable scroll-ready has-section-header">
+<table>
+<thead><tr>
+<th style="width:14px"></th>
+<th>Contact</th>
+<th>Reengagement Date</th>
+<th>Days</th>
+<th>Notes</th>
+<th>Priority</th>
+<th>Actions</th>
+</tr></thead>
+<tbody id="tbodyReady"></tbody>
+</table>
+</div>
 </div>
 <div style="margin-top:36px;">
-<div class="section-header section-header-future"><span class="section-title">Coming Up</span><span class="section-count-badge" id="countFuture">0</span></div>
-<div class="table-container scrollable scroll-future has-section-header"><table><thead><tr><th style="width:14px"></th><th>Contact</th><th>Reengagement Date</th><th>Days</th><th>Notes</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="tbodyFuture"></tbody></table></div>
+<div class="section-header section-header-future">
+<span class="section-title">Coming Up</span>
+<span class="section-count-badge" id="countFuture">0</span>
+</div>
+<div class="table-container scrollable scroll-future has-section-header">
+<table>
+<thead><tr>
+<th style="width:14px"></th>
+<th>Contact</th>
+<th>Reengagement Date</th>
+<th>Days</th>
+<th>Notes</th>
+<th>Priority</th>
+<th>Actions</th>
+</tr></thead>
+<tbody id="tbodyFuture"></tbody>
+</table>
+</div>
 </div>
 <div class="focus-wrapper">
 <div class="focus-header">
-<div class="focus-header-left"><span class="focus-title">Daily Focus</span><span class="focus-updated" id="focusUpdated"></span></div>
-<div style="display:flex;align-items:center;gap:10px;"><span class="focus-count" id="countFocus">0</span><button class="btn-add-focus" onclick="openFocusModal()">+ Add Lead</button></div>
+<div class="focus-header-left">
+<span class="focus-title">Daily Focus</span>
+<span class="focus-updated" id="focusUpdated"></span>
 </div>
-<div class="focus-table-container"><table><thead><tr><th style="width:14px"></th><th>Contact</th><th>Received</th><th>Status</th><th>Notes</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="tbodyFocus"></tbody></table></div>
+<div style="display:flex;align-items:center;gap:10px;">
+<span class="focus-count" id="countFocus">0</span>
+<button class="btn-add-focus" onclick="openFocusModal()">+ Add Lead</button>
+</div>
+</div>
+<div class="focus-table-container">
+<table>
+<thead><tr>
+<th style="width:14px"></th>
+<th>Contact</th>
+<th>Received</th>
+<th>Status</th>
+<th>Notes</th>
+<th>Priority</th>
+<th>Actions</th>
+</tr></thead>
+<tbody id="tbodyFocus"></tbody>
+</table>
+</div>
 </div>
 <div class="archive-wrapper">
 <div class="archive-header" onclick="toggleArchive()">
-<div class="archive-header-left"><span class="archive-title">Archive</span><span class="archive-count" id="countArchive">0</span></div>
+<div class="archive-header-left">
+<span class="archive-title">Archive</span>
+<span class="archive-count" id="countArchive">0</span>
+</div>
 <span class="archive-chevron" id="archiveChevron">▼</span>
 </div>
 <div class="archive-body" id="archiveBody">
-<div class="archive-toolbar" id="archiveToolbar"><span class="archive-toolbar-text" id="archiveSelectedText">0 selected</span><button class="btn-delete-selected" onclick="deleteSelected()">Delete Selected</button></div>
-<div class="archive-table-container" id="archiveTableContainer"><table><thead><tr><th style="width:36px;text-align:center;"><input type="checkbox" class="archive-checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th><th style="width:14px"></th><th>Contact</th><th>Reengagement Date</th><th>Days</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="tbodyArchive"></tbody></table></div>
+<div class="archive-toolbar" id="archiveToolbar">
+<span class="archive-toolbar-text" id="archiveSelectedText">0 selected</span>
+<button class="btn-delete-selected" onclick="deleteSelected()">Delete Selected</button>
+</div>
+<div class="archive-table-container" id="archiveTableContainer">
+<table>
+<thead><tr>
+<th style="width:36px;text-align:center;">
+<input type="checkbox" class="archive-checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+</th>
+<th style="width:14px"></th>
+<th>Contact</th>
+<th>Reengagement Date</th>
+<th>Days</th>
+<th>Notes</th>
+<th>Actions</th>
+</tr></thead>
+<tbody id="tbodyArchive"></tbody>
+</table>
 </div>
 </div>
 </div>
-<div class="modal" id="addModal"><div class="modal-content"><div class="modal-header" id="modalHeader">Add New Prospect</div><form id="addForm"><div class="form-group"><label>Contact</label><input type="text" id="formContact" required></div><div class="form-group"><label>Email</label><input type="email" id="formEmail"></div><div class="form-group"><label>Reengagement Date</label><input type="date" id="formDate" required></div><div class="form-group"><label>Notes</label><textarea id="formNotes" rows="4"></textarea></div><div class="modal-buttons"><button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button><button type="submit" class="btn-primary">Save</button></div></form></div></div>
-<div class="modal" id="focusModal"><div class="modal-content"><div class="modal-header" id="focusModalHeader">Add Focus Lead</div><form id="focusForm"><div class="form-group"><label>Name</label><input type="text" id="focusFormName" required></div><div class="form-group"><label>Company</label><input type="text" id="focusFormCompany"></div><div class="form-group"><label>Email</label><input type="email" id="focusFormEmail"></div><div class="form-group"><label>Received Date</label><input type="date" id="focusFormReceivedDate"></div><div class="form-group"><label>Status</label><select id="focusFormStatus" onchange="toggleHoldUntil()"><option value="new">New Lead</option><option value="active">Active</option><option value="called">Called</option><option value="hold">On Hold</option><option value="done">Done</option></select></div><div class="form-group" id="holdUntilGroup" style="display:none;"><label>Hold Until</label><input type="date" id="focusFormHoldUntil"></div><div class="form-group"><label>Notes</label><textarea id="focusFormNotes" rows="4"></textarea></div><div class="modal-buttons"><button type="button" class="btn-secondary" onclick="closeFocusModal()">Cancel</button><button type="submit" class="btn-primary">Save</button></div></form></div></div>
-<div class="modal" id="settingsModal"><div class="modal-content" style="max-width:560px;"><div class="modal-header">⚙ Settings</div><div class="settings-section"><h3>Identity</h3><div class="form-group"><label>Display Name</label><input type="text" id="settingName" placeholder="e.g. Caleb Garritson"></div><div class="form-group"><label>Work Email</label><input type="email" id="settingEmail" placeholder="e.g. caleb.garritson@gusto.com"></div><div class="form-group"><label>GitHub Username</label><input type="text" id="settingOwner" placeholder="e.g. CalebGarritson" readonly style="opacity:.6;"></div></div><div class="settings-section"><h3>Gmail Lead Scan</h3><div class="form-group"><label>Gmail Search Query</label><input type="text" id="settingGmailQuery" placeholder="newer_than:2d in:inbox"></div><div class="form-group"><label>Lead Keywords (comma-separated)</label><input type="text" id="settingKeywords" placeholder="payroll, gusto, interested, quote, employees"></div><div class="form-group"><label>Scan Schedule</label><select id="settingScanSchedule"><option value="daily_7am">Daily — Mon–Fri at 7 AM MT</option><option value="daily_8am">Daily — Mon–Fri at 8 AM MT</option><option value="twice_daily">Twice Daily — 7 AM & 1 PM MT</option><option value="every_4h">Every 4 Hours</option></select><small style="color:var(--text-secondary);font-size:11px;margin-top:4px;display:block;">Schedule changes take effect on the next Cowork sync.</small></div></div><div class="settings-section"><h3>Salesforce <span class="sf-stub-badge">Coming Soon</span></h3><div class="sf-warning"><div class="sf-warning-title">⚠ Ownership Protection Rule</div><div class="sf-warning-body">When the Salesforce connector is active, tasks will only be created in Salesforce if the tracker owner matches the Salesforce lead owner. A mismatch will block task creation and show a warning. Your Salesforce ID will be configured here when the connector is built.</div></div><div class="form-group"><label>Salesforce User ID (future)</label><input type="text" id="settingSalesforceId" placeholder="Will be set when connector is built" disabled style="opacity:.45;"></div></div><div class="settings-section"><h3>Account</h3><div style="display:flex;gap:10px;"><button class="btn-secondary" style="flex:none;padding:8px 16px;font-size:13px;" onclick="saveSettings();closeSettings();">Save Settings</button><button class="btn-secondary" style="flex:none;padding:8px 16px;font-size:13px;color:#f87171;border-color:#f87171;" onclick="disconnectGitHub()">Disconnect GitHub</button></div></div><div class="modal-buttons" style="margin-top:0;"><button type="button" class="btn-secondary" onclick="closeSettings()">Close</button><button type="button" class="btn-primary" onclick="saveSettings();closeSettings();">Save & Close</button></div></div></div>
+</div>
+<div class="modal" id="addModal">
+<div class="modal-content">
+<div class="modal-header" id="modalHeader">Add New Prospect</div>
+<form id="addForm">
+<div class="form-group">
+<label>Contact</label>
+<input type="text" id="formContact" required>
+</div>
+<div class="form-group">
+<label>Email</label>
+<input type="email" id="formEmail">
+</div>
+<div class="form-group">
+<label>Reengagement Date</label>
+<input type="date" id="formDate" required>
+</div>
+<div class="form-group">
+<label>Notes</label>
+<textarea id="formNotes" rows="4"></textarea>
+</div>
+<div class="modal-buttons">
+<button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
+<button type="submit" class="btn-primary">Save</button>
+</div>
+</form>
+</div>
+</div>
+<div class="modal" id="focusModal">
+<div class="modal-content">
+<div class="modal-header" id="focusModalHeader">Add Focus Lead</div>
+<form id="focusForm">
+<div class="form-group">
+<label>Name</label>
+<input type="text" id="focusFormName" required>
+</div>
+<div class="form-group">
+<label>Company</label>
+<input type="text" id="focusFormCompany">
+</div>
+<div class="form-group">
+<label>Email</label>
+<input type="email" id="focusFormEmail">
+</div>
+<div class="form-group">
+<label>Received Date</label>
+<input type="date" id="focusFormReceivedDate">
+</div>
+<div class="form-group">
+<label>Status</label>
+<select id="focusFormStatus" onchange="toggleHoldUntil()">
+<option value="new">New Lead</option>
+<option value="active">Active</option>
+<option value="called">Called</option>
+<option value="hold">On Hold</option>
+<option value="done">Done</option>
+</select>
+</div>
+<div class="form-group" id="holdUntilGroup" style="display:none;">
+<label>Hold Until</label>
+<input type="date" id="focusFormHoldUntil">
+</div>
+<div class="form-group">
+<label>Notes</label>
+<textarea id="focusFormNotes" rows="4"></textarea>
+</div>
+<div class="modal-buttons">
+<button type="button" class="btn-secondary" onclick="closeFocusModal()">Cancel</button>
+<button type="submit" class="btn-primary">Save</button>
+</div>
+</form>
+</div>
+</div>
+<div class="modal" id="settingsModal">
+<div class="modal-content" style="max-width:560px;">
+<div class="modal-header">⚙ Settings</div>
+<div class="settings-section">
+<h3>Identity</h3>
+<div class="form-group">
+<label>Display Name</label>
+<input type="text" id="settingName" placeholder="e.g. Caleb Garritson">
+</div>
+<div class="form-group">
+<label>Work Email</label>
+<input type="email" id="settingEmail" placeholder="e.g. caleb.garritson@gusto.com">
+</div>
+<div class="form-group">
+<label>GitHub Username</label>
+<input type="text" id="settingOwner" placeholder="e.g. CalebGarritson" readonly style="opacity:.6;">
+</div>
+</div>
+<div class="settings-section">
+<h3>Gmail Lead Scan</h3>
+<div class="form-group">
+<label>Gmail Search Query</label>
+<input type="text" id="settingGmailQuery" placeholder="newer_than:2d in:inbox">
+</div>
+<div class="form-group">
+<label>Lead Keywords (comma-separated)</label>
+<input type="text" id="settingKeywords" placeholder="payroll, gusto, interested, quote, employees">
+</div>
+<div class="form-group">
+<label>Scan Schedule</label>
+<select id="settingScanSchedule">
+<option value="daily_7am">Daily — Mon–Fri at 7 AM MT</option>
+<option value="daily_8am">Daily — Mon–Fri at 8 AM MT</option>
+<option value="twice_daily">Twice Daily — 7 AM & 1 PM MT</option>
+<option value="every_4h">Every 4 Hours</option>
+</select>
+<small style="color:var(--text-secondary);font-size:11px;margin-top:4px;display:block;">
+Schedule changes take effect on the next Cowork sync.
+</small>
+</div>
+</div>
+<div class="settings-section">
+<h3>Salesforce <span class="sf-stub-badge">Coming Soon</span></h3>
+<div class="sf-warning">
+<div class="sf-warning-title">⚠ Ownership Protection Rule</div>
+<div class="sf-warning-body">
+When the Salesforce connector is active, tasks will only be created in Salesforce
+if the tracker owner matches the Salesforce lead owner.
+A mismatch will block task creation and show a warning.
+Your Salesforce ID will be configured here when the connector is built.
+</div>
+</div>
+<div class="form-group">
+<label>Salesforce User ID (future)</label>
+<input type="text" id="settingSalesforceId" placeholder="Will be set when connector is built" disabled style="opacity:.45;">
+</div>
+</div>
+<div class="settings-section">
+<h3>Account</h3>
+<div style="display:flex;gap:10px;">
+<button class="btn-secondary" style="flex:none;padding:8px 16px;font-size:13px;" onclick="saveSettings();closeSettings();">Save Settings</button>
+<button class="btn-secondary" style="flex:none;padding:8px 16px;font-size:13px;color:#f87171;border-color:#f87171;" onclick="disconnectGitHub()">Disconnect GitHub</button>
+</div>
+</div>
+<div class="modal-buttons" style="margin-top:0;">
+<button type="button" class="btn-secondary" onclick="closeSettings()">Close</button>
+<button type="button" class="btn-primary" onclick="saveSettings();closeSettings();">Save & Close</button>
+</div>
+</div>
+</div>
 <script src="tracker.js"></script>
 </body>
 </html>

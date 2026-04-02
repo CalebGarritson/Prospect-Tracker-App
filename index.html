@@ -56,7 +56,6 @@ background: rgba(0,0,0,.85);
 z-index: 2000;
 align-items: center;
 justify-content: center;
-overflow-y: auto;
 }
 #setupScreen.active { display: flex; }
 .setup-card {
@@ -67,7 +66,6 @@ padding: 40px;
 max-width: 480px;
 width: 90%;
 box-shadow: 0 24px 64px rgba(0,0,0,.6);
-margin: auto;
 }
 .setup-card h2 { font-size: 22px; font-weight: 700; color: #ffe033; margin-bottom: 8px; }
 .setup-card p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.7; }
@@ -102,6 +100,37 @@ box-shadow: 0 20px 60px rgba(0,0,0,.5);
 .sf-help-card ol li { margin-bottom: 2px; }
 .sf-help-card code { background: rgba(88,166,255,.1); color: var(--accent-blue); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
 .sf-help-note { margin-top: 14px; padding: 10px 14px; background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2); border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+/* ── GitHub Help Modal ── */
+.gh-help-modal {
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,.65); z-index: 3000;
+align-items: center; justify-content: center;
+}
+.gh-help-modal.active { display: flex; }
+.gh-help-card {
+background: var(--bg-secondary); border: 1px solid var(--border-color);
+border-radius: 14px; padding: 28px; max-width: 500px; width: 92%;
+box-shadow: 0 20px 60px rgba(0,0,0,.55);
+max-height: 88vh; overflow-y: auto;
+}
+.gh-help-card h3 { font-size: 16px; font-weight: 700; color: #ffe033; margin-bottom: 6px; }
+.gh-help-card .gh-section-label {
+font-size: 11px; font-weight: 700; text-transform: uppercase;
+letter-spacing: .08em; color: var(--accent-blue); margin: 18px 0 8px;
+}
+.gh-help-card ol { padding-left: 20px; color: var(--text-secondary); font-size: 13px; line-height: 2.1; }
+.gh-help-card ol li { margin-bottom: 1px; }
+.gh-help-card code { background: rgba(88,166,255,.1); color: var(--accent-blue); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
+.gh-warning-box {
+margin: 8px 0 14px; padding: 10px 14px;
+background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.35);
+border-radius: 8px; font-size: 12px; color: #fbbf24; line-height: 1.7;
+}
+.gh-tip-box {
+margin-top: 12px; padding: 10px 14px;
+background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2);
+border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+}
 /* ── Sync Badge ── */
 .sync-badge {
 display: inline-flex;
@@ -251,63 +280,100 @@ td { padding: 16px; font-size: 14px; color: var(--text-primary); }
 .focus-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(192,38,211,.10), transparent); border: 1px solid var(--border-color); border-bottom: none; border-radius: 10px 10px 0 0; }
 .focus-header-left { display: flex; align-items: center; gap: 12px; }
 .focus-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); }
-.focus-updated { font-size: 12px; color: #6b7280; }
-.focus-count { background: #9333ea; color: white; font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
-.focus-table-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0 0 12px 12px; overflow: hidden; }
-.btn-add-focus { background: rgba(192,38,211,.15); color: #e879f9; border: 1px solid rgba(192,38,211,.3); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
-.btn-add-focus:hover { background: rgba(192,38,211,.25); }
-/* ── Archive ── */
-.archive-wrapper { margin-top: 48px; }
-.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; user-select: none; transition: background .2s; }
-.archive-header:hover { background: rgba(107,114,128,.15); }
+.focus-count-badge { background: #9333ea; color: white; font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
+.focus-updated { font-size: 11px; color: var(--text-secondary); opacity: .6; }
+/* ── Archive Section ── */
+.archive-wrapper { margin-top: 36px; }
+.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(107,114,128,.10), transparent); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: background .2s; }
+.archive-header:hover { background: linear-gradient(90deg, rgba(107,114,128,.18), transparent); }
 .archive-header-left { display: flex; align-items: center; gap: 12px; }
-.archive-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; }
-.archive-count { background: #4b5563; color: #d1d5db; font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
-.archive-chevron { font-size: 14px; color: var(--text-secondary); transition: transform .25s; }
-.archive-chevron.open { transform: rotate(180deg); }
-.archive-body { display: none; margin-top: 4px; }
+.archive-chevron { color: var(--text-secondary); font-size: 12px; transition: transform .25s; }
+.archive-chevron.open { transform: rotate(90deg); }
+.archive-body { display: none; }
 .archive-body.open { display: block; }
-.archive-toolbar { display: none; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 16px; background: rgba(167,139,250,.07); border: 1px solid var(--border-color); border-bottom: none; border-radius: 12px 12px 0 0; }
+.archive-toolbar {
+display: none;
+position: sticky;
+top: 0;
+z-index: 3;
+align-items: center;
+justify-content: space-between;
+padding: 10px 20px;
+background: rgba(248,113,113,.08);
+border: 1px solid rgba(248,113,113,.25);
+border-bottom: none;
+}
 .archive-toolbar.visible { display: flex; }
-.archive-toolbar-text { font-size: 13px; color: var(--text-secondary); }
-.btn-delete-selected { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; background: rgba(167,139,250,.18); color: #a78bfa; transition: all .2s; }
-.btn-delete-selected:hover { background: rgba(167,139,250,.3); }
-.archive-checkbox { width: 15px; height: 15px; cursor: pointer; accent-color: #a78bfa; }
-.archive-table-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
-.archive-table-container.has-toolbar { border-radius: 0 0 12px 12px; }
-/* ── Modal ── */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; align-items: center; justify-content: center; }
+.archive-toolbar-text { font-size: 13px; color: #f87171; font-weight: 600; }
+.btn-delete-selected {
+padding: 7px 16px; border-radius: 6px; border: 1px solid rgba(248,113,113,.4);
+background: rgba(248,113,113,.1); color: #f87171;
+font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.btn-delete-selected:hover { background: rgba(248,113,113,.2); }
+.table-container.has-toolbar { border-radius: 0 0 12px 12px; }
+.archive-select-th { width: 32px; text-align: center !important; padding: 8px !important; }
+.archive-checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: #f87171; }
+/* ── Empty State ── */
+.empty-state-row td { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 14px; }
+/* ── Modals ── */
+.modal {
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,.7); z-index: 1000;
+align-items: center; justify-content: center;
+}
 .modal.active { display: flex; }
-.modal-content { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.5); max-height: 90vh; overflow-y: auto; }
-.modal-header { font-size: 20px; font-weight: 700; margin-bottom: 24px; color: var(--text-primary); }
+.modal-card {
+background: var(--bg-secondary); border: 1px solid var(--border-color);
+border-radius: 16px; padding: 32px; max-width: 500px; width: 90%;
+box-shadow: 0 24px 64px rgba(0,0,0,.6); max-height: 90vh; overflow-y: auto;
+}
+.modal-card h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 24px; }
+.modal-buttons { display: flex; gap: 12px; margin-top: 24px; }
+/* ── Form Groups ── */
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
 .form-group input, .form-group textarea, .form-group select {
-width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
-border-radius: 6px; padding: 10px 12px; color: var(--text-primary);
-font-size: 14px; font-family: inherit; transition: border-color .2s;
+width: 100%; padding: 11px 14px;
+background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
+border-radius: 8px; color: var(--text-primary); font-size: 14px; transition: border-color .2s;
 }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-blue); background: rgba(88,166,255,.05); }
-.modal-buttons { display: flex; gap: 12px; margin-top: 24px; }
-.modal-buttons .btn-primary { flex: 1; }
-/* ── Settings Modal ── */
-.settings-section { margin-bottom: 28px; }
-.settings-section h3 { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
-.settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.settings-label { font-size: 14px; color: var(--text-primary); }
-.settings-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-.sf-stub-badge { display: inline-block; padding: 3px 10px; background: rgba(251,133,0,.15); color: #fb8500; border: 1px solid rgba(251,133,0,.3); border-radius: 20px; font-size: 11px; font-weight: 700; }
-/* ── Salesforce Warning Modal ── */
-.sf-warning { background: rgba(251,133,0,.08); border: 1px solid rgba(251,133,0,.3); border-radius: 10px; padding: 18px; margin-bottom: 20px; }
-.sf-warning-title { font-size: 15px; font-weight: 700; color: #fb8500; margin-bottom: 8px; }
-.sf-warning-body  { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-/* ── Empty State ── */
-.empty-state-row td { text-align: center; padding: 30px 20px; color: var(--text-secondary); }
-@media (max-width: 768px) {
-table { font-size: 12px; }
-th, td { padding: 12px; }
-.modal-content { padding: 24px; }
+.form-group input::placeholder, .form-group textarea::placeholder { color: #4a5268; }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-group select option { background: var(--bg-secondary); }
+/* ── Settings Sections ── */
+.settings-section-label {
+font-size: 11px; font-weight: 700; text-transform: uppercase;
+letter-spacing: .08em; color: var(--accent-blue);
+margin: 24px 0 12px; padding-bottom: 6px;
+border-bottom: 1px solid var(--border-color);
 }
+.settings-section-label:first-child { margin-top: 0; }
+.settings-note {
+font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+padding: 8px 12px; background: rgba(88,166,255,.06);
+border-radius: 6px; margin-bottom: 12px;
+}
+.sf-id-display {
+padding: 11px 14px; background: rgba(255,255,255,.03);
+border: 1px solid var(--border-color); border-radius: 8px;
+font-family: monospace; font-size: 13px; color: var(--text-secondary); letter-spacing: .04em;
+}
+/* ── SF Note (Settings modal) ── */
+.sf-note {
+margin-top: 14px; padding: 10px 14px;
+background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2);
+border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+}
+/* ── Disconnect Button ── */
+.btn-disconnect {
+width: 100%; padding: 10px; border-radius: 8px;
+border: 1px solid rgba(248,113,113,.3); background: rgba(248,113,113,.06);
+color: #f87171; font-size: 13px; font-weight: 600;
+cursor: pointer; transition: all .2s; margin-top: 8px;
+}
+.btn-disconnect:hover { background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.5); }
 </style>
 </head>
 <body>
@@ -335,10 +401,10 @@ Salesforce User ID <span style="color:#f87171;">*</span>
 </div>
 <div style="border-top:1px solid var(--border-color);margin:20px 0 16px;"></div>
 <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
-<strong style="color:var(--text-primary);">Connect your GitHub repo</strong><br>
-Your data lives in a private repo — enter your username and a
-<a class="setup-link" href="https://github.com/settings/tokens/new" target="_blank">Personal Access Token</a>
-(repo scope required).
+<strong style="color:var(--text-primary);">Connect your GitHub repo</strong>
+<button type="button" class="sf-help-btn" onclick="openGHHelp()" title="How to set up GitHub" style="margin-left:6px;">?</button><br>
+Your data lives in a private repo — enter your username and a Personal Access Token.
+<span style="color:rgba(88,166,255,.6);font-size:12px;"> (Don't have one yet? Click <strong style="color:var(--accent-blue);">?</strong> above.)</span>
 </p>
 <div class="form-group">
 <label>GitHub Username <span style="color:#f87171;">*</span></label>
@@ -349,7 +415,7 @@ Your data lives in a private repo — enter your username and a
 <input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
 </div>
 <div class="modal-buttons" style="margin-top:20px;">
-<button type="submit" class="btn-primary" style="flex:1;">Connect & Launch Tracker</button>
+<button type="submit" class="btn-primary" style="flex:1;">Connect &amp; Launch Tracker</button>
 </div>
 <div class="setup-error" id="setupError"></div>
 </form>
@@ -389,9 +455,9 @@ Your data lives in a private repo — enter your username and a
 </table>
 </div>
 </div>
-<div style="margin-top:36px;">
+<div style="margin-top:24px;">
 <div class="section-header section-header-future">
-<span class="section-title">Coming Up</span>
+<span class="section-title">Upcoming</span>
 <span class="section-count-badge" id="countFuture">0</span>
 </div>
 <div class="table-container scrollable scroll-future has-section-header">
@@ -413,18 +479,16 @@ Your data lives in a private repo — enter your username and a
 <div class="focus-header">
 <div class="focus-header-left">
 <span class="focus-title">Daily Focus</span>
+<span class="focus-count-badge" id="countFocus">0</span>
 <span class="focus-updated" id="focusUpdated"></span>
 </div>
-<div style="display:flex;align-items:center;gap:10px;">
-<span class="focus-count" id="countFocus">0</span>
-<button class="btn-add-focus" onclick="openFocusModal()">+ Add Lead</button>
+<button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openFocusModal()">+ Add Lead</button>
 </div>
-</div>
-<div class="focus-table-container">
+<div class="table-container has-section-header">
 <table>
 <thead><tr>
 <th style="width:14px"></th>
-<th>Contact</th>
+<th>Name / Company</th>
 <th>Received</th>
 <th>Status</th>
 <th>Notes</th>
@@ -438,22 +502,20 @@ Your data lives in a private repo — enter your username and a
 <div class="archive-wrapper">
 <div class="archive-header" onclick="toggleArchive()">
 <div class="archive-header-left">
-<span class="archive-title">Archive</span>
-<span class="archive-count" id="countArchive">0</span>
+<span class="section-title" style="color:var(--text-secondary);">Archived</span>
+<span class="section-count-badge" style="background:#4b5563;" id="countArchive">0</span>
 </div>
-<span class="archive-chevron" id="archiveChevron">▼</span>
+<span class="archive-chevron" id="archiveChevron">▶</span>
 </div>
 <div class="archive-body" id="archiveBody">
 <div class="archive-toolbar" id="archiveToolbar">
 <span class="archive-toolbar-text" id="archiveSelectedText">0 selected</span>
-<button class="btn-delete-selected" onclick="deleteSelected()">Delete Selected</button>
+<button class="btn-delete-selected" onclick="deleteSelected()">🗑 Delete Selected</button>
 </div>
-<div class="archive-table-container" id="archiveTableContainer">
+<div class="table-container has-section-header" id="archiveTableContainer">
 <table>
 <thead><tr>
-<th style="width:36px;text-align:center;">
-<input type="checkbox" class="archive-checkbox" id="selectAll" onchange="toggleSelectAll(this)">
-</th>
+<th class="archive-select-th"><input type="checkbox" class="archive-checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
 <th style="width:14px"></th>
 <th>Contact</th>
 <th>Reengagement Date</th>
@@ -467,51 +529,53 @@ Your data lives in a private repo — enter your username and a
 </div>
 </div>
 </div>
+<!-- ── Add / Edit Prospect Modal ── -->
 <div class="modal" id="addModal">
-<div class="modal-content">
-<div class="modal-header" id="modalHeader">Add New Prospect</div>
+<div class="modal-card">
+<h2 id="modalHeader">Add New Prospect</h2>
 <form id="addForm">
 <div class="form-group">
-<label>Contact</label>
-<input type="text" id="formContact" required>
+<label>Contact Name <span style="color:#f87171;">*</span></label>
+<input type="text" id="formContact" placeholder="First Last · Company" required>
 </div>
 <div class="form-group">
 <label>Email</label>
-<input type="email" id="formEmail">
+<input type="email" id="formEmail" placeholder="contact@company.com">
 </div>
 <div class="form-group">
-<label>Reengagement Date</label>
+<label>Reengagement Date <span style="color:#f87171;">*</span></label>
 <input type="date" id="formDate" required>
 </div>
 <div class="form-group">
 <label>Notes</label>
-<textarea id="formNotes" rows="4"></textarea>
+<textarea id="formNotes" placeholder="Last conversation, context, objections…"></textarea>
 </div>
 <div class="modal-buttons">
 <button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
-<button type="submit" class="btn-primary">Save</button>
+<button type="submit" class="btn-primary" style="flex:1;">Save Prospect</button>
 </div>
 </form>
 </div>
 </div>
+<!-- ── Daily Focus Modal ── -->
 <div class="modal" id="focusModal">
-<div class="modal-content">
-<div class="modal-header" id="focusModalHeader">Add Focus Lead</div>
+<div class="modal-card">
+<h2 id="focusModalHeader">Add Focus Lead</h2>
 <form id="focusForm">
 <div class="form-group">
-<label>Name</label>
-<input type="text" id="focusFormName" required>
+<label>Name <span style="color:#f87171;">*</span></label>
+<input type="text" id="focusFormName" placeholder="First Last" required>
 </div>
 <div class="form-group">
 <label>Company</label>
-<input type="text" id="focusFormCompany">
+<input type="text" id="focusFormCompany" placeholder="Company name">
 </div>
 <div class="form-group">
 <label>Email</label>
-<input type="email" id="focusFormEmail">
+<input type="email" id="focusFormEmail" placeholder="lead@company.com">
 </div>
 <div class="form-group">
-<label>Received Date</label>
+<label>Date Received</label>
 <input type="date" id="focusFormReceivedDate">
 </div>
 <div class="form-group">
@@ -530,83 +594,59 @@ Your data lives in a private repo — enter your username and a
 </div>
 <div class="form-group">
 <label>Notes</label>
-<textarea id="focusFormNotes" rows="4"></textarea>
+<textarea id="focusFormNotes" placeholder="Lead source, context, next steps…"></textarea>
 </div>
 <div class="modal-buttons">
 <button type="button" class="btn-secondary" onclick="closeFocusModal()">Cancel</button>
-<button type="submit" class="btn-primary">Save</button>
+<button type="submit" class="btn-primary" style="flex:1;">Save Lead</button>
 </div>
 </form>
 </div>
 </div>
+<!-- ── Settings Modal ── -->
 <div class="modal" id="settingsModal">
-<div class="modal-content" style="max-width:560px;">
-<div class="modal-header">⚙ Settings</div>
-<div class="settings-section">
-<h3>Identity</h3>
+<div class="modal-card">
+<h2>⚙ Settings</h2>
+<div class="settings-section-label">Your Profile</div>
 <div class="form-group">
 <label>Display Name</label>
-<input type="text" id="settingName" placeholder="e.g. Caleb Garritson">
+<input type="text" id="settingName" placeholder="Your name">
 </div>
 <div class="form-group">
 <label>Work Email</label>
-<input type="email" id="settingEmail" placeholder="e.g. caleb.garritson@gusto.com">
+<input type="email" id="settingEmail" placeholder="you@gusto.com">
 </div>
+<div class="settings-section-label">Salesforce</div>
 <div class="form-group">
-<label>GitHub Username</label>
-<input type="text" id="settingOwner" placeholder="e.g. CalebGarritson" readonly style="opacity:.6;">
+<label>Your Salesforce User ID</label>
+<div class="sf-id-display" id="settingSalesforceId">—</div>
 </div>
-</div>
-<div class="settings-section">
-<h3>Gmail Lead Scan</h3>
+<div class="settings-section-label">GitHub Connection</div>
+<div class="settings-note">Your data repo: <strong id="settingOwner"></strong>/Prospect-tracker</div>
+<div class="settings-section-label">Gmail Scan Settings</div>
 <div class="form-group">
 <label>Gmail Search Query</label>
 <input type="text" id="settingGmailQuery" placeholder="newer_than:2d in:inbox">
 </div>
 <div class="form-group">
 <label>Lead Keywords (comma-separated)</label>
-<input type="text" id="settingKeywords" placeholder="payroll, gusto, interested, quote, employees">
+<textarea id="settingKeywords" placeholder="payroll, gusto, small business…"></textarea>
 </div>
 <div class="form-group">
 <label>Scan Schedule</label>
 <select id="settingScanSchedule">
-<option value="daily_7am">Daily — Mon–Fri at 7 AM MT</option>
-<option value="daily_8am">Daily — Mon–Fri at 8 AM MT</option>
-<option value="twice_daily">Twice Daily — 7 AM & 1 PM MT</option>
-<option value="every_4h">Every 4 Hours</option>
+<option value="daily_7am">Daily at 7am</option>
+<option value="daily_8am">Daily at 8am</option>
+<option value="daily_9am">Daily at 9am</option>
+<option value="twice_daily">Twice daily (7am + 12pm)</option>
+<option value="manual">Manual only</option>
 </select>
-<small style="color:var(--text-secondary);font-size:11px;margin-top:4px;display:block;">
-Schedule changes take effect on the next Cowork sync.
-</small>
 </div>
+<div class="modal-buttons">
+<button type="button" class="btn-secondary" onclick="closeSettings()">Cancel</button>
+<button type="button" class="btn-primary" style="flex:1;" onclick="saveSettings();closeSettings();">Save Settings</button>
 </div>
-<div class="settings-section">
-<h3>Salesforce <span class="sf-stub-badge">Coming Soon</span></h3>
-<div class="sf-warning">
-<div class="sf-warning-title">⚠ Ownership Protection Rule</div>
-<div class="sf-warning-body">
-When the Salesforce connector is active, tasks will only be created in Salesforce
-if the tracker owner matches the Salesforce lead owner.
-A mismatch will block task creation and show a warning.
-Your Salesforce ID will be configured here when the connector is built.
-</div>
-</div>
-<div class="form-group">
-<label>Salesforce User ID (future)</label>
-<input type="text" id="settingSalesforceId" placeholder="Will be set when connector is built" disabled style="opacity:.45;">
-</div>
-</div>
-<div class="settings-section">
-<h3>Account</h3>
-<div style="display:flex;gap:10px;">
-<button class="btn-secondary" style="flex:none;padding:8px 16px;font-size:13px;" onclick="saveSettings();closeSettings();">Save Settings</button>
-<button class="btn-secondary" style="flex:none;padding:8px 16px;font-size:13px;color:#f87171;border-color:#f87171;" onclick="disconnectGitHub()">Disconnect GitHub</button>
-</div>
-</div>
-<div class="modal-buttons" style="margin-top:0;">
-<button type="button" class="btn-secondary" onclick="closeSettings()">Close</button>
-<button type="button" class="btn-primary" onclick="saveSettings();closeSettings();">Save & Close</button>
-</div>
+<button class="btn-disconnect" onclick="disconnectGitHub()">⚠ Disconnect GitHub</button>
 </div>
 </div>
 <!-- ── Salesforce User ID Help Modal ── -->
@@ -623,12 +663,48 @@ Your Salesforce ID will be configured here when the connector is built.
 <li>Your <strong>Salesforce User ID</strong> starts with <code>005</code> and is 18 characters long<br>
 (e.g. <code>00521000003XXXXAAA</code>)</li>
 </ol>
-<div class="sf-help-note">
+<div class="sf-note">
 <strong>Alternative:</strong> Ask your Salesforce admin or find it in<br>
 Setup → Users → click your name → the ID appears in the URL.
 </div>
 <div class="modal-buttons" style="margin-top:20px;">
 <button type="button" class="btn-primary" style="flex:1;" onclick="closeSFHelp()">Got it</button>
+</div>
+</div>
+</div>
+<!-- ── GitHub Setup Help Modal ── -->
+<div class="gh-help-modal" id="ghHelpModal">
+<div class="gh-help-card">
+<h3>🐙 GitHub Setup Guide</h3>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;line-height:1.6;">Follow these steps to create your free GitHub account and connect it to Calebrate.</p>
+
+<div class="gh-section-label">Part 1 — Create a GitHub Account</div>
+<ol>
+<li>Go to <strong><a href="https://github.com/signup" target="_blank" style="color:var(--accent-blue);">github.com/signup</a></strong> and click <strong>"Sign up"</strong></li>
+<li>Enter your <strong>@gusto.com work email</strong> and choose a password</li>
+<li>Pick a username — something like <code>FirstLastGusto</code></li>
+<li>Complete the verification steps and check your Gusto inbox to confirm your email</li>
+</ol>
+<div class="gh-warning-box">
+⚠️ <strong>Important:</strong> Do NOT click "Continue with Google" or any fast-sign-in shortcut. Those link to your personal Gmail. You must sign up with your <strong>@gusto.com email</strong> directly so your work data stays separate.
+</div>
+
+<div class="gh-section-label">Part 2 — Create a Personal Access Token</div>
+<ol>
+<li>Once signed in, click your <strong>profile picture</strong> in the top-right corner → <strong>Settings</strong></li>
+<li>Scroll all the way to the bottom of the left sidebar and click <strong>"Developer settings"</strong></li>
+<li>Click <strong>"Personal access tokens"</strong> → <strong>"Tokens (classic)"</strong></li>
+<li>Click <strong>"Generate new token"</strong> → <strong>"Generate new token (classic)"</strong></li>
+<li>Give it a name like <code>Calebrate Tracker</code>, set expiration to <strong>"No expiration"</strong></li>
+<li>Check the box next to <strong>"repo"</strong> (it says "Full control of private repositories") — that's the only one you need</li>
+<li>Scroll to the bottom and click the green <strong>"Generate token"</strong> button</li>
+<li>⚠️ <strong>Copy your token immediately</strong> — it starts with <code>ghp_</code> and you won't be able to see it again once you leave the page</li>
+</ol>
+<div class="gh-tip-box">
+💡 <strong>Tip:</strong> Paste the token somewhere safe (like a note) before coming back here. Once copied, paste it into the "Personal Access Token" field in this form.
+</div>
+<div class="modal-buttons" style="margin-top:20px;">
+<button type="button" class="btn-primary" style="flex:1;" onclick="closeGHHelp()">Got it — take me back</button>
 </div>
 </div>
 </div>

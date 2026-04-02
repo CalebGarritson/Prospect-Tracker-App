@@ -258,9 +258,9 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
-<div class="priority-dot ${p.priority>=1?'active-1':''}"></div>
-<div class="priority-dot ${p.priority>=2?'active-2':''}"></div>
-<div class="priority-dot ${p.priority>=3?'active-3':''}"></div>
+<div class="priority-dot ${p.priority>=1?'active-1':''}"; onclick="setPriority(${p.id},1)"></div>
+<div class="priority-dot ${p.priority>=2?'active-2':''}"; onclick="setPriority(${p.id},2)"></div>
+<div class="priority-dot ${p.priority>=3?'active-3':''}"; onclick="setPriority(${p.id},3)"></div>
 </div>
 </td>
 <td onclick="event.stopPropagation()">
@@ -340,9 +340,9 @@ row.innerHTML = `
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
-<div class="priority-dot ${p.priority>=1?'active-1':''}"></div>
-<div class="priority-dot ${p.priority>=2?'active-2':''}"></div>
-<div class="priority-dot ${p.priority>=3?'active-3':''}"></div>
+<div class="priority-dot ${p.priority>=1?'active-1':''}"; onclick="setFocusPriority('${p.id}',1)"></div>
+<div class="priority-dot ${p.priority>=2?'active-2':''}"; onclick="setFocusPriority('${p.id}',2)"></div>
+<div class="priority-dot ${p.priority>=3?'active-3':''}"; onclick="setFocusPriority('${p.id}',3)"></div>
 </div>
 </td>
 <td onclick="event.stopPropagation()">
@@ -551,6 +551,12 @@ return { allowed: true, reason: 'Ownership verified.' };
 window.__sfOwnerCheck = validateSalesforceOwnership;
 function esc(str) {
 return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function switchTab(tabName) {
+document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+document.getElementById(tabName).classList.add('active');
+event.target.classList.add('active');
 }
 (async () => {
 if (!_token || !_owner) {

@@ -51,536 +51,977 @@ line-height: 1.6;
 #setupScreen {
 display: none;
 position: fixed;
-inset: 0;
-background: rgba(0,0,0,.85);
-z-index: 2000;
+top: 0; left: 0; right: 0; bottom: 0;
+z-index: 9999;
+background: linear-gradient(135deg, var(--bg-header) 0%, var(--bg-primary) 100%);
 align-items: center;
 justify-content: center;
 }
-#setupScreen.active { display: flex; }
-.setup-card {
-background: var(--bg-secondary);
-border: 1px solid var(--border-color);
-border-radius: 16px;
+#setupScreen.active {
+display: flex;
+}
+.setup-container {
+width: 100%;
+max-width: 420px;
 padding: 40px;
-max-width: 480px;
-width: 90%;
-box-shadow: 0 24px 64px rgba(0,0,0,.6);
-}
-.setup-card h2 { font-size: 22px; font-weight: 700; color: #ffe033; margin-bottom: 8px; }
-.setup-card p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.7; }
-.setup-card .setup-link { color: var(--accent-blue); text-decoration: none; }
-.setup-card .setup-link:hover { text-decoration: underline; }
-.setup-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
-.setup-error.visible { display: block; }
-/* ── SF Help Bubble ── */
-.sf-help-btn {
-display: inline-flex; align-items: center; justify-content: center;
-width: 17px; height: 17px; border-radius: 50%;
-background: rgba(88,166,255,.15); border: 1px solid rgba(88,166,255,.4);
-color: var(--accent-blue); font-size: 11px; font-weight: 700;
-cursor: pointer; line-height: 1; padding: 0; margin-left: 4px;
-transition: all .2s; vertical-align: middle;
-}
-.sf-help-btn:hover { background: rgba(88,166,255,.3); }
-/* ── SF Help Modal ── */
-.sf-help-modal {
-display: none; position: fixed; inset: 0;
-background: rgba(0,0,0,.6); z-index: 3000;
-align-items: center; justify-content: center;
-}
-.sf-help-modal.active { display: flex; }
-.sf-help-card {
-background: var(--bg-secondary); border: 1px solid var(--border-color);
-border-radius: 14px; padding: 28px; max-width: 420px; width: 90%;
-box-shadow: 0 20px 60px rgba(0,0,0,.5);
-}
-.sf-help-card h3 { font-size: 16px; font-weight: 700; color: #ffe033; margin-bottom: 14px; }
-.sf-help-card ol { padding-left: 20px; color: var(--text-secondary); font-size: 13px; line-height: 2; }
-.sf-help-card ol li { margin-bottom: 2px; }
-.sf-help-card code { background: rgba(88,166,255,.1); color: var(--accent-blue); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
-.sf-help-note { margin-top: 14px; padding: 10px 14px; background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2); border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
-/* ── GitHub Help Modal ── */
-.gh-help-modal {
-display: none; position: fixed; inset: 0;
-background: rgba(0,0,0,.65); z-index: 3000;
-align-items: center; justify-content: center;
-}
-.gh-help-modal.active { display: flex; }
-.gh-help-card {
-background: var(--bg-secondary); border: 1px solid var(--border-color);
-border-radius: 14px; padding: 28px; max-width: 500px; width: 92%;
-box-shadow: 0 20px 60px rgba(0,0,0,.55);
-max-height: 88vh; overflow-y: auto;
-}
-.gh-help-card h3 { font-size: 16px; font-weight: 700; color: #ffe033; margin-bottom: 6px; }
-.gh-help-card .gh-section-label {
-font-size: 11px; font-weight: 700; text-transform: uppercase;
-letter-spacing: .08em; color: var(--accent-blue); margin: 18px 0 8px;
-}
-.gh-help-card ol { padding-left: 20px; color: var(--text-secondary); font-size: 13px; line-height: 2.1; }
-.gh-help-card ol li { margin-bottom: 1px; }
-.gh-help-card code { background: rgba(88,166,255,.1); color: var(--accent-blue); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
-.gh-warning-box {
-margin: 8px 0 14px; padding: 10px 14px;
-background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.35);
-border-radius: 8px; font-size: 12px; color: #fbbf24; line-height: 1.7;
-}
-.gh-tip-box {
-margin-top: 12px; padding: 10px 14px;
-background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2);
-border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6;
-}
-/* ── Sync Badge ── */
-.sync-badge {
-display: inline-flex;
-align-items: center;
-gap: 6px;
-padding: 6px 14px;
-border-radius: 20px;
-font-size: 12px;
-font-weight: 700;
-cursor: default;
-transition: all .2s;
-border: 1px solid var(--border-color);
-color: var(--text-secondary);
-background: rgba(255,255,255,.04);
-}
-.sync-badge.saving  { color: var(--accent-blue);   border-color: var(--accent-blue);   background: rgba(88,166,255,.08); }
-.sync-badge.saved   { color: var(--accent-green);  border-color: var(--accent-green);  background: rgba(38,208,124,.08); }
-.sync-badge.error   { color: #f87171;              border-color: #f87171;              background: rgba(248,113,113,.08); cursor: pointer; }
-.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.sync-dot.pulse { animation: pulse 1.2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-/* ── Container ── */
-.container { max-width: 1600px; margin: 0 auto; }
-header { margin-bottom: 40px; }
-.header-top {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 32px;
-}
-h1 { font-size: 32px; font-weight: 700; color: #ffe033; }
-.header-actions { display: flex; gap: 10px; align-items: center; }
-/* ── Buttons ── */
-.btn-primary {
-background: linear-gradient(135deg, #58a6ff, #79c0ff);
-color: var(--bg-primary);
-border: none; padding: 10px 20px; border-radius: 8px;
-font-weight: 600; cursor: pointer; font-size: 14px;
-transition: transform .2s, box-shadow .2s;
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(88,166,255,.3); }
-.btn-settings {
-background: rgba(255,255,255,.06);
-color: var(--text-secondary);
-border: 1px solid var(--border-color);
-padding: 9px 16px; border-radius: 8px;
-font-weight: 600; cursor: pointer; font-size: 14px;
-transition: all .2s;
-}
-.btn-settings:hover { background: rgba(255,255,255,.10); color: var(--text-primary); }
-.btn-secondary {
-flex: 1; padding: 10px 20px;
-border: 1px solid var(--border-color);
-background: transparent; color: var(--text-primary);
-border-radius: 6px; cursor: pointer; font-weight: 600; transition: all .2s;
-}
-.btn-secondary:hover { border-color: var(--text-primary); background: rgba(226,232,240,.05); }
-/* ── Section Headers ── */
-.section-header {
-display: flex;
-align-items: center;
-gap: 12px;
-padding: 10px 20px;
-border-radius: 10px 10px 0 0;
-border: 1px solid var(--border-color);
-border-bottom: none;
-}
-.section-header-ready  { background: linear-gradient(90deg, rgba(167,139,250,.12), transparent); }
-.section-header-future { background: linear-gradient(90deg, rgba(88,166,255,.10), transparent); }
-.section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); }
-.section-count-badge {
-background: var(--accent-blue); color: var(--bg-primary);
-font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px;
-}
-/* ── Tables ── */
-.table-container {
 background: var(--bg-secondary);
 border: 1px solid var(--border-color);
 border-radius: 12px;
-overflow: hidden;
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
-.table-container.has-section-header { border-radius: 0 0 12px 12px; }
-.table-container.scrollable { overflow-y: auto; overflow-x: hidden; }
-.table-container.scrollable thead th { position: sticky; top: 0; z-index: 2; background: var(--bg-header); }
-.table-container.scroll-ready  { max-height: 432px; }
-.table-container.scroll-future { max-height: 216px; }
-.table-container.scrollable::-webkit-scrollbar { width: 6px; }
-.table-container.scrollable::-webkit-scrollbar-track { background: transparent; }
-.table-container.scrollable::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-.table-container.scrollable::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
-table { width: 100%; border-collapse: collapse; }
-thead { background: var(--bg-header); border-bottom: 2px solid var(--border-color); }
-th { padding: 16px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .5px; user-select: none; white-space: nowrap; }
-tbody tr { border-bottom: 1px solid var(--border-color); transition: background .2s; }
-tbody tr:nth-child(odd) { background: rgba(26,29,46,.5); }
-tbody tr:hover { background: rgba(88,166,255,.08); cursor: pointer; }
-td { padding: 16px; font-size: 14px; color: var(--text-primary); }
-/* ── Priority Dots ── */
-.priority-dots { display: flex; gap: 6px; align-items: center; }
-.priority-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #3a4060; background: transparent; cursor: pointer; transition: all .18s; flex-shrink: 0; }
-.priority-dot:hover { border-color: #a8b2c1; }
-.priority-dot.active-1 { background: #4ade80; border-color: #4ade80; }
-.priority-dot.active-2 { background: #fbbf24; border-color: #fbbf24; }
-.priority-dot.active-3 { background: #a78bfa; border-color: #a78bfa; }
-/* ── Swatch ── */
-.swatch { width: 6px; border-radius: 3px; align-self: stretch; min-height: 40px; flex-shrink: 0; }
-.swatch.overdue        { background: linear-gradient(180deg, #7c3aed, #a78bfa); }
-.swatch.today          { background: linear-gradient(180deg, #d97706, #fbbf24); }
-.swatch.upcoming-soon  { background: linear-gradient(180deg, #0d7a72, #0d9488); }
-.swatch.upcoming-later { background: linear-gradient(180deg, #1d4ed8, #60a5fa); }
-.swatch.archived       { background: linear-gradient(180deg, #374151, #6b7280); }
-.swatch.focus-new      { background: linear-gradient(180deg, #c026d3, #e879f9); }
-.swatch.focus-active   { background: linear-gradient(180deg, #0284c7, #38bdf8); }
-.swatch.focus-hold     { background: linear-gradient(180deg, #b45309, #fbbf24); }
-.swatch.focus-called   { background: linear-gradient(180deg, #065f46, #34d399); }
-/* ── Days Pill ── */
-.days-pill { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-align: center; min-width: 60px; color: white; }
-.days-pill.overdue        { background: var(--accent-red); }
-.days-pill.today          { background: var(--accent-orange); }
-.days-pill.upcoming-soon  { background: #0d9488; }
-.days-pill.upcoming-later { background: #536878; }
-.days-pill.archived       { background: #4b5563; }
-/* ── Status Pill (Daily Focus) ── */
-.status-pill { display: inline-block; padding: 5px 11px; border-radius: 20px; font-size: 12px; font-weight: 700; color: white; white-space: nowrap; }
-.status-pill.new-lead  { background: #9333ea; }
-.status-pill.active    { background: #0284c7; }
-.status-pill.called    { background: #059669; }
-.status-pill.hold      { background: #b45309; }
-.status-pill.done      { background: #4b5563; }
-/* ── Notes ── */
-.notes-cell { max-width: 300px; color: var(--text-secondary); font-size: 13px; }
-.notes-truncated { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* ── Actions ── */
-.actions { display: flex; gap: 8px; }
-.action-btn { padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; background: rgba(88,166,255,.1); color: var(--accent-blue); }
-.action-btn:hover { background: rgba(88,166,255,.2); }
-.action-btn.delete { background: rgba(167,139,250,.1); color: var(--accent-red); }
-.action-btn.delete:hover { background: rgba(167,139,250,.2); }
-/* ── Expanded Row ── */
-.expanded-row { display: none; }
-.expanded-row.active { display: table-row; background: rgba(88,166,255,.05) !important; }
-.expanded-content { padding: 24px; }
-.expanded-content h3 { font-size: 14px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
-.expanded-content p { color: var(--text-primary); line-height: 1.8; font-size: 14px; }
-/* ── Daily Focus Section ── */
-.focus-wrapper { margin-top: 36px; }
-.focus-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(192,38,211,.10), transparent); border: 1px solid var(--border-color); border-bottom: none; border-radius: 10px 10px 0 0; }
-.focus-header-left { display: flex; align-items: center; gap: 12px; }
-.focus-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); }
-.focus-count-badge { background: #9333ea; color: white; font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
-.focus-updated { font-size: 11px; color: var(--text-secondary); opacity: .6; }
-/* ── Archive Section ── */
-.archive-wrapper { margin-top: 36px; }
-.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(107,114,128,.10), transparent); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: background .2s; }
-.archive-header:hover { background: linear-gradient(90deg, rgba(107,114,128,.18), transparent); }
-.archive-header-left { display: flex; align-items: center; gap: 12px; }
-.archive-chevron { color: var(--text-secondary); font-size: 12px; transition: transform .25s; }
-.archive-chevron.open { transform: rotate(90deg); }
-.archive-body { display: none; }
-.archive-body.open { display: block; }
-.archive-toolbar {
+.setup-logo {
+font-size: 32px;
+font-weight: 700;
+text-align: center;
+margin-bottom: 8px;
+color: var(--accent-purple);
+}
+.setup-desc {
+text-align: center;
+color: var(--text-secondary);
+font-size: 13px;
+margin-bottom: 30px;
+line-height: 1.5;
+}
+.setup-form {
+display: flex;
+flex-direction: column;
+gap: 16px;
+}
+.form-group {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+.form-group label {
+font-size: 12px;
+color: var(--text-secondary);
+font-weight: 500;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.form-group input {
+padding: 10px;
+background: var(--bg-primary);
+color: var(--text-primary);
+border: 1px solid var(--border-color);
+border-radius: 6px;
+font-size: 13px;
+font-family: inherit;
+}
+.form-group input:focus {
+outline: none;
+border-color: var(--accent-purple);
+box-shadow: 0 0 8px rgba(210, 145, 255, 0.2);
+}
+.setup-info {
+font-size: 11px;
+color: var(--text-secondary);
+line-height: 1.4;
+padding: 10px;
+background: rgba(255, 224, 51, 0.08);
+border-left: 2px solid rgba(255, 224, 51, 0.3);
+border-radius: 4px;
+}
+.sf-help-btn {
+margin-top: -10px;
+padding: 6px 12px;
+background: none;
+border: none;
+color: var(--accent-cyan);
+font-size: 11px;
+text-decoration: underline;
+cursor: pointer;
+}
+.sf-help-btn:hover {
+color: var(--accent-purple);
+}
+.setup-buttons {
+display: flex;
+gap: 10px;
+margin-top: 10px;
+}
+.setup-buttons button {
+flex: 1;
+padding: 11px;
+background: var(--accent-purple);
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+transition: opacity 0.2s;
+}
+.setup-buttons button:hover {
+opacity: 0.85;
+}
+#setupError {
+color: #ff9999;
+font-size: 12px;
+padding: 10px;
+background: rgba(255, 100, 100, 0.1);
+border-radius: 4px;
+border-left: 2px solid #ff9999;
+margin-bottom: 10px;
 display: none;
-position: sticky;
-top: 0;
-z-index: 3;
+}
+#setupError.visible {
+display: block;
+}
+/* ── SF Help Modal ── */
+#sfHelpModal {
+display: none;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0, 0, 0, 0.7);
 align-items: center;
+justify-content: center;
+z-index: 10000;
+padding: 20px;
+}
+#sfHelpModal.active {
+display: flex;
+}
+.help-box {
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 12px;
+padding: 30px;
+max-width: 500px;
+color: var(--text-primary);
+}
+.help-box h2 {
+margin-bottom: 15px;
+color: var(--accent-purple);
+}
+.help-box ol {
+margin-left: 20px;
+line-height: 1.8;
+}
+.help-box li {
+margin-bottom: 10px;
+}
+.help-box strong {
+color: var(--accent-cyan);
+}
+/* ── Main App ── */
+#mainApp {
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 20px;
+}
+.header-row {
+display: flex;
 justify-content: space-between;
-padding: 10px 20px;
-background: rgba(248,113,113,.08);
-border: 1px solid rgba(248,113,113,.25);
-border-bottom: none;
+align-items: center;
+margin-bottom: 40px;
+flex-wrap: wrap;
+gap: 20px;
 }
-.archive-toolbar.visible { display: flex; }
-.archive-toolbar-text { font-size: 13px; color: #f87171; font-weight: 600; }
-.btn-delete-selected {
-padding: 7px 16px; border-radius: 6px; border: 1px solid rgba(248,113,113,.4);
-background: rgba(248,113,113,.1); color: #f87171;
-font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+.header-left {
+display: flex;
+align-items: baseline;
+gap: 20px;
 }
-.btn-delete-selected:hover { background: rgba(248,113,113,.2); }
-.table-container.has-toolbar { border-radius: 0 0 12px 12px; }
-.archive-select-th { width: 32px; text-align: center !important; padding: 8px !important; }
-.archive-checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: #f87171; }
-/* ── Empty State ── */
-.empty-state-row td { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 14px; }
-/* ── Modals ── */
-.modal {
-display: none; position: fixed; inset: 0;
-background: rgba(0,0,0,.7); z-index: 1000;
-align-items: center; justify-content: center;
+.app-title {
+font-size: 32px;
+font-weight: 700;
+color: var(--accent-purple);
+letter-spacing: -0.5px;
 }
-.modal.active { display: flex; }
-.modal-card {
-background: var(--bg-secondary); border: 1px solid var(--border-color);
-border-radius: 16px; padding: 32px; max-width: 500px; width: 90%;
-box-shadow: 0 24px 64px rgba(0,0,0,.6); max-height: 90vh; overflow-y: auto;
+.user-info {
+font-size: 12px;
+color: var(--text-secondary);
 }
-.modal-card h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 24px; }
-.modal-buttons { display: flex; gap: 12px; margin-top: 24px; }
-/* ── Form Groups ── */
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-.form-group input, .form-group textarea, .form-group select {
-width: 100%; padding: 11px 14px;
-background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
-border-radius: 8px; color: var(--text-primary); font-size: 14px; transition: border-color .2s;
+.header-right {
+display: flex;
+align-items: center;
+gap: 15px;
+flex-wrap: wrap;
 }
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-blue); background: rgba(88,166,255,.05); }
-.form-group input::placeholder, .form-group textarea::placeholder { color: #4a5268; }
-.form-group textarea { resize: vertical; min-height: 80px; }
-.form-group select option { background: var(--bg-secondary); }
-/* ── Settings Sections ── */
-.settings-section-label {
-font-size: 11px; font-weight: 700; text-transform: uppercase;
-letter-spacing: .08em; color: var(--accent-blue);
-margin: 24px 0 12px; padding-bottom: 6px;
+.header-action {
+padding: 8px 14px;
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 6px;
+color: var(--text-primary);
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+.header-action:hover {
+background: var(--accent-purple);
+color: white;
+}
+.sync-badge {
+padding: 8px 12px;
+border-radius: 20px;
+font-size: 11px;
+font-weight: 600;
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 8px;
+cursor: pointer;
+transition: all 0.2s;
+}
+.sync-badge.saved {
+background: rgba(38, 208, 124, 0.15);
+color: #26d07c;
+border: 1px solid rgba(38, 208, 124, 0.3);
+}
+.sync-badge.saving {
+background: rgba(88, 166, 255, 0.15);
+color: #58a6ff;
+border: 1px solid rgba(88, 166, 255, 0.3);
+}
+.sync-badge.error {
+background: rgba(255, 100, 100, 0.15);
+color: #ff9999;
+border: 1px solid rgba(255, 100, 100, 0.3);
+}
+.sync-dot {
+display: inline-block;
+width: 6px;
+height: 6px;
+border-radius: 50%;
+background: currentColor;
+}
+.sync-dot.pulse {
+animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.5; }
+}
+.nav-tabs {
+display: flex;
+gap: 5px;
+margin-bottom: 30px;
+padding-bottom: 20px;
 border-bottom: 1px solid var(--border-color);
 }
-.settings-section-label:first-child { margin-top: 0; }
-.settings-note {
-font-size: 12px; color: var(--text-secondary); line-height: 1.6;
-padding: 8px 12px; background: rgba(88,166,255,.06);
-border-radius: 6px; margin-bottom: 12px;
+.nav-tab {
+padding: 10px 18px;
+background: var(--bg-secondary);
+border: 1px solid transparent;
+border-radius: 6px;
+color: var(--text-secondary);
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
 }
-.sf-id-display {
-padding: 11px 14px; background: rgba(255,255,255,.03);
-border: 1px solid var(--border-color); border-radius: 8px;
-font-family: monospace; font-size: 13px; color: var(--text-secondary); letter-spacing: .04em;
+.nav-tab.active {
+background: var(--accent-purple);
+color: white;
+border-color: var(--accent-purple);
 }
-/* ── SF Note (Settings modal) ── */
-.sf-note {
-margin-top: 14px; padding: 10px 14px;
-background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2);
-border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+.nav-tab:hover:not(.active) {
+background: var(--bg-secondary);
+color: var(--text-primary);
 }
-/* ── Disconnect Button ── */
-.btn-disconnect {
-width: 100%; padding: 10px; border-radius: 8px;
-border: 1px solid rgba(248,113,113,.3); background: rgba(248,113,113,.06);
-color: #f87171; font-size: 13px; font-weight: 600;
-cursor: pointer; transition: all .2s; margin-top: 8px;
+.tab-content {
+display: none;
 }
-.btn-disconnect:hover { background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.5); }
+.tab-content.active {
+display: block;
+}
+.section-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+.section-title {
+font-size: 16px;
+font-weight: 700;
+color: var(--text-primary);
+}
+.section-count {
+font-size: 12px;
+color: var(--text-secondary);
+padding: 4px 10px;
+background: var(--bg-secondary);
+border-radius: 4px;
+}
+.add-btn {
+padding: 8px 14px;
+background: var(--accent-purple);
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: opacity 0.2s;
+}
+.add-btn:hover {
+opacity: 0.85;
+}
+.table-container {
+overflow-x: auto;
+margin-bottom: 20px;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+font-size: 13px;
+}
+thead {
+background: var(--bg-secondary);
+border-bottom: 1px solid var(--border-color);
+}
+th {
+padding: 12px;
+text-align: left;
+font-weight: 600;
+color: var(--text-secondary);
+text-transform: uppercase;
+font-size: 11px;
+letter-spacing: 0.5px;
+}
+td {
+padding: 12px;
+border-bottom: 1px solid var(--border-color);
+color: var(--text-primary);
+}
+tbody tr:hover {
+background: var(--bg-secondary);
+}
+.prospect-row {
+cursor: pointer;
+transition: background 0.2s;
+}
+.prospect-row:hover {
+background: var(--bg-secondary);
+}
+.expanded-row {
+display: none;
+}
+.expanded-row.active {
+display: table-row;
+background: rgba(167, 139, 250, 0.05);
+}
+.expanded-content {
+padding: 20px;
+color: var(--text-secondary);
+}
+.expanded-content h3 {
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 10px;
+color: var(--text-primary);
+}
+.swatch {
+display: inline-block;
+width: 12px;
+height: 12px;
+border-radius: 3px;
+}
+.swatch.today {
+background: var(--accent-orange);
+}
+.swatch.upcoming-soon {
+background: var(--accent-green);
+}
+.swatch.upcoming-later {
+background: var(--accent-blue);
+}
+.swatch.overdue {
+background: var(--accent-red);
+}
+.swatch.archived {
+background: var(--text-secondary);
+}
+.swatch.focus-new {
+background: #00d4ff;
+}
+.swatch.focus-hold {
+background: #ffb703;
+}
+.swatch.focus-called {
+background: #8338ec;
+}
+.swatch.focus-active {
+background: var(--accent-green);
+}
+.days-pill {
+display: inline-block;
+padding: 4px 8px;
+border-radius: 4px;
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.3px;
+}
+.days-pill.today {
+background: rgba(251, 133, 0, 0.15);
+color: var(--accent-orange);
+border: 1px solid rgba(251, 133, 0, 0.3);
+}
+.days-pill.upcoming-soon {
+background: rgba(38, 208, 124, 0.15);
+color: var(--accent-green);
+border: 1px solid rgba(38, 208, 124, 0.3);
+}
+.days-pill.upcoming-later {
+background: rgba(88, 166, 255, 0.15);
+color: var(--accent-blue);
+border: 1px solid rgba(88, 166, 255, 0.3);
+}
+.days-pill.overdue {
+background: rgba(167, 139, 250, 0.15);
+color: var(--accent-red);
+border: 1px solid rgba(167, 139, 250, 0.3);
+}
+.days-pill.archived {
+background: rgba(168, 178, 193, 0.15);
+color: var(--text-secondary);
+border: 1px solid rgba(168, 178, 193, 0.3);
+}
+.status-pill {
+display: inline-block;
+padding: 4px 8px;
+border-radius: 4px;
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.3px;
+}
+.status-pill.new-lead {
+background: rgba(0, 212, 255, 0.15);
+color: #00d4ff;
+border: 1px solid rgba(0, 212, 255, 0.3);
+}
+.status-pill.active {
+background: rgba(38, 208, 124, 0.15);
+color: var(--accent-green);
+border: 1px solid rgba(38, 208, 124, 0.3);
+}
+.status-pill.hold {
+background: rgba(255, 183, 3, 0.15);
+color: #ffb703;
+border: 1px solid rgba(255, 183, 3, 0.3);
+}
+.status-pill.called {
+background: rgba(131, 56, 236, 0.15);
+color: #8338ec;
+border: 1px solid rgba(131, 56, 236, 0.3);
+}
+.status-pill.done {
+background: rgba(168, 178, 193, 0.15);
+color: var(--text-secondary);
+border: 1px solid rgba(168, 178, 193, 0.3);
+}
+.notes-cell {
+max-width: 250px;
+}
+.notes-truncated {
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+color: var(--text-secondary);
+font-size: 12px;
+}
+.priority-dots {
+display: flex;
+gap: 8px;
+justify-content: flex-start;
+}
+.priority-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+background: transparent;
+border: 2px solid var(--text-secondary);
+cursor: pointer;
+transition: all 0.2s;
+}
+.priority-dot:hover {
+background: var(--text-secondary);
+}
+.priority-dot.active-1 {
+background: var(--accent-orange);
+border-color: var(--accent-orange);
+}
+.priority-dot.active-2 {
+background: var(--accent-orange);
+border-color: var(--accent-orange);
+width: 10px;
+height: 10px;
+margin: -1px;
+}
+.priority-dot.active-3 {
+background: var(--accent-orange);
+border-color: var(--accent-orange);
+width: 12px;
+height: 12px;
+margin: -2px;
+}
+.actions {
+display: flex;
+gap: 6px;
+justify-content: flex-end;
+}
+.action-btn {
+padding: 6px 10px;
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 4px;
+color: var(--text-primary);
+font-size: 11px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+.action-btn:hover {
+background: var(--accent-purple);
+color: white;
+border-color: var(--accent-purple);
+}
+.action-btn.delete:hover {
+background: #ff9999;
+border-color: #ff9999;
+}
+.archive-header {
+padding: 20px;
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 8px;
+margin-top: 30px;
+cursor: pointer;
+user-select: none;
+display: flex;
+justify-content: space-between;
+align-items: center;
+transition: background 0.2s;
+}
+.archive-header:hover {
+background: var(--border-color);
+}
+.archive-chevron {
+display: inline-block;
+transition: transform 0.2s;
+}
+.archive-chevron.open {
+transform: rotate(180deg);
+}
+.archive-body {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.3s ease-in-out;
+}
+.archive-body.open {
+max-height: 1000px;
+}
+.archive-table {
+width: 100%;
+margin-top: 0;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+}
+.archive-table thead {
+background: var(--bg-secondary);
+}
+.archive-table tbody tr {
+background: var(--bg-secondary);
+}
+.archive-checkbox {
+width: 16px;
+height: 16px;
+cursor: pointer;
+accentColor: var(--accent-purple);
+}
+.archive-toolbar {
+position: sticky;
+bottom: 0;
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 8px;
+padding: 15px;
+margin-top: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+max-height: 0;
+overflow: hidden;
+opacity: 0;
+transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
+}
+.archive-toolbar.visible {
+max-height: 50px;
+opacity: 1;
+}
+#archiveTableContainer.has-toolbar {
+padding-bottom: 60px;
+}
+.archive-actions {
+display: flex;
+gap: 10px;
+justify-content: flex-end;
+}
+.archive-btn {
+padding: 8px 14px;
+background: var(--accent-purple);
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: opacity 0.2s;
+}
+.archive-btn:hover {
+opacity: 0.85;
+}
+.archive-btn.delete {
+background: #ff9999;
+}
+/* ── Focus Section ── */
+.focus-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+.focus-title {
+font-size: 16px;
+font-weight: 700;
+color: var(--text-primary);
+}
+.focus-updated {
+font-size: 11px;
+color: var(--text-secondary);
+}
+/* ── Modal ── */
+.modal {
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0, 0, 0, 0.5);
+align-items: center;
+justify-content: center;
+display: none;
+z-index: 2000;
+padding: 20px;
+}
+.modal.active {
+display: flex;
+}
+.modal-content {
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 12px;
+padding: 30px;
+width: 100%;
+max-width: 500px;
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+.modal-header {
+font-size: 18px;
+font-weight: 700;
+margin-bottom: 20px;
+color: var(--text-primary);
+}
+.form-group {
+display: flex;
+flex-direction: column;
+gap: 6px;
+margin-bottom: 15px;
+}
+.form-group label {
+font-size: 12px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: var(--text-secondary);
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+padding: 10px;
+background: var(--bg-primary);
+color: var(--text-primary);
+border: 1px solid var(--border-color);
+border-radius: 6px;
+font-size: 13px;
+font-family: inherit;
+width: 100%;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+outline: none;
+border-color: var(--accent-purple);
+box-shadow: 0 0 8px rgba(210, 145, 255, 0.2);
+}
+.form-group textarea {
+resize: vertical;
+min-height: 80px;
+}
+.modal-footer {
+display: flex;
+gap: 10px;
+margin-top: 20px;
+justify-content: flex-end;
+}
+.modal-btn {
+padding: 10px 18px;
+background: var(--accent-purple);
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: opacity 0.2s;
+}
+.modal-btn:hover {
+opacity: 0.85;
+}
+.modal-btn.cancel {
+background: transparent;
+color: var(--text-primary);
+border: 1px solid var(--border-color);
+}
+.empty-state-row {
+text-align: center !important;
+color: var(--text-secondary) !important;
+paddign: 30px !important;
+}
 </style>
 </head>
 <body>
+<!-- SETUP SCREEN -->
 <div id="setupScreen">
-<div class="setup-card">
-<h2>🔐 Welcome to Prospect Tracker</h2>
-<p>
-Fill in your info below to get started. Your prospect data is stored in your own private GitHub repository — it's yours and no one else can see it.
-</p>
-<form id="setupForm">
+<div class="setup-container">
+<div class="setup-logo">Calebrate</div>
+<div class="setup-desc">A private, GitHub-backed prospect tracker for Gusto sales reps</div>
+<div id="setupError"></div>
+<form id="setupForm" class="setup-form">
 <div class="form-group">
-<label>Full Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="setupName" placeholder="e.g. Caleb Garritson" required>
+<label>GitHub Username</label>
+<input type="text" id="setupOwner" placeholder="your-username" required>
 </div>
 <div class="form-group">
-<label>Work Email <span style="color:#f87171;">*</span></label>
+<label>GitHub Personal Access Token</label>
+<input type="password" id="setupToken" placeholder="ghp_..." required>
+<div class="setup-info">Create a token at <strong>github.com/settings/tokens</strong> with access to your private repos.</div>
+</div>
+<div class="form-group">
+<label>Display Name</label>
+<input type="text" id="setupName" placeholder="Your Full Name" required>
+</div>
+<div class="form-group">
+<label>Work Email (@gusto.com)</label>
 <input type="email" id="setupEmail" placeholder="you@gusto.com" required>
 </div>
 <div class="form-group">
-<label>
-Salesforce User ID <span style="color:#f87171;">*</span>
-<button type="button" class="sf-help-btn" onclick="openSFHelp()" title="How to find this">?</button>
-</label>
-<input type="text" id="setupSalesforceId" placeholder="005XXXXXXXXXXXXXXX" required style="font-family:monospace;letter-spacing:.03em;">
+<label>Salesforce User ID</label>
+<input type="text" id="setupSalesforceId" placeholder="005xx..." required>
+<button class="sf-help-btn" type="button" onclick="openSFHelp()">? Find your ID</button>
 </div>
-<div style="border-top:1px solid var(--border-color);margin:20px 0 16px;"></div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
-<strong style="color:var(--text-primary);">Connect your GitHub repo</strong>
-<button type="button" class="sf-help-btn" onclick="openGHHelp()" title="How to set up GitHub" style="margin-left:6px;">?</button><br>
-Your data lives in a private repo — enter your username and a Personal Access Token.
-<span style="color:rgba(88,166,255,.6);font-size:12px;"> (Don't have one yet? Click <strong style="color:var(--accent-blue);">?</strong> above.)</span>
-</p>
-<div class="form-group">
-<label>GitHub Username <span style="color:#f87171;">*</span></label>
-<input type="text" id="setupOwner" placeholder="e.g. CalebGarritson" required>
+<div class="setup-buttons">
+<button type="submit" class="setup-btn">Connect to GitHub</button>
 </div>
-<div class="form-group">
-<label>Personal Access Token <span style="color:#f87171;">*</span></label>
-<input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
-</div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="submit" class="btn-primary" style="flex:1;">Connect &amp; Launch Tracker</button>
-</div>
-<div class="setup-error" id="setupError"></div>
 </form>
 </div>
 </div>
-<div class="container" id="mainApp" style="display:none;">
-<header>
-<div class="header-top">
-<h1>Prospect Tracker</h1>
-<div class="header-actions">
-<div class="sync-badge" id="syncBadge">
-<span class="sync-dot" id="syncDot"></span>
-<span id="syncLabel">Loading…</span>
+<!-- SALESFORCE HELP MODAL -->
+<div id="sfHelpModal">
+<div class="help-box">
+<h2>Finding Your Salesforce User ID</h2>
+<ol>
+<li>Log in to <strong>Salesforce</strong></li>
+<li>Click your <strong>profile icon</strong> (top right) and select <strong>Settings</strong></li>
+<li>In the left sidebar, click <strong>Personal Information</strong></li>
+<li>Look for <strong>User ID</strong> — it starts with <strong>005</strong> and is 15-18 characters</li>
+<li>Copy and paste it here</li>
+</ol>
 </div>
-<button class="btn-settings" onclick="openSettings()">⚙ Settings</button>
-<button class="btn-primary" onclick="openAddModal()">+ Add Prospect</button>
+</div>
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+<div class="header-row">
+<div class="header-left">
+<div class="app-title">Calebrate</div>
+<div class="user-info"><span id="userDisplayName"></span></div>
+</div>
+<div class="header-right">
+<button class="header-action" onclick="openSettings()">Settings</button>
+<button class="header-action" onclick="disconnectGitHub()">Disconnect</button>
+<div class="sync-badge saved"><span class="sync-dot"></span><span id="syncLabel">Synced</span></div>
 </div>
 </div>
-</header>
-<div>
-<div class="section-header section-header-ready">
+<div class="nav-tabs">
+<div class="nav-tab active" onclick="showTab('prospects')">Prospects</div>
+<div class="nav-tab" onclick="showTab('focus')">Daily Focus</div>
+</div>
+<!-- PROSPECTS TAB -->
+<div id="prospects-tab" class="tab-content active">
+<div class="section-header">
+<div style="display:flex; gap:20px; align-items:center;">
 <span class="section-title">Ready to Call</span>
-<span class="section-count-badge" id="countReady">0</span>
+<span class="section-count"><span id="countReady">0</span> prospects</span>
 </div>
-<div class="table-container scrollable scroll-ready has-section-header">
+<button class="add-btn" onclick="openAddModal()">+ Add Prospect</button>
+</div>
+<div class="table-container">
 <table>
-<thead><tr>
-<th style="width:14px"></th>
+<thead>
+<tr>
+<th style="width:20px;"></th>
 <th>Contact</th>
-<th>Reengagement Date</th>
+<th>Date</th>
 <th>Days</th>
 <th>Notes</th>
-<th>Priority</th>
-<th>Actions</th>
-</tr></thead>
+<th style="width:120px;">Priority</th>
+<th style="width:140px;">Actions</th>
+</tr>
+</thead>
 <tbody id="tbodyReady"></tbody>
 </table>
 </div>
-</div>
-<div style="margin-top:24px;">
-<div class="section-header section-header-future">
+<div class="section-header" style="margin-top:40px;">
+<div style="display:flex; gap:20px; align-items:center;">
 <span class="section-title">Upcoming</span>
-<span class="section-count-badge" id="countFuture">0</span>
+<span class="section-count"><span id="countFuture">0</span> prospects</span>
 </div>
-<div class="table-container scrollable scroll-future has-section-header">
+</div>
+<div class="table-container">
 <table>
-<thead><tr>
-<th style="width:14px"></th>
+<thead>
+<tr>
+<th style="width:20px;"></th>
 <th>Contact</th>
-<th>Reengagement Date</th>
+<th>Date</th>
 <th>Days</th>
 <th>Notes</th>
-<th>Priority</th>
-<th>Actions</th>
-</tr></thead>
+<th style="width:120px;">Priority</th>
+<th style="width:140px;">Actions</th>
+</tr>
+</thead>
 <tbody id="tbodyFuture"></tbody>
 </table>
 </div>
+<div class="archive-header" onclick="toggleArchive()">
+<div>
+<span class="section-title">Archive</span>
+<span class="section-count" style="margin-left:15px;"><span id="countArchive">0</span> prospects</span>
 </div>
-<div class="focus-wrapper">
-<div class="focus-header">
-<div class="focus-header-left">
-<span class="focus-title">Daily Focus</span>
-<span class="focus-count-badge" id="countFocus">0</span>
-<span class="focus-updated" id="focusUpdated"></span>
+<span class="archive-chevron" id="archiveChevron">▼</span>
 </div>
-<button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openFocusModal()">+ Add Lead</button>
+<div class="archive-body" id="archiveBody">
+<div id="archiveTableContainer" class="table-container">
+<table class="archive-table">
+<thead>
+<tr>
+<th style="width:40px;"></th>
+<th style="width:20px;"></th>
+<th>Contact</th>
+<th>Date</th>
+<th>Days</th>
+<th>Notes</th>
+<th style="width:140px;">Actions</th>
+</tr>
+</thead>
+<tbody id="tbodyArchive"></tbody>
+</table>
 </div>
-<div class="table-container has-section-header">
+<div class="archive-toolbar" id="archiveToolbar">
+<div>
+<input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+<span style="margin-left:10px;" id="archiveSelectedText">0 selected</span>
+</div>
+<div class="archive-actions">
+<button class="archive-btn delete" onclick="deleteSelected()">Delete Selected</button>
+</div>
+</div>
+</div>
+</div>
+<!-- DAILY FOCUS TAB -->
+<div id="focus-tab" class="tab-content">
+<div class="section-header">
+<div style="display:flex; flex-direction:column;">
+<span class="section-title">Daily Focus</span>
+<span class="focus-updated" id="focusUpdated">Updated today</span>
+</div>
+<button class="add-btn" onclick="openFocusModal()">+ Add Lead</button>
+</div>
+<div class="table-container">
 <table>
-<thead><tr>
-<th style="width:14px"></th>
-<th>Name / Company</th>
+<thead>
+<tr>
+<th style="width:20px;"></th>
+<th>Name</th>
 <th>Received</th>
 <th>Status</th>
 <th>Notes</th>
-<th>Priority</th>
-<th>Actions</th>
-</tr></thead>
+<th style="width:120px;">Priority</th>
+<th style="width:140px;">Actions</th>
+</tr>
+</thead>
 <tbody id="tbodyFocus"></tbody>
 </table>
 </div>
 </div>
-<div class="archive-wrapper">
-<div class="archive-header" onclick="toggleArchive()">
-<div class="archive-header-left">
-<span class="section-title" style="color:var(--text-secondary);">Archived</span>
-<span class="section-count-badge" style="background:#4b5563;" id="countArchive">0</span>
 </div>
-<span class="archive-chevron" id="archiveChevron">▶</span>
-</div>
-<div class="archive-body" id="archiveBody">
-<div class="archive-toolbar" id="archiveToolbar">
-<span class="archive-toolbar-text" id="archiveSelectedText">0 selected</span>
-<button class="btn-delete-selected" onclick="deleteSelected()">🗑 Delete Selected</button>
-</div>
-<div class="table-container has-section-header" id="archiveTableContainer">
-<table>
-<thead><tr>
-<th class="archive-select-th"><input type="checkbox" class="archive-checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
-<th style="width:14px"></th>
-<th>Contact</th>
-<th>Reengagement Date</th>
-<th>Days</th>
-<th>Notes</th>
-<th>Actions</th>
-</tr></thead>
-<tbody id="tbodyArchive"></tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-<!-- ── Add / Edit Prospect Modal ── -->
-<div class="modal" id="addModal">
-<div class="modal-card">
-<h2 id="modalHeader">Add New Prospect</h2>
-<form id="addForm">
+<!-- MODALS -->
+<div id="addModal" class="modal">
+<div class="modal-content">
+<div class="modal-header" id="modalHeader">Add New Prospect</div>
+<form id="addForm" class="form-group-list">
 <div class="form-group">
-<label>Contact Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="formContact" placeholder="First Last · Company" required>
+<label>Contact Name</label>
+<input type="text" id="formContact" required>
 </div>
 <div class="form-group">
 <label>Email</label>
-<input type="email" id="formEmail" placeholder="contact@company.com">
+<input type="email" id="formEmail">
 </div>
 <div class="form-group">
-<label>Reengagement Date <span style="color:#f87171;">*</span></label>
+<label>Call Date</label>
 <input type="date" id="formDate" required>
 </div>
 <div class="form-group">
 <label>Notes</label>
-<textarea id="formNotes" placeholder="Last conversation, context, objections…"></textarea>
+<textarea id="formNotes"></textarea>
 </div>
-<div class="modal-buttons">
-<button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
-<button type="submit" class="btn-primary" style="flex:1;">Save Prospect</button>
+<div class="modal-footer">
+<button type="button" class="modal-btn cancel" onclick="closeAddModal()">Cancel</button>
+<button type="submit" class="modal-btn">Save</button>
 </div>
 </form>
 </div>
 </div>
-<!-- ── Daily Focus Modal ── -->
-<div class="modal" id="focusModal">
-<div class="modal-card">
-<h2 id="focusModalHeader">Add Focus Lead</h2>
-<form id="focusForm">
+<div id="focusModal" class="modal">
+<div class="modal-content">
+<div class="modal-header" id="focusModalHeader">Add Focus Lead</div>
+<form id="focusForm" class="form-group-list">
 <div class="form-group">
-<label>Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="focusFormName" placeholder="First Last" required>
+<label>Lead Name</label>
+<input type="text" id="focusFormName" required>
 </div>
 <div class="form-group">
 <label>Company</label>
-<input type="text" id="focusFormCompany" placeholder="Company name">
+<input type="text" id="focusFormCompany">
 </div>
 <div class="form-group">
 <label>Email</label>
-<input type="email" id="focusFormEmail" placeholder="lead@company.com">
+<input type="email" id="focusFormEmail">
 </div>
 <div class="form-group">
-<label>Date Received</label>
+<label>Received Date</label>
 <input type="date" id="focusFormReceivedDate">
 </div>
 <div class="form-group">
 <label>Status</label>
-<select id="focusFormStatus" onchange="toggleHoldUntil()">
+<select id="focusFormStatus" onchange="toggleHoldUntil()" required>
 <option value="new">New Lead</option>
 <option value="active">Active</option>
 <option value="called">Called</option>
@@ -594,120 +1035,74 @@ Your data lives in a private repo — enter your username and a Personal Access 
 </div>
 <div class="form-group">
 <label>Notes</label>
-<textarea id="focusFormNotes" placeholder="Lead source, context, next steps…"></textarea>
+<textarea id="focusFormNotes"></textarea>
 </div>
-<div class="modal-buttons">
-<button type="button" class="btn-secondary" onclick="closeFocusModal()">Cancel</button>
-<button type="submit" class="btn-primary" style="flex:1;">Save Lead</button>
+<div class="modal-footer">
+<button type="button" class="modal-btn cancel" onclick="closeFocusModal()">Cancel</button>
+<button type="submit" class="modal-btn">Save</button>
 </div>
 </form>
 </div>
 </div>
-<!-- ── Settings Modal ── -->
-<div class="modal" id="settingsModal">
-<div class="modal-card">
-<h2>⚙ Settings</h2>
-<div class="settings-section-label">Your Profile</div>
+<div id="settingsModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">Settings</div>
+<form id="settingsForm" class="form-group-list">
 <div class="form-group">
 <label>Display Name</label>
-<input type="text" id="settingName" placeholder="Your name">
+<input type="text" id="settingName">
 </div>
 <div class="form-group">
 <label>Work Email</label>
-<input type="email" id="settingEmail" placeholder="you@gusto.com">
+<input type="email" id="settingEmail">
 </div>
-<div class="settings-section-label">Salesforce</div>
 <div class="form-group">
-<label>Your Salesforce User ID</label>
-<div class="sf-id-display" id="settingSalesforceId">—</div>
+<label>GitHub Owner</label>
+<input type="text" id="settingOwner" readonly>
 </div>
-<div class="settings-section-label">GitHub Connection</div>
-<div class="settings-note">Your data repo: <strong id="settingOwner"></strong>/Prospect-tracker</div>
-<div class="settings-section-label">Gmail Scan Settings</div>
 <div class="form-group">
 <label>Gmail Search Query</label>
-<input type="text" id="settingGmailQuery" placeholder="newer_than:2d in:inbox">
+<input type="text" id="settingGmailQuery">
+<div class="setup-info">Used for automated lead scanning. Default: <code>newer_than:2d in:inbox</code></div>
 </div>
 <div class="form-group">
-<label>Lead Keywords (comma-separated)</label>
-<textarea id="settingKeywords" placeholder="payroll, gusto, small business…"></textarea>
+<label>Lead Keywords</label>
+<textarea id="settingKeywords" style="min-height:80px;"></textarea>
+<div class="setup-info">Keywords to identify leads in Gmail. Comma-separated.</div>
 </div>
 <div class="form-group">
 <label>Scan Schedule</label>
 <select id="settingScanSchedule">
-<option value="daily_7am">Daily at 7am</option>
-<option value="daily_8am">Daily at 8am</option>
-<option value="daily_9am">Daily at 9am</option>
-<option value="twice_daily">Twice daily (7am + 12pm)</option>
-<option value="manual">Manual only</option>
+<option value="daily_7am">Daily at 7 AM</option>
+<option value="daily_12pm">Daily at 12 PM</option>
+<option value="daily_6pm">Daily at 6 PM</option>
+<option value="every_4h">Every 4 Hours</option>
+<option value="every_hour">Every Hour</option>
 </select>
 </div>
-<div class="modal-buttons">
-<button type="button" class="btn-secondary" onclick="closeSettings()">Cancel</button>
-<button type="button" class="btn-primary" style="flex:1;" onclick="saveSettings();closeSettings();">Save Settings</button>
+<div class="modal-footer">
+<button type="button" class="modal-btn cancel" onclick="closeSettings()">Cancel</button>
+<button type="button" class="modal-btn" onclick="saveSettings(); closeSettings();">Save</button>
 </div>
-<button class="btn-disconnect" onclick="disconnectGitHub()">⚠ Disconnect GitHub</button>
-</div>
-</div>
-<!-- ── Salesforce User ID Help Modal ── -->
-<div class="sf-help-modal" id="sfHelpModal">
-<div class="sf-help-card">
-<h3>📋 How to Find Your Salesforce User ID</h3>
-<ol>
-<li>Log in to <strong>Salesforce</strong></li>
-<li>Click your <strong>avatar / profile picture</strong> in the top-right corner</li>
-<li>Click <strong>"Settings"</strong> from the dropdown</li>
-<li>In the URL bar you'll see something like:<br>
-<code>lightning/settings/personal/PersonalInformation/home</code><br>
-— scroll down the page to <strong>"Advanced User Details"</strong></li>
-<li>Your <strong>Salesforce User ID</strong> starts with <code>005</code> and is 18 characters long<br>
-(e.g. <code>00521000003XXXXAAA</code>)</li>
-</ol>
-<div class="sf-note">
-<strong>Alternative:</strong> Ask your Salesforce admin or find it in<br>
-Setup → Users → click your name → the ID appears in the URL.
-</div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="button" class="btn-primary" style="flex:1;" onclick="closeSFHelp()">Got it</button>
-</div>
-</div>
-</div>
-<!-- ── GitHub Setup Help Modal ── -->
-<div class="gh-help-modal" id="ghHelpModal">
-<div class="gh-help-card">
-<h3>🐙 GitHub Setup Guide</h3>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;line-height:1.6;">Follow these steps to create your free GitHub account and connect it to Calebrate.</p>
-
-<div class="gh-section-label">Part 1 — Create a GitHub Account</div>
-<ol>
-<li>Go to <strong><a href="https://github.com/signup" target="_blank" style="color:var(--accent-blue);">github.com/signup</a></strong> and click <strong>"Sign up"</strong></li>
-<li>Enter your <strong>@gusto.com work email</strong> and choose a password</li>
-<li>Pick a username — something like <code>FirstLastGusto</code></li>
-<li>Complete the verification steps and check your Gusto inbox to confirm your email</li>
-</ol>
-<div class="gh-warning-box">
-⚠️ <strong>Important:</strong> Do NOT click "Continue with Google" or any fast-sign-in shortcut. Those link to your personal Gmail. You must sign up with your <strong>@gusto.com email</strong> directly so your work data stays separate.
-</div>
-
-<div class="gh-section-label">Part 2 — Create a Personal Access Token</div>
-<ol>
-<li>Once signed in, click your <strong>profile picture</strong> in the top-right corner → <strong>Settings</strong></li>
-<li>Scroll all the way to the bottom of the left sidebar and click <strong>"Developer settings"</strong></li>
-<li>Click <strong>"Personal access tokens"</strong> → <strong>"Tokens (classic)"</strong></li>
-<li>Click <strong>"Generate new token"</strong> → <strong>"Generate new token (classic)"</strong></li>
-<li>Give it a name like <code>Calebrate Tracker</code>, set expiration to <strong>"No expiration"</strong></li>
-<li>Check the box next to <strong>"repo"</strong> (it says "Full control of private repositories") — that's the only one you need</li>
-<li>Scroll to the bottom and click the green <strong>"Generate token"</strong> button</li>
-<li>⚠️ <strong>Copy your token immediately</strong> — it starts with <code>ghp_</code> and you won't be able to see it again once you leave the page</li>
-</ol>
-<div class="gh-tip-box">
-💡 <strong>Tip:</strong> Paste the token somewhere safe (like a note) before coming back here. Once copied, paste it into the "Personal Access Token" field in this form.
-</div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="button" class="btn-primary" style="flex:1;" onclick="closeGHHelp()">Got it — take me back</button>
-</div>
+</form>
 </div>
 </div>
 <script src="tracker.js"></script>
+<script>
+function showTab(tabName) {
+const tabs = document.querySelectorAll('.nav-tab');
+const contents = document.querySelectorAll('.tab-content');
+tabs.forEach(t => t.classList.remove('active'));
+contents.forEach(c => c.classList.remove('active'));
+if (tabName === 'prospects') {
+tabs[0].classList.add('active');
+document.getElementById('prospects-tab').classList.add('active');
+} else if (tabName === 'focus') {
+tabs[1].classList.add('active');
+document.getElementById('focus-tab').classList.add('active');
+}
+}
+document.getElementById('userDisplayName').textContent = appSettings.displayName || '';
+</script>
 </body>
 </html>

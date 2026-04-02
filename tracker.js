@@ -104,14 +104,34 @@ document.getElementById('mainApp').style.display = 'block';
 }
 document.getElementById('setupForm').addEventListener('submit', async (e) => {
 e.preventDefault();
-const owner = document.getElementById('setupOwner').value.trim();
-const token = document.getElementById('setupToken').value.trim();
-const errEl = document.getElementById('setupError');
+const owner       = document.getElementById('setupOwner').value.trim();
+const token       = document.getElementById('setupToken').value.trim();
+const displayName = document.getElementById('setupName').value.trim();
+const workEmail   = document.getElementById('setupEmail').value.trim();
+const sfId        = document.getElementById('setupSalesforceId').value.trim();
+const errEl       = document.getElementById('setupError');
 errEl.classList.remove('visible');
+// Validate @gusto.com email
+if (!workEmail.toLowerCase().endsWith('@gusto.com')) {
+errEl.textContent = '❌ Please use your @gusto.com work email address.';
+errEl.classList.add('visible');
+return;
+}
+// Validate Salesforce ID format (starts with 005, 15 or 18 chars)
+if (!/^005[a-zA-Z0-9]{12,15}$/.test(sfId)) {
+errEl.textContent = '❌ Salesforce User ID should start with "005" and be 15–18 characters. Click the ? for help finding it.';
+errEl.classList.add('visible');
+return;
+}
 _owner = owner;
 _token = token;
 try {
 await loadAll();
+// Save profile info to settings
+appSettings.displayName  = displayName;
+appSettings.workEmail    = workEmail;
+appSettings.salesforceId = sfId;
+await doSaveSettings();
 localStorage.setItem('pt_owner', owner);
 localStorage.setItem('pt_token', token);
 hideSetupScreen();
@@ -123,6 +143,9 @@ _owner = '';
 _token = '';
 }
 });
+function openSFHelp()  { document.getElementById('sfHelpModal').classList.add('active'); }
+function closeSFHelp() { document.getElementById('sfHelpModal').classList.remove('active'); }
+document.addEventListener('click', e => { if (e.target.id === 'sfHelpModal') closeSFHelp(); });
 function disconnectGitHub() {
 if (!confirm('Disconnect GitHub? You\'ll need to re-enter your token. Your data stays safe in GitHub.')) return;
 localStorage.removeItem('pt_token');

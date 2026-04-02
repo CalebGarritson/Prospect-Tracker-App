@@ -56,6 +56,7 @@ background: rgba(0,0,0,.85);
 z-index: 2000;
 align-items: center;
 justify-content: center;
+overflow-y: auto;
 }
 #setupScreen.active { display: flex; }
 .setup-card {
@@ -66,6 +67,7 @@ padding: 40px;
 max-width: 480px;
 width: 90%;
 box-shadow: 0 24px 64px rgba(0,0,0,.6);
+margin: auto;
 }
 .setup-card h2 { font-size: 22px; font-weight: 700; color: #ffe033; margin-bottom: 8px; }
 .setup-card p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.7; }
@@ -73,6 +75,33 @@ box-shadow: 0 24px 64px rgba(0,0,0,.6);
 .setup-card .setup-link:hover { text-decoration: underline; }
 .setup-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
 .setup-error.visible { display: block; }
+/* ── SF Help Bubble ── */
+.sf-help-btn {
+display: inline-flex; align-items: center; justify-content: center;
+width: 17px; height: 17px; border-radius: 50%;
+background: rgba(88,166,255,.15); border: 1px solid rgba(88,166,255,.4);
+color: var(--accent-blue); font-size: 11px; font-weight: 700;
+cursor: pointer; line-height: 1; padding: 0; margin-left: 4px;
+transition: all .2s; vertical-align: middle;
+}
+.sf-help-btn:hover { background: rgba(88,166,255,.3); }
+/* ── SF Help Modal ── */
+.sf-help-modal {
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,.6); z-index: 3000;
+align-items: center; justify-content: center;
+}
+.sf-help-modal.active { display: flex; }
+.sf-help-card {
+background: var(--bg-secondary); border: 1px solid var(--border-color);
+border-radius: 14px; padding: 28px; max-width: 420px; width: 90%;
+box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.sf-help-card h3 { font-size: 16px; font-weight: 700; color: #ffe033; margin-bottom: 14px; }
+.sf-help-card ol { padding-left: 20px; color: var(--text-secondary); font-size: 13px; line-height: 2; }
+.sf-help-card ol li { margin-bottom: 2px; }
+.sf-help-card code { background: rgba(88,166,255,.1); color: var(--accent-blue); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+.sf-help-note { margin-top: 14px; padding: 10px 14px; background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2); border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 /* ── Sync Badge ── */
 .sync-badge {
 display: inline-flex;
@@ -284,29 +313,43 @@ th, td { padding: 12px; }
 <body>
 <div id="setupScreen">
 <div class="setup-card">
-<h2>🔐 Connect to GitHub</h2>
+<h2>🔐 Welcome to Prospect Tracker</h2>
 <p>
-Your prospect data lives in your private GitHub repository.
-Enter your GitHub username and a Personal Access Token (PAT) to get started.
-Your data is never lost — even if you clear your browser cache.
-</p>
-<p>
-<strong>Need a PAT?</strong>
-Go to <a class="setup-link" href="https://github.com/settings/tokens/new" target="_blank">
-github.com/settings/tokens/new</a> → set expiration → check
-<strong>repo</strong> scope → click Generate.
+Fill in your info below to get started. Your prospect data is stored in your own private GitHub repository — it's yours and no one else can see it.
 </p>
 <form id="setupForm">
 <div class="form-group">
-<label>GitHub Username</label>
+<label>Full Name <span style="color:#f87171;">*</span></label>
+<input type="text" id="setupName" placeholder="e.g. Caleb Garritson" required>
+</div>
+<div class="form-group">
+<label>Work Email <span style="color:#f87171;">*</span></label>
+<input type="email" id="setupEmail" placeholder="you@gusto.com" required>
+</div>
+<div class="form-group">
+<label>
+Salesforce User ID <span style="color:#f87171;">*</span>
+<button type="button" class="sf-help-btn" onclick="openSFHelp()" title="How to find this">?</button>
+</label>
+<input type="text" id="setupSalesforceId" placeholder="005XXXXXXXXXXXXXXX" required style="font-family:monospace;letter-spacing:.03em;">
+</div>
+<div style="border-top:1px solid var(--border-color);margin:20px 0 16px;"></div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
+<strong style="color:var(--text-primary);">Connect your GitHub repo</strong><br>
+Your data lives in a private repo — enter your username and a
+<a class="setup-link" href="https://github.com/settings/tokens/new" target="_blank">Personal Access Token</a>
+(repo scope required).
+</p>
+<div class="form-group">
+<label>GitHub Username <span style="color:#f87171;">*</span></label>
 <input type="text" id="setupOwner" placeholder="e.g. CalebGarritson" required>
 </div>
 <div class="form-group">
-<label>Personal Access Token</label>
+<label>Personal Access Token <span style="color:#f87171;">*</span></label>
 <input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
 </div>
 <div class="modal-buttons" style="margin-top:20px;">
-<button type="submit" class="btn-primary" style="flex:1;">Connect & Load My Data</button>
+<button type="submit" class="btn-primary" style="flex:1;">Connect & Launch Tracker</button>
 </div>
 <div class="setup-error" id="setupError"></div>
 </form>
@@ -563,6 +606,29 @@ Your Salesforce ID will be configured here when the connector is built.
 <div class="modal-buttons" style="margin-top:0;">
 <button type="button" class="btn-secondary" onclick="closeSettings()">Close</button>
 <button type="button" class="btn-primary" onclick="saveSettings();closeSettings();">Save & Close</button>
+</div>
+</div>
+</div>
+<!-- ── Salesforce User ID Help Modal ── -->
+<div class="sf-help-modal" id="sfHelpModal">
+<div class="sf-help-card">
+<h3>📋 How to Find Your Salesforce User ID</h3>
+<ol>
+<li>Log in to <strong>Salesforce</strong></li>
+<li>Click your <strong>avatar / profile picture</strong> in the top-right corner</li>
+<li>Click <strong>"Settings"</strong> from the dropdown</li>
+<li>In the URL bar you'll see something like:<br>
+<code>lightning/settings/personal/PersonalInformation/home</code><br>
+— scroll down the page to <strong>"Advanced User Details"</strong></li>
+<li>Your <strong>Salesforce User ID</strong> starts with <code>005</code> and is 18 characters long<br>
+(e.g. <code>00521000003XXXXAAA</code>)</li>
+</ol>
+<div class="sf-help-note">
+<strong>Alternative:</strong> Ask your Salesforce admin or find it in<br>
+Setup → Users → click your name → the ID appears in the URL.
+</div>
+<div class="modal-buttons" style="margin-top:20px;">
+<button type="button" class="btn-primary" style="flex:1;" onclick="closeSFHelp()">Got it</button>
 </div>
 </div>
 </div>

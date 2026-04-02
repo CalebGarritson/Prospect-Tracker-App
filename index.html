@@ -14,7 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="Caleb Garritson">
-<meta name="description" content="Calebrate — Created by Caleb Garritson, caleb.garritson@gusto.com">
+<meta name="description" content="Calebrate &#x2014; Created by Caleb Garritson, caleb.garritson@gusto.com">
 <title>Calebrate</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -282,14 +282,17 @@ td { padding: 16px; font-size: 14px; color: var(--text-primary); }
 .focus-wrapper { margin-top: 36px; }
 .focus-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(192,38,211,.10), transparent); border: 1px solid var(--border-color); border-bottom: none; border-radius: 10px 10px 0 0; }
 .focus-header-left { display: flex; align-items: center; gap: 12px; }
+.focus-header-right { display: flex; align-items: center; gap: 10px; }
 .focus-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #e879f9; }
 .focus-count-badge { background: rgba(255,224,51,.12); color: #ffe033; border: 1px solid rgba(255,224,51,.25); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
 .focus-updated { font-size: 11px; color: var(--text-secondary); opacity: .6; }
 /* ── Archive Section ── */
 .archive-wrapper { margin-top: 36px; }
-.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(107,114,128,.10), transparent); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: background .2s; }
-.archive-header:hover { background: linear-gradient(90deg, rgba(107,114,128,.18), transparent); }
+.archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(38,208,124,.10), transparent); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: background .2s; }
+.archive-header:hover { background: linear-gradient(90deg, rgba(38,208,124,.18), transparent); }
 .archive-header-left { display: flex; align-items: center; gap: 12px; }
+.archive-header-right { display: flex; align-items: center; gap: 10px; }
+.archive-title { color: #6ee7b7; }
 .archive-chevron { color: var(--text-secondary); font-size: 12px; transition: transform .25s; }
 .archive-chevron.open { transform: rotate(90deg); }
 .archive-body { display: none; }
@@ -384,7 +387,7 @@ cursor: pointer; transition: all .2s; margin-top: 8px;
 <div class="setup-card">
 <h2>&#x1F510; Welcome to Prospect Tracker</h2>
 <p>
-Fill in your info below to get started. Your prospect data is stored in your own private GitHub repository — it's yours and no one else can see it.
+Fill in your info below to get started. Your prospect data is stored in your own private GitHub repository &#x2014; it's yours and no one else can see it.
 </p>
 <form id="setupForm">
 <div class="form-group">
@@ -406,7 +409,7 @@ Salesforce User ID <span style="color:#f87171;">*</span>
 <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
 <strong style="color:var(--text-primary);">Connect your GitHub repo</strong>
 <button type="button" class="sf-help-btn" onclick="openGHHelp()" title="How to set up GitHub" style="margin-left:6px;">?</button><br>
-Your data lives in a private repo — enter your username and a Personal Access Token.
+Your data lives in a private repo &#x2014; enter your username and a Personal Access Token.
 <span style="color:rgba(88,166,255,.6);font-size:12px;"> (Don't have one yet? Click <strong style="color:var(--accent-blue);">?</strong> above.)</span>
 </p>
 <div class="form-group">
@@ -482,10 +485,12 @@ Your data lives in a private repo — enter your username and a Personal Access 
 <div class="focus-header">
 <div class="focus-header-left">
 <span class="focus-title">Daily Focus</span>
-<span class="focus-count-badge" id="countFocus">0</span>
 <span class="focus-updated" id="focusUpdated"></span>
 </div>
+<div class="focus-header-right">
 <button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openFocusModal()">+ Add Lead</button>
+<span class="focus-count-badge" id="countFocus">0</span>
+</div>
 </div>
 <div class="table-container has-section-header">
 <table>
@@ -505,10 +510,12 @@ Your data lives in a private repo — enter your username and a Personal Access 
 <div class="archive-wrapper">
 <div class="archive-header" onclick="toggleArchive()">
 <div class="archive-header-left">
-<span class="section-title" style="color:#9ca3af;">Archived</span>
+<span class="section-title archive-title">Archived</span>
+</div>
+<div class="archive-header-right">
+<span class="archive-chevron" id="archiveChevron">&#x25B6;</span>
 <span class="section-count-badge" id="countArchive">0</span>
 </div>
-<span class="archive-chevron" id="archiveChevron">&#x25B6;</span>
 </div>
 <div class="archive-body" id="archiveBody">
 <div class="archive-toolbar" id="archiveToolbar">
@@ -539,7 +546,7 @@ Your data lives in a private repo — enter your username and a Personal Access 
 <form id="addForm">
 <div class="form-group">
 <label>Contact Name <span style="color:#f87171;">*</span></label>
-<input type="text" id="formContact" placeholder="First Last · Company" required>
+<input type="text" id="formContact" placeholder="First Last &#xB7; Company" required>
 </div>
 <div class="form-group">
 <label>Email</label>

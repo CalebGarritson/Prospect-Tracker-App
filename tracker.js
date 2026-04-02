@@ -1,10 +1,10 @@
 // ============================================================
-// PROSPECT TRACKER — tracker.js
+// CALEBRATE — tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
-// GitHub:      github.com/CalebGarritson/Prospect-Tracker-App
+// GitHub:      github.com/CalebGarritson/Prospect-tracker
 // Created:     April 2026
-// Description: Core application logic for the Prospect Tracker.
+// Description: Core application logic for Calebrate.
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
@@ -151,7 +151,7 @@ function defaultSettings() {
 return {
 displayName:   '',
 workEmail:     '',
-gmailQuery:    'newer_than:4d in:inbox',
+gmailQuery:    'newer_than:2d in:inbox',
 leadKeywords:  'payroll, gusto, small business, interested, quote, employees, onboarding, hr solution, benefits',
 scanSchedule:  'daily_7am',
 salesforceId:  ''
@@ -497,7 +497,7 @@ function openSettings() {
 document.getElementById('settingName').value         = appSettings.displayName  || '';
 document.getElementById('settingEmail').value        = appSettings.workEmail    || '';
 document.getElementById('settingOwner').value        = _owner;
-document.getElementById('settingGmailQuery').value   = appSettings.gmailQuery   || 'newer_than:4d in:inbox';
+document.getElementById('settingGmailQuery').value   = appSettings.gmailQuery   || 'newer_than:2d in:inbox';
 document.getElementById('settingKeywords').value     = appSettings.leadKeywords || '';
 document.getElementById('settingScanSchedule').value = appSettings.scanSchedule || 'daily_7am';
 document.getElementById('settingsModal').classList.add('active');

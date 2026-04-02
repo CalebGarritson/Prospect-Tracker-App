@@ -39,7 +39,7 @@ const d = date instanceof Date ? date : new Date(date);
 return `${d.getUTCMonth()+1}/${d.getUTCDate()}/${d.getUTCFullYear()}`;
 }
 function formatHoldDate(str) {
-if (!str) return '—';
+if (!str) return '\u2014';
 const [y,m,d] = str.split('-');
 return `${parseInt(m)}/${parseInt(d)}/${y}`;
 }
@@ -49,6 +49,65 @@ if (days  <   0) return 'overdue';
 if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
+}
+// ── Auto-setup: check if repo exists, create it + seed data files ──
+async function checkRepoExists() {
+const res = await fetch(
+`https://api.github.com/repos/${_owner}/${REPO}`,
+{ headers: { 'Authorization': `token ${_token}`, 'Accept': 'application/vnd.github.v3+json' } }
+);
+return res.ok;
+}
+async function bootstrapRepo(statusCb) {
+// 1) Create private repo
+statusCb('Creating your private data repo\u2026');
+const createRes = await fetch('https://api.github.com/user/repos', {
+method: 'POST',
+headers: {
+'Authorization': `token ${_token}`,
+'Accept': 'application/vnd.github.v3+json',
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+name: REPO,
+private: true,
+description: 'Private data store for Calebrate prospect tracker',
+auto_init: true          // creates main branch with a README
+})
+});
+if (!createRes.ok) {
+const txt = await createRes.text();
+throw new Error(`Could not create repo: ${txt}`);
+}
+// Brief pause to let GitHub finish initializing the default branch
+await new Promise(r => setTimeout(r, 1500));
+// 2) Seed the three data files
+const seeds = [
+{ path: PATHS.prospects, data: [],  msg: 'Seed prospects.json' },
+{ path: PATHS.focus,     data: [],  msg: 'Seed focus.json' },
+{ path: PATHS.settings,  data: {},  msg: 'Seed settings.json' }
+];
+for (const seed of seeds) {
+statusCb(`Creating ${seed.path}\u2026`);
+const content = btoa(unescape(encodeURIComponent(JSON.stringify(seed.data, null, 2))));
+const res = await fetch(
+`https://api.github.com/repos/${_owner}/${REPO}/contents/${seed.path}`,
+{
+method: 'PUT',
+headers: {
+'Authorization': `token ${_token}`,
+'Accept': 'application/vnd.github.v3+json',
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({ message: seed.msg, content, branch: BRANCH })
+}
+);
+if (!res.ok) {
+const txt = await res.text();
+throw new Error(`Failed to create ${seed.path}: ${txt}`);
+}
+}
+statusCb('Setup complete \u2014 loading tracker\u2026');
 }
 async function ghRead(path) {
 const res = await fetch(
@@ -113,19 +172,30 @@ const errEl       = document.getElementById('setupError');
 errEl.classList.remove('visible');
 // Validate @gusto.com email
 if (!workEmail.toLowerCase().endsWith('@gusto.com')) {
-errEl.textContent = '❌ Please use your @gusto.com work email address.';
+errEl.textContent = '\u274C Please use your @gusto.com work email address.';
 errEl.classList.add('visible');
 return;
 }
 // Validate Salesforce ID format (starts with 005, 15 or 18 chars)
 if (!/^005[a-zA-Z0-9]{12,15}$/.test(sfId)) {
-errEl.textContent = '❌ Salesforce User ID should start with "005" and be 15–18 characters. Click the ? for help finding it.';
+errEl.textContent = '\u274C Salesforce User ID should start with "005" and be 15\u201318 characters. Click the ? for help finding it.';
 errEl.classList.add('visible');
 return;
 }
 _owner = owner;
 _token = token;
+const statusEl = document.getElementById('setupStatus');
+const showStatus = (msg) => { if (statusEl) { statusEl.textContent = msg; statusEl.style.display = 'block'; } };
+const hideStatus = ()    => { if (statusEl) { statusEl.style.display = 'none'; } };
 try {
+// Check whether the data repo already exists
+showStatus('Checking GitHub connection\u2026');
+const repoExists = await checkRepoExists();
+if (!repoExists) {
+// Auto-create repo + seed files for first-time users
+await bootstrapRepo(showStatus);
+}
+hideStatus();
 await loadAll();
 // Save profile info to settings
 appSettings.displayName  = displayName;
@@ -137,7 +207,8 @@ localStorage.setItem('pt_token', token);
 hideSetupScreen();
 renderAll();
 } catch (err) {
-errEl.textContent = '❌ ' + err.message + ' — Check your username and token, then try again.';
+hideStatus();
+errEl.textContent = '\u274C ' + err.message + ' \u2014 Check your username and token, then try again.';
 errEl.classList.add('visible');
 _owner = '';
 _token = '';
@@ -156,7 +227,7 @@ localStorage.removeItem('pt_owner');
 location.reload();
 }
 async function loadAll() {
-setSyncStatus('saving', 'Loading…');
+setSyncStatus('saving', 'Loading\u2026');
 const [p, f, s] = await Promise.all([
 ghRead(PATHS.prospects),
 ghRead(PATHS.focus),
@@ -168,7 +239,7 @@ dailyFocus  = f.data;
 _fSHA       = f.sha;
 appSettings = { ...defaultSettings(), ...s.data };
 _sSHA       = s.sha;
-setSyncStatus('saved', 'Synced ✓');
+setSyncStatus('saved', 'Synced \u2713');
 }
 function normalizeProspect(p) {
 return { ...p, date: new Date(p.date + 'T00:00:00Z'), priority: p.priority || 0 };
@@ -184,12 +255,12 @@ salesforceId:  ''
 };
 }
 function scheduleSave() {
-setSyncStatus('saving', 'Saving…');
+setSyncStatus('saving', 'Saving\u2026');
 clearTimeout(_saveTimer);
 _saveTimer = setTimeout(doSaveProspects, 2000);
 }
 function scheduleFocusSave() {
-setSyncStatus('saving', 'Saving…');
+setSyncStatus('saving', 'Saving\u2026');
 clearTimeout(_focusSaveT);
 _focusSaveT = setTimeout(doSaveFocus, 2000);
 }
@@ -200,9 +271,9 @@ const serialized = prospects.map(p => ({
 date: p.date.toISOString().split('T')[0]
 }));
 _pSHA = await ghWrite(PATHS.prospects, serialized, _pSHA, 'Update prospects');
-setSyncStatus('saved', 'Saved ✓');
+setSyncStatus('saved', 'Saved \u2713');
 } catch (err) {
-setSyncStatus('error', '⚠ Save failed — click to retry');
+setSyncStatus('error', '\u26A0 Save failed \u2014 click to retry');
 document.getElementById('syncBadge').onclick = doSaveProspects;
 console.error(err);
 }
@@ -210,9 +281,9 @@ console.error(err);
 async function doSaveFocus() {
 try {
 _fSHA = await ghWrite(PATHS.focus, dailyFocus, _fSHA, 'Update daily focus');
-setSyncStatus('saved', 'Saved ✓');
+setSyncStatus('saved', 'Saved \u2713');
 } catch (err) {
-setSyncStatus('error', '⚠ Save failed — click to retry');
+setSyncStatus('error', '\u26A0 Save failed \u2014 click to retry');
 document.getElementById('syncBadge').onclick = doSaveFocus;
 console.error(err);
 }
@@ -261,15 +332,15 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
-<div class="priority-dot ${p.priority>=1?'active-1':''}"></div>
-<div class="priority-dot ${p.priority>=2?'active-2':''}"></div>
-<div class="priority-dot ${p.priority>=3?'active-3':''}"></div>
+<div class="priority-dot ${p.priority>=1?'active-1':''}" onclick="setPriority(${p.id},1)"></div>
+<div class="priority-dot ${p.priority>=2?'active-2':''}" onclick="setPriority(${p.id},2)"></div>
+<div class="priority-dot ${p.priority>=3?'active-3':''}" onclick="setPriority(${p.id},3)"></div>
 </div>
 </td>
 <td onclick="event.stopPropagation()">
 <div class="actions">
-<button class="action-btn">Edit</button>
-<button class="action-btn delete">Delete</button>
+<button class="action-btn" onclick="editProspect(event,${p.id})">Edit</button>
+<button class="action-btn delete" onclick="deleteProspect(event,${p.id})">Delete</button>
 </div>
 </td>`;
 tb.appendChild(row);
@@ -299,7 +370,7 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="actions">
-<button class="action-btn">Edit</button>
+<button class="action-btn" onclick="editProspect(event,${p.id})">Edit</button>
 </div>
 </td>`;
 tbA.appendChild(row);
@@ -336,22 +407,22 @@ row.innerHTML = `
 <td style="padding:0 6px;"><div class="swatch ${swatchCls}"></div></td>
 <td>
 <div style="font-weight:600;">${esc(p.name)}</div>
-<div style="font-size:11px;color:var(--text-secondary);">${esc(p.company||'')} ${p.email ? '· ' + esc(p.email) : ''}</div>
+<div style="font-size:11px;color:var(--text-secondary);">${esc(p.company||'')} ${p.email ? '\u00B7 ' + esc(p.email) : ''}</div>
 </td>
-<td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '—'}</td>
+<td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '\u2014'}</td>
 <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
-<div class="priority-dot ${p.priority>=1?'active-1':''}"></div>
-<div class="priority-dot ${p.priority>=2?'active-2':''}"></div>
-<div class="priority-dot ${p.priority>=3?'active-3':''}"></div>
+<div class="priority-dot ${p.priority>=1?'active-1':''}" onclick="setFocusPriority('${p.id}',1)"></div>
+<div class="priority-dot ${p.priority>=2?'active-2':''}" onclick="setFocusPriority('${p.id}',2)"></div>
+<div class="priority-dot ${p.priority>=3?'active-3':''}" onclick="setFocusPriority('${p.id}',3)"></div>
 </div>
 </td>
 <td onclick="event.stopPropagation()">
 <div class="actions">
-<button class="action-btn">Edit</button>
-<button class="action-btn delete">Delete</button>
+<button class="action-btn" onclick="editFocusProspect(event,'${p.id}')">Edit</button>
+<button class="action-btn delete" onclick="deleteFocusProspect(event,'${p.id}')">Delete</button>
 </div>
 </td>`;
 tbody.appendChild(row);
@@ -546,7 +617,7 @@ return { allowed: false, reason: 'No Salesforce ID configured for this tracker. 
 if (trackerOwner.toLowerCase() !== (leadOwnerId || '').toLowerCase()) {
 return {
 allowed: false,
-reason: `⚠ Ownership mismatch: this tracker belongs to "${trackerOwner}" but the Salesforce lead is owned by "${leadOwnerId}". Task creation blocked.`
+reason: `\u26A0 Ownership mismatch: this tracker belongs to "${trackerOwner}" but the Salesforce lead is owned by "${leadOwnerId}". Task creation blocked.`
 };
 }
 return { allowed: true, reason: 'Ownership verified.' };
@@ -570,7 +641,7 @@ renderAll();
 showSetupScreen();
 document.getElementById('setupOwner').value = _owner;
 const errEl = document.getElementById('setupError');
-errEl.textContent = '⚠ Session expired or token invalid. Please reconnect.';
+errEl.textContent = '\u26A0 Session expired or token invalid. Please reconnect.';
 errEl.classList.add('visible');
 }
 })();

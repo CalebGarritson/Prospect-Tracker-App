@@ -50,7 +50,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// ── Auto-setup: check if repo exists, create it + seed data files ──
+// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -85,7 +85,7 @@ await new Promise(r => setTimeout(r, 1500));
 const seeds = [
 { path: PATHS.prospects, data: [],  msg: 'Seed prospects.json' },
 { path: PATHS.focus,     data: [],  msg: 'Seed focus.json' },
-{ path: PATHS.settings,  data: {},  msg: 'Seed settings.json' }
+{ path: PATHS.settings,  data: { initialScanComplete: false },  msg: 'Seed settings.json' }
 ];
 for (const seed of seeds) {
 statusCb(`Creating ${seed.path}\u2026`);

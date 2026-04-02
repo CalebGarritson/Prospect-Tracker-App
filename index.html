@@ -1,1 +1,463 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<!-- ============================================================
+     CALEBRATE
+     Created by:  Caleb Garritson
+     Email:       caleb.garritson@gusto.com
+     GitHub:      github.com/CalebGarritson/Prospect-tracker
+     Created:     April 2026
+     Description: A private, GitHub-backed prospect tracking tool
+                  with automated Gmail lead scanning and Salesforce
+                  ownership validation. Built for Gusto sales reps.
+     ============================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Caleb Garritson">
+<meta name="description" content="Calebrate — Created by Caleb Garritson, caleb.garritson@gusto.com">
+<title>Calebrate</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+--bg-primary:    #0f1117;
+--bg-secondary:  #1a1d2e;
+--bg-header:     #13162a;
+--border-color:  #2d3148;
+--text-primary:  #e2e8f0;
+--text-secondary:#a8b2c1;
+--accent-red:    #a78bfa;
+--accent-orange: #fb8500;
+--accent-green:  #26d07c;
+--accent-blue:   #58a6ff;
+--accent-cyan:   #79c0ff;
+--accent-purple: #d291ff;
+}
+body {
+background-color: var(--bg-primary);
+background-image:
+radial-gradient(circle at 15% 15%, rgba(167,139,250,.50) 0%, transparent 40%),
+radial-gradient(circle at 85% 80%, rgba(96,165,250,.45) 0%, transparent 40%),
+radial-gradient(circle at 78%  8%, rgba(13,148,136,.42) 0%, transparent 30%),
+radial-gradient(circle at  4% 88%, rgba(255,224,51,.35) 0%, transparent 30%),
+radial-gradient(circle at 50% 50%, rgba(210,145,255,.18) 0%, transparent 60%),
+radial-gradient(circle, rgba(167,139,250,.22) 1px, transparent 1px);
+background-size: auto,auto,auto,auto,auto,28px 28px;
+color: var(--text-primary);
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+padding: 24px;
+line-height: 1.6;
+}
+/* ── Setup Screen ── */
+#setupScreen {
+display: none;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: var(--bg-primary);
+z-index: 9999;
+align-items: center; justify-content: center;
+}
+#setupScreen.active { display: flex; }
+.setup-form { background: var(--bg-secondary); padding: 40px; border-radius: 12px; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.setup-form h1 { margin-bottom: 8px; font-size: 28px; }
+.setup-form p { color: var(--text-secondary); margin-bottom: 24px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; }
+.form-group input, .form-group select { width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 14px; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent-blue); background: rgba(88,166,255,0.1); }
+.help-icon { cursor: pointer; color: var(--accent-blue); margin-left: 6px; }
+.form-group button { width: 100%; padding: 12px; background: var(--accent-blue); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 12px; }
+.form-group button:hover { background: #4a9dff; }
+.setup-error { color: var(--accent-red); padding: 12px; background: rgba(255,0,0,0.1); border-radius: 6px; margin-bottom: 16px; display: none; }
+.setup-error.visible { display: block; }
+
+/* ── Modal Styles ── */
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal.active { display: flex; }
+.modal-content { background: var(--bg-secondary); padding: 24px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+.modal-header { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+.modal-close { text-align: right; margin-top: 16px; }
+.modal-close button { padding: 8px 16px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; cursor: pointer; }
+.modal-close button:hover { background: var(--border-color); }
+
+/* ── Help Modals ── */
+.help-content { padding: 16px 0; }
+.help-content h3 { color: var(--accent-blue); margin-top: 16px; margin-bottom: 8px; }
+.help-content p { color: var(--text-secondary); margin-bottom: 12px; }
+.help-content code { background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; color: var(--accent-green); font-family: 'Courier New', monospace; }
+
+/* ── Main Layout ── */
+main { max-width: 1200px; margin: 0 auto; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.title { font-size: 28px; font-weight: 700; }
+.sync-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-secondary); color: var(--text-secondary); }
+.sync-badge.saved { color: var(--accent-green); }
+.sync-badge.saving { color: var(--accent-orange); }
+.sync-badge.error { color: var(--accent-red); }
+.sync-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--text-secondary); }
+.sync-dot.pulse { animation: pulse 1s infinite; background: var(--accent-orange); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* ── Section Headers ── */
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; cursor: pointer; user-select: none; }
+.section-header h2 { margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.section-count { padding: 4px 8px; background: #fbbf24; color: #000; border-radius: 4px; font-weight: 600; font-size: 13px; }
+.section-header.ready { background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); }
+.section-header.future { background: rgba(120, 113, 169, 0.1); color: #a78bfa; }
+.section-header.archive { background: rgba(168, 85, 247, 0.1); color: #a78bfa; }
+.chevron { font-size: 16px; transition: transform 0.2s; }
+.section-header.open .chevron { transform: rotate(90deg); }
+
+/* ── Tables ── */
+.table-container { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--bg-header); }
+th { padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+tbody tr:hover { background: rgba(167, 139, 250, 0.05); }
+.swatch { width: 6px; height: 100%; border-radius: 3px; display: inline-block; }
+.swatch.today { background: #26d07c; }
+.swatch.upcoming-soon { background: #fb8500; }
+.swatch.upcoming-later { background: #58a6ff; }
+.swatch.overdue { background: #f85149; }
+.swatch.archived { background: #7d8590; }
+.focus-new { background: #26d07c; }
+.focus-hold { background: #d291ff; }
+.focus-called { background: #fbbf24; }
+.focus-active { background: #58a6ff; }
+
+.days-pill { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; display: inline-block; }
+.days-pill.today { background: rgba(38, 208, 124, 0.2); color: #26d07c; }
+.days-pill.upcoming-soon { background: rgba(251, 133, 0, 0.2); color: #fb8500; }
+.days-pill.upcoming-later { background: rgba(88, 166, 255, 0.2); color: #58a6ff; }
+.days-pill.overdue { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+.days-pill.archived { background: rgba(125, 133, 144, 0.2); color: #7d8590; }
+.status-pill { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; display: inline-block; }
+.status-pill.new-lead { background: rgba(38, 208, 124, 0.2); color: #26d07c; }
+.status-pill.hold { background: rgba(210, 145, 255, 0.2); color: #d291ff; }
+.status-pill.called { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+.status-pill.done { background: rgba(125, 133, 144, 0.2); color: #7d8590; }
+.status-pill.active { background: rgba(88, 166, 255, 0.2); color: #58a6ff; }
+
+.notes-cell { overflow: hidden; }
+.notes-truncated { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: var(--text-secondary); }
+.expanded-row { display: none; }
+.expanded-row.active { display: table-row; }
+.expanded-content { padding: 16px; background: rgba(167, 139, 250, 0.05); border-radius: 6px; }
+.expanded-content h3 { margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.expanded-content p { color: var(--text-secondary); line-height: 1.5; word-wrap: break-word; white-space: pre-wrap; }
+.empty-state-row { background: var(--bg-secondary) !important; }
+.empty-state-row td { text-align: center; color: var(--text-secondary); font-style: italic; }
+
+/* ── Priority Dots ── */
+.priority-dots { display: flex; gap: 4px; }
+.priority-dot { width: 8px; height: 8px; border-radius: 50%; cursor: pointer; border: 1px solid var(--border-color); }
+.priority-dot.active-1 { background: #fb8500; }
+.priority-dot.active-2 { background: #f85149; }
+.priority-dot.active-3 { background: #f85149; }
+
+/* ── Actions ── */
+.actions { display: flex; gap: 6px; }
+.action-btn { padding: 4px 8px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; cursor: pointer; font-size: 12px; }
+.action-btn:hover { background: var(--border-color); }
+.action-btn.delete { color: #f85149; }
+.action-btn.delete:hover { background: rgba(248, 81, 73, 0.2); }
+
+/* ── Archive Toolbar ── */
+#archiveToolbar { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--bg-secondary); padding: 16px 24px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100; }
+#archiveToolbar.visible { display: flex; gap: 16px; align-items: center; }
+.toolbar-label { white-space: nowrap; }
+.toolbar-btn { padding: 8px 12px; background: var(--accent-red); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.toolbar-btn:hover { background: #f85149; }
+
+#archiveTableContainer { transition: padding-bottom 0.2s; }
+#archiveTableContainer.has-toolbar { padding-bottom: 100px; }
+
+/* ── Settings Button ── */
+.settings-btn { padding: 8px 16px; background: var(--accent-blue); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.settings-btn:hover { background: #4a9dff; }
+.disconnect-btn { padding: 8px 16px; background: var(--bg-primary); border: 1px solid #f85149; color: #f85149; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 12px; }
+.disconnect-btn:hover { background: rgba(248, 81, 73, 0.1); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+.top-bar { flex-direction: column; }
+.title { font-size: 24px; }
+table { font-size: 13px; }
+th, td { padding: 8px; }
+.modal-content { width: 95%; }
+#archiveToolbar { width: calc(100% - 48px); }
+}
+</style>
+</head>
+<body>
+<div id="setupScreen">
+<div class="setup-form">
+<h1>Welcome to Calebrate</h1>
+<p>A prospect tracker for Gusto sales reps. All data stays in your private GitHub repo.</p>
+<form id="setupForm">
+<div class="form-group">
+<label>GitHub Username</label>
+<input id="setupOwner" type="text" placeholder="your-github-username" required>
+</div>
+<div class="form-group">
+<label>GitHub Personal Access Token <span class="help-icon" onclick="openGHHelp()">?</span></label>
+<input id="setupToken" type="password" placeholder="ghp_xxxxxxxxxxxx" required>
+</div>
+<div class="form-group">
+<label>Display Name</label>
+<input id="setupName" type="text" placeholder="Your Name" required>
+</div>
+<div class="form-group">
+<label>Work Email (@gusto.com)</label>
+<input id="setupEmail" type="email" placeholder="your.name@gusto.com" required>
+</div>
+<div class="form-group">
+<label>Salesforce User ID <span class="help-icon" onclick="openSFHelp()">?</span></label>
+<input id="setupSalesforceId" type="text" placeholder="005xxxxxxxxxxxxx" required>
+</div>
+<div id="setupError" class="setup-error"></div>
+<button type="submit">Let's Go</button>
+</form>
+</div>
+</div>
+
+<div id="sfHelpModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">Finding Your Salesforce User ID</div>
+<div class="help-content">
+<p>Your Salesforce User ID is a unique identifier in your Salesforce profile.</p>
+<h3>Steps:</h3>
+<p>1. Log in to Salesforce</p>
+<p>2. Click your profile icon (top right)</p>
+<p>3. Select "Settings"</p>
+<p>4. Copy the <code>User ID</code> from your profile (starts with "005")</p>
+<p>5. Paste it above</p>
+<h3>Why?</h3>
+<p>Calebrate validates that you own each lead in Salesforce before creating a task. This prevents accidental task creation on leads you don't own.</p>
+</div>
+<div class="modal-close"><button onclick="closeSFHelp()">Close</button></div>
+</div>
+</div>
+
+<div id="ghHelpModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">GitHub Setup Instructions</div>
+<div class="help-content">
+<p>Calebrate stores all your data in a private GitHub repository. No servers, no accounts.</p>
+<h3>Step 1: Create a Personal Access Token</h3>
+<p>1. Go to <code>github.com/settings/tokens</code></p>
+<p>2. Click "Generate new token (classic)"</p>
+<p>3. Give it a name like "Calebrate"</p>
+<p>4. Check these scopes:</p>
+<p style="margin-left: 16px;"><code>repo</code> (full control of private repositories)</p>
+<p style="margin-left: 16px;"><code>user</code> (read user profile data)</p>
+<p>5. Click "Generate token"</p>
+<p>6. Copy the token (you won't see it again)</p>
+<h3>Step 2: Enter Your Credentials</h3>
+<p>1. Enter your GitHub username (e.g., "CalebGarritson")</p>
+<p>2. Paste the token you just generated</p>
+<p>3. Calebrate will create a <code>Prospect-tracker</code> repo in your account</p>
+<p>4. All prospect data will be stored there, encrypted in your control</p>
+</div>
+<div class="modal-close"><button onclick="closeGHHelp()">Close</button></div>
+</div>
+</div>
+
+<main id="mainApp" style="display:none;">
+<div class="top-bar">
+<div class="title">Calebrate</div>
+<div style="display:flex; gap:12px;">
+<button class="settings-btn" onclick="openSettings()">Settings</button>
+<div id="syncBadge" class="sync-badge"><span id="syncDot" class="sync-dot"></span><span id="syncLabel">Synced ✓</span></div>
+</div>
+</div>
+
+<div id="focusSection">
+<div class="section-header future" onclick="toggleArchive()">
+<h2><span class="chevron">▶</span>Today's Focus<span class="section-count" id="countFocus">0</span></h2>
+<div style="color:var(--text-secondary); font-size:12px;" id="focusUpdated">Updated today</div>
+</div>
+<div class="table-container" id="focusTableContainer" style="display:block;">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Status</th><th>Lead</th><th>Received</th><th>Status</th><th>Notes</th><th>Priority</th><th>Actions</th></tr>
+</thead>
+<tbody id="tbodyFocus"></tbody>
+</table>
+</div>
+</div>
+<button onclick="openFocusModal()" style="margin-bottom:24px; padding:10px 16px; background:var(--accent-blue); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">+ Add Focus Lead</button>
+</div>
+
+<div id="readySection">
+<div class="section-header ready">
+<h2><span class="chevron">▶</span>Ready to Call<span class="section-count" id="countReady">0</span></h2>
+</div>
+<div class="table-container" id="readyTableContainer" style="display:block;">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>Contact</th><th>Call Date</th><th>Days</th><th>Notes</th><th>Priority</th><th>Actions</th></tr>
+</thead>
+<tbody id="tbodyReady"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="futureSection">
+<div class="section-header future">
+<h2><span class="chevron">▶</span>Upcoming<span class="section-count" id="countFuture">0</span></h2>
+</div>
+<div class="table-container" id="futureTableContainer" style="display:block;">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>Contact</th><th>Call Date</th><th>Days</th><th>Notes</th><th>Priority</th><th>Actions</th></tr>
+</thead>
+<tbody id="tbodyFuture"></tbody>
+</table>
+</div>
+</div>
+<button onclick="openAddModal()" style="margin-bottom:24px; margin-top:16px; padding:10px 16px; background:var(--accent-blue); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">+ Add Prospect</button>
+</div>
+
+<div id="archiveSection">
+<div class="section-header archive" onclick="toggleArchive()">
+<h2><span id="archiveChevron" class="chevron">▶</span>Archived<span class="section-count" id="countArchive">0</span></h2>
+</div>
+<div id="archiveBody" class="table-container" id="archiveTableContainer" style="display:none;">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="width:40px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th><th></th><th>Contact</th><th>Call Date</th><th>Days</th><th>Notes</th><th>Actions</th></tr>
+</thead>
+<tbody id="tbodyArchive"></tbody>
+</table>
+</div>
+<div id="archiveToolbar">
+<span class="toolbar-label" id="archiveSelectedText">0 selected</span>
+<button class="toolbar-btn" onclick="deleteSelected()">Delete Selected</button>
+</div>
+</div>
+</div>
+</main>
+
+<div id="addModal" class="modal">
+<div class="modal-content">
+<div class="modal-header" id="modalHeader">Add New Prospect</div>
+<form id="addForm">
+<div class="form-group">
+<label>Contact Name</label>
+<input id="formContact" type="text" required>
+</div>
+<div class="form-group">
+<label>Email</label>
+<input id="formEmail" type="email">
+</div>
+<div class="form-group">
+<label>Call Date</label>
+<input id="formDate" type="date" required>
+</div>
+<div class="form-group">
+<label>Notes</label>
+<textarea id="formNotes" style="width:100%; min-height:80px; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); resize:vertical;"></textarea>
+</div>
+<div style="display:flex; gap:8px;">
+<button type="submit" style="flex:1; padding:10px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Save Prospect</button>
+<button type="button" onclick="closeAddModal()" style="flex:1; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); color:var(--text-primary); border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+</div>
+</form>
+</div>
+</div>
+
+<div id="focusModal" class="modal">
+<div class="modal-content">
+<div class="modal-header" id="focusModalHeader">Add Focus Lead</div>
+<form id="focusForm">
+<div class="form-group">
+<label>Lead Name</label>
+<input id="focusFormName" type="text" required>
+</div>
+<div class="form-group">
+<label>Company</label>
+<input id="focusFormCompany" type="text">
+</div>
+<div class="form-group">
+<label>Email</label>
+<input id="focusFormEmail" type="email">
+</div>
+<div class="form-group">
+<label>Received Date</label>
+<input id="focusFormReceivedDate" type="date">
+</div>
+<div class="form-group">
+<label>Status</label>
+<select id="focusFormStatus" onchange="toggleHoldUntil()" required>
+<option value="new">New Lead</option>
+<option value="active">Active</option>
+<option value="hold">Hold</option>
+<option value="called">Called</option>
+<option value="done">Done</option>
+</select>
+</div>
+<div class="form-group" id="holdUntilGroup" style="display:none;">
+<label>Hold Until (YYYY-MM-DD)</label>
+<input id="focusFormHoldUntil" type="text" placeholder="2026-05-01">
+</div>
+<div class="form-group">
+<label>Notes</label>
+<textarea id="focusFormNotes" style="width:100%; min-height:80px; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); resize:vertical;"></textarea>
+</div>
+<div style="display:flex; gap:8px;">
+<button type="submit" style="flex:1; padding:10px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Save</button>
+<button type="button" onclick="closeFocusModal()" style="flex:1; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); color:var(--text-primary); border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+</div>
+</form>
+</div>
+</div>
+
+<div id="settingsModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">Settings</div>
+<div class="form-group">
+<label>Display Name</label>
+<input id="settingName" type="text">
+</div>
+<div class="form-group">
+<label>Work Email</label>
+<input id="settingEmail" type="email">
+</div>
+<div class="form-group">
+<label>GitHub Owner</label>
+<input id="settingOwner" type="text" readonly>
+</div>
+<div class="form-group">
+<label>Gmail Query</label>
+<input id="settingGmailQuery" type="text" placeholder="newer_than:2d in:inbox">
+</div>
+<div class="form-group">
+<label>Lead Keywords</label>
+<input id="settingKeywords" type="text" placeholder="payroll, gusto, small business">
+</div>
+<div class="form-group">
+<label>Scan Schedule</label>
+<select id="settingScanSchedule">
+<option value="daily_7am">Daily at 7 AM</option>
+<option value="daily_9am">Daily at 9 AM</option>
+<option value="weekly">Weekly</option>
+</select>
+</div>
+<div style="display:flex; gap:8px; margin-top:16px;">
+<button onclick="saveSettings(); closeSettings();" style="flex:1; padding:10px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Save</button>
+<button onclick="closeSettings()" style="flex:1; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); color:var(--text-primary); border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+</div>
+<button onclick="disconnectGitHub()" class="disconnect-btn">Disconnect GitHub</button>
+</div>
+</div>
+
+<script src="tracker.js"></script>
+</body>
+</html>

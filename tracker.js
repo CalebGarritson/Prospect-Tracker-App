@@ -64,7 +64,6 @@ const res = await fetch(
 return res.ok;
 }
 async function bootstrapRepo(statusCb) {
-// 1) Create private repo
 statusCb('Creating your private data repo\u2026');
 const createRes = await fetch('https://api.github.com/user/repos', {
 method: 'POST',
@@ -77,16 +76,14 @@ body: JSON.stringify({
 name: REPO,
 private: true,
 description: 'Private data store for Calebrate prospect tracker',
-auto_init: true          // creates main branch with a README
+auto_init: true
 })
 });
 if (!createRes.ok) {
 const txt = await createRes.text();
 throw new Error(`Could not create repo: ${txt}`);
 }
-// Brief pause to let GitHub finish initializing the default branch
 await new Promise(r => setTimeout(r, 1500));
-// 2) Seed the three data files
 const seeds = [
 { path: PATHS.prospects, data: [],  msg: 'Seed prospects.json' },
 { path: PATHS.focus,     data: [],  msg: 'Seed focus.json' },
@@ -175,13 +172,11 @@ const workEmail   = document.getElementById('setupEmail').value.trim();
 const sfId        = document.getElementById('setupSalesforceId').value.trim();
 const errEl       = document.getElementById('setupError');
 errEl.classList.remove('visible');
-// Validate @gusto.com email
 if (!workEmail.toLowerCase().endsWith('@gusto.com')) {
 errEl.textContent = '\u274C Please use your @gusto.com work email address.';
 errEl.classList.add('visible');
 return;
 }
-// Validate Salesforce ID format (starts with 005, 15 or 18 chars)
 if (!/^005[a-zA-Z0-9]{12,15}$/.test(sfId)) {
 errEl.textContent = '\u274C Salesforce User ID should start with "005" and be 15\u201318 characters. Click the ? for help finding it.';
 errEl.classList.add('visible');
@@ -193,16 +188,13 @@ const statusEl = document.getElementById('setupStatus');
 const showStatus = (msg) => { if (statusEl) { statusEl.textContent = msg; statusEl.style.display = 'block'; } };
 const hideStatus = ()    => { if (statusEl) { statusEl.style.display = 'none'; } };
 try {
-// Check whether the data repo already exists
 showStatus('Checking GitHub connection\u2026');
 const repoExists = await checkRepoExists();
 if (!repoExists) {
-// Auto-create repo + seed files for first-time users
 await bootstrapRepo(showStatus);
 }
 hideStatus();
 await loadAll();
-// Save profile info to settings
 appSettings.displayName  = displayName;
 appSettings.workEmail    = workEmail;
 appSettings.salesforceId = sfId;
@@ -330,7 +322,7 @@ const countDot = hasR ? `<span class="reminder-count-dot">${pR.length}</span>` :
 const row = document.createElement('tr');
 row.className = 'prospect-row';
 row.onclick = () => toggleExpanded(row);
-row Close.innerHTML = `
+row.innerHTML = `
 <td style="padding:0 6px;"><div class="swatch ${cls}"></div></td>
 <td>
 <div style="font-weight:600;">${esc(p.contact)}</div>
@@ -808,7 +800,6 @@ const dateLabel = isToday(date) ? 'today' : fmtDateShort(date);
 updatePickerState();
 renderAll();
 showReminderToast('Reminder set for ' + info.name + ' \u2014 ' + dateLabel + ' at ' + fmtTimeDisplay(time));
-// Advance time by 30 min for quick multi-add
 const next = new Date(date + 'T' + time);
 next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
@@ -881,7 +872,6 @@ setTimeout(() => { toast.classList.remove('active'); }, 3500);
 (async () => {
 if (!_token || !_owner) {
 showSetupScreen();
-// Auto-open GitHub guide for first-time users (no stored credentials)
 openGHHelp();
 return;
 }

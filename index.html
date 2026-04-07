@@ -426,6 +426,12 @@ background: none; border: 1px solid rgba(248,113,113,.3); color: #f87171;
 padding: 4px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: all .2s;
 }
 .reminder-cancel:hover { background: rgba(248,113,113,.15); }
+.reminder-actions { display: flex; gap: 6px; align-items: center; }
+.reminder-edit {
+background: none; border: 1px solid rgba(232,121,249,.3); color: #e879f9;
+padding: 4px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: all .2s;
+}
+.reminder-edit:hover { background: rgba(232,121,249,.15); }
 .no-reminders { font-size: 13px; color: var(--text-secondary); padding: 16px; text-align: center; }
 /* ── Reminder: Notification Banner ── */
 .notif-banner {
@@ -829,7 +835,7 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </ol>
 <div class="sf-note">
 <strong>Alternative:</strong> Ask your Salesforce admin or find it in<br>
-Setup → Users → click your name → the ID appears in the URL.
+Setup &#x2192; Users &#x2192; click your name &#x2192; the ID appears in the URL.
 </div>
 <div class="modal-buttons" style="margin-top:20px;">
 <button type="button" class="btn-primary" style="flex:1;" onclick="closeSFHelp()">Got it</button>
@@ -855,10 +861,10 @@ Setup → Users → click your name → the ID appears in the URL.
 
 <div class="gh-section-label">Part 2 &#x2014; Create a Personal Access Token</div>
 <ol>
-<li>Once signed in, click your <strong>profile picture</strong> in the top-right corner → <strong>Settings</strong></li>
+<li>Once signed in, click your <strong>profile picture</strong> in the top-right corner &#x2192; <strong>Settings</strong></li>
 <li>Scroll all the way to the bottom of the left sidebar and click <strong>"Developer settings"</strong></li>
-<li>Click <strong>"Personal access tokens"</strong> → <strong>"Tokens (classic)"</strong></li>
-<li>Click <strong>"Generate new token"</strong> → <strong>"Generate new token (classic)"</strong></li>
+<li>Click <strong>"Personal access tokens"</strong> &#x2192; <strong>"Tokens (classic)"</strong></li>
+<li>Click <strong>"Generate new token"</strong> &#x2192; <strong>"Generate new token (classic)"</strong></li>
 <li>Give it a name like <code>Calebrate Tracker</code>, set expiration to <strong>"No expiration"</strong></li>
 <li>Check the box next to <strong>"repo"</strong> (it says "Full control of private repositories") &#x2014; that's the only one you need</li>
 <li>Scroll to the bottom and click the green <strong>"Generate token"</strong> button</li>

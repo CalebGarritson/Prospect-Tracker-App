@@ -7,7 +7,7 @@
 // Description: Core application logic for Calebrate.
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
-//              validation. All data stored in the user's private
+//              validation. All data stored in the user\u2019s private
 //              GitHub repo \u2014 no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
@@ -422,7 +422,7 @@ row.onclick = () => toggleExpanded(row);
 row.style.opacity = p.status === 'done' ? '0.45' : '1';
 row.innerHTML = `
 <td style="padding:0 6px;"><div class="swatch ${swatchCls}"></div></td>
-<td>
+<td class="focus-name-cell">
 <div style="font-weight:600;">${esc(p.name)}</div>
 <div style="font-size:11px;color:var(--text-secondary);">${esc(p.company||'')} ${p.email ? '\u00B7 ' + esc(p.email) : ''}</div>
 </td>

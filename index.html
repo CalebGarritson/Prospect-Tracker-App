@@ -218,7 +218,7 @@ border-radius: 12px;
 overflow: hidden;
 }
 .table-container.has-section-header { border-radius: 0 0 12px 12px; }
-.table-container.scrollable { overflow-y: auto; overflow-x: auto; }
+.table-container.scrollable { overflow-y: auto; overflow-x: hidden; }
 .table-container.scrollable thead th { position: sticky; top: 0; z-index: 2; background: var(--bg-header); }
 .table-container.scroll-ready  { max-height: 432px; }
 .table-container.scroll-future { max-height: 216px; }
@@ -267,7 +267,7 @@ td:last-child { padding-right: 24px; }
 .status-pill.hold      { background: #b45309; }
 .status-pill.done      { background: #4b5563; }
 /* ── Notes ── */
-.notes-cell { max-width: 200px; color: var(--text-secondary); font-size: 13px; }
+.notes-cell { max-width: 120px; color: var(--text-secondary); font-size: 13px; }
 .notes-truncated { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* ── Actions ── */
 .actions { display: flex; gap: 8px; white-space: nowrap; flex-shrink: 0; }
@@ -519,7 +519,9 @@ z-index: 4000; display: none; animation: toastSlide .3s ease;
 @keyframes toastSlide { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 /* ── Daily Focus Scroll ── */
 .table-container.scroll-focus { max-height: 340px; }
-.table-container.scroll-focus table { min-width: 900px; }
+.table-container.scroll-focus table { table-layout: fixed; width: 100%; }
+.focus-name-cell { overflow: hidden; text-overflow: ellipsis; }
+.focus-name-cell div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -656,13 +658,13 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <table>
 <thead><tr>
 <th style="width:14px"></th>
-<th>Name / Company</th>
-<th>Received</th>
-<th>Status</th>
-<th>Notes</th>
-<th>Priority</th>
-<th style="width:44px">Remind</th>
-<th>Actions</th>
+<th style="width:24%">Name / Company</th>
+<th style="width:10%">Received</th>
+<th style="width:12%">Status</th>
+<th style="width:14%">Notes</th>
+<th style="width:7%">Priority</th>
+<th style="width:50px">Remind</th>
+<th style="width:130px">Actions</th>
 </tr></thead>
 <tbody id="tbodyFocus"></tbody>
 </table>

@@ -218,7 +218,7 @@ border-radius: 12px;
 overflow: hidden;
 }
 .table-container.has-section-header { border-radius: 0 0 12px 12px; }
-.table-container.scrollable { overflow-y: auto; overflow-x: hidden; }
+.table-container.scrollable { overflow-y: auto; overflow-x: auto; }
 .table-container.scrollable thead th { position: sticky; top: 0; z-index: 2; background: var(--bg-header); }
 .table-container.scroll-ready  { max-height: 432px; }
 .table-container.scroll-future { max-height: 216px; }
@@ -267,10 +267,10 @@ td:last-child { padding-right: 24px; }
 .status-pill.hold      { background: #b45309; }
 .status-pill.done      { background: #4b5563; }
 /* ── Notes ── */
-.notes-cell { max-width: 300px; color: var(--text-secondary); font-size: 13px; }
+.notes-cell { max-width: 200px; color: var(--text-secondary); font-size: 13px; }
 .notes-truncated { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* ── Actions ── */
-.actions { display: flex; gap: 8px; }
+.actions { display: flex; gap: 8px; white-space: nowrap; flex-shrink: 0; }
 .action-btn { padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; background: rgba(88,166,255,.1); color: var(--accent-blue); }
 .action-btn:hover { background: rgba(88,166,255,.2); }
 .action-btn.delete { background: rgba(167,139,250,.1); color: var(--accent-red); }
@@ -519,6 +519,7 @@ z-index: 4000; display: none; animation: toastSlide .3s ease;
 @keyframes toastSlide { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 /* ── Daily Focus Scroll ── */
 .table-container.scroll-focus { max-height: 340px; }
+.table-container.scroll-focus table { min-width: 900px; }
 </style>
 </head>
 <body>

@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE — tracker.js
+// CALEBRATE \u2014 tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -8,7 +8,7 @@
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
-//              GitHub repo — no server required.
+//              GitHub repo \u2014 no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -27,7 +27,7 @@ let _fSHA        = null;
 let _sSHA        = null;
 let _saveTimer   = null;
 let _focusSaveT  = null;
-// ── Reminders ──
+// \u2500\u2500 Reminders \u2500\u2500
 let _reminders = JSON.parse(localStorage.getItem('pt_reminders') || '{}');
 const MAX_REMINDERS = 3;
 let _pickerProspectId = null;
@@ -55,7 +55,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// ── Auto-setup: check if repo exists, create it + seed data files ──
+// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -650,7 +650,9 @@ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;
 // ============================================================
 function getReminders(id) { return _reminders[id] || []; }
 function getTotalReminderCount() {
-let c = 0; Object.keys(_reminders).forEach(k => { c += _reminders[k].length; }); return c;
+let c = 0; Object.keys(_reminders).forEach(k => { c += _reminders[k].length; });
+_tasks.forEach(t => { if (!t.done && t.time) c++; });
+return c;
 }
 function saveReminders() { localStorage.setItem('pt_reminders', JSON.stringify(_reminders)); }
 function todayStr() {
@@ -683,33 +685,57 @@ const f = dailyFocus.find(x => x.id === id);
 if (f) return { name: f.name, company: f.company || '', source: 'focus' };
 return null;
 }
-// ── Render Active Reminders list ──
+// \u2500\u2500 Render Active Reminders list \u2500\u2500
 function renderReminders() {
 const list = document.getElementById('remindersList');
 const countEl = document.getElementById('reminderCount');
 if (!list || !countEl) return;
-const total = getTotalReminderCount();
-countEl.textContent = total;
-if (total === 0) {
-list.innerHTML = '<div class="no-reminders">No reminders set. Click the bell icon next to any prospect to schedule one.</div>';
-return;
-}
 const all = [];
+// Manual bell reminders (existing system)
 Object.keys(_reminders).forEach(id => {
 const info = findProspectInfo(id);
 if (!info) return;
 _reminders[id].forEach((r, idx) => {
 const sourceLabel = info.company || (info.source === 'task' ? 'My Tasks' : info.source === 'focus' ? 'Daily Focus' : 'Prospects');
-all.push({ prospectId: id, idx, date: r.date, time: r.time, name: info.name, source: sourceLabel });
+all.push({ prospectId: id, idx, date: r.date, time: r.time, name: info.name, source: sourceLabel, isAuto: false });
 });
 });
+// Auto-reminders from tasks with a time set (not done)
+_tasks.forEach(t => {
+if (t.done || !t.time) return;
+var autoKey = 'task_auto_' + t.id;
+all.push({ prospectId: autoKey, idx: -1, date: t.due, time: t.time, name: t.name, source: 'My Tasks', isAuto: true, taskId: t.id });
+});
+const total = all.length;
+countEl.textContent = total;
+if (total === 0) {
+list.innerHTML = '<div class="no-reminders">No reminders set. Click the bell icon next to any prospect to schedule one.</div>';
+return;
+}
 all.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
 list.innerHTML = '';
 all.forEach(r => {
 const dateLabel = isToday(r.date) ? 'Today' : fmtDateShort(r.date);
 const dateClass = isToday(r.date) ? 'today-date' : '';
+const autoTag = r.isAuto ? '<span class="reminder-auto-tag">Auto</span>' : '';
 const item = document.createElement('div');
 item.className = 'reminder-item';
+if (r.isAuto) {
+item.innerHTML =
+'<div class="reminder-info">' +
+'<div class="reminder-datetime">' +
+'<span class="reminder-date ' + dateClass + '">' + dateLabel + '</span>' +
+'<span class="reminder-time">' + fmtTimeDisplay(r.time) + '</span>' +
+'</div>' +
+'<div>' +
+'<div class="reminder-name">' + esc(r.name) + autoTag + '</div>' +
+'<div class="reminder-source">' + esc(r.source) + ' \u00B7 Recurring</div>' +
+'</div>' +
+'</div>' +
+'<div class="reminder-actions">' +
+'<span style="font-size:11px;color:var(--text-secondary);opacity:.6;">Set in task</span>' +
+'</div>';
+} else {
 item.innerHTML =
 '<div class="reminder-info">' +
 '<div class="reminder-datetime">' +
@@ -725,6 +751,7 @@ item.innerHTML =
 '<button class="reminder-edit" onclick="editReminder(\'' + r.prospectId + '\',' + r.idx + ')">Edit</button>' +
 '<button class="reminder-cancel" onclick="cancelReminder(\'' + r.prospectId + '\',' + r.idx + ')">Cancel</button>' +
 '</div>';
+}
 list.appendChild(item);
 });
 }
@@ -759,7 +786,7 @@ renderAll();
 document.getElementById('pickerOverlay').classList.add('active');
 showReminderToast('Editing reminder for ' + info.name + ' \u2014 pick a new time');
 }
-// ── Time Picker ──
+// \u2500\u2500 Time Picker \u2500\u2500
 function openTimePicker(id, type) {
 const strId = String(id);
 const info = findProspectInfo(type === 'focus' ? id : parseInt(id) || id);
@@ -847,7 +874,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// ── Notification engine — checks every 15 seconds ──
+// \u2500\u2500 Notification engine \u2014 checks every 15 seconds \u2500\u2500
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -875,10 +902,26 @@ showReminderToast('Reminder fired for ' + info.name + '!');
 }
 if (_reminders[id] && _reminders[id].length === 0) delete _reminders[id];
 });
+// Auto-reminders from tasks with time set
+_tasks.forEach(t => {
+if (t.done || !t.time) return;
+if (t.due < currentDate || (t.due === currentDate && t.time <= currentTime)) {
+if ('Notification' in window && Notification.permission === 'granted') {
+const notif = new Notification('Calebrate \u2014 Task Reminder', {
+body: t.name,
+requireInteraction: true,
+tag: 'calebrate-task-' + t.id
+});
+notif.onclick = function() { window.focus(); notif.close(); };
+}
+firedAny = true;
+showReminderToast('Task reminder: ' + t.name + '!');
+}
+});
 if (firedAny) { saveReminders(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
-// ── Notification permission ──
+// \u2500\u2500 Notification permission \u2500\u2500
 function updateNotifBanner() {
 const banner = document.getElementById('notifBanner');
 const text = document.getElementById('notifText');
@@ -911,6 +954,7 @@ let _editingTaskId = null;
 let _taskRecurrence = 'once';
 let _taskWeeklyDays = [];
 let _taskMonthDay = 1;
+let _taskSortMode = 'priority';
 
 function saveTasks() { localStorage.setItem('pt_tasks', JSON.stringify(_tasks)); }
 
@@ -961,16 +1005,42 @@ function getRecurPillClass(task) {
   return 'once';
 }
 
-function sortTasksByPriority(tasks) {
+function sortTasks(tasks) {
   return tasks.slice().sort((a, b) => {
-    // Done tasks go to the bottom
+    // Done tasks always sink to the bottom
     if (a.done && !b.done) return 1;
     if (!a.done && b.done) return -1;
-    // Higher priority first (3 > 2 > 1 > 0)
-    if (b.priority !== a.priority) return b.priority - a.priority;
-    // Same priority: sort by due date (earliest first)
-    return a.due.localeCompare(b.due);
+    if (_taskSortMode === 'due') {
+      // Sort by due date ascending (soonest first), then priority as tiebreaker
+      var dateComp = a.due.localeCompare(b.due);
+      if (dateComp !== 0) return dateComp;
+      return b.priority - a.priority;
+    } else {
+      // Sort by priority descending (3 dots first), then due date as tiebreaker
+      if (b.priority !== a.priority) return b.priority - a.priority;
+      return a.due.localeCompare(b.due);
+    }
   });
+}
+
+function toggleTaskSort() {
+  _taskSortMode = _taskSortMode === 'priority' ? 'due' : 'priority';
+  var dueTh = document.getElementById('sortDueTh');
+  var label = document.getElementById('sortModeLabel');
+  var arrow = document.getElementById('sortDueArrow');
+  if (_taskSortMode === 'due') {
+    dueTh.classList.add('active-sort');
+    label.textContent = 'Sorted by Due Date';
+    label.className = 'sort-mode-indicator due-date';
+    arrow.textContent = '\u25BC';
+  } else {
+    dueTh.classList.remove('active-sort');
+    label.textContent = 'Sorted by Priority';
+    label.className = 'sort-mode-indicator priority';
+    arrow.textContent = '\u25B2';
+  }
+  renderTasks();
+  showReminderToast('Tasks sorted by ' + (_taskSortMode === 'due' ? 'due date' : 'priority'));
 }
 
 function renderTasks() {
@@ -985,11 +1055,11 @@ function renderTasks() {
   if (deleteBtn) deleteBtn.disabled = completed.length === 0;
 
   if (!_tasks.length) {
-    tbody.innerHTML = '<tr class="empty-state-row"><td colspan="9">No tasks yet. Click + Add Task to create one.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-state-row"><td colspan="10">No tasks yet. Click + Add Task to create one.</td></tr>';
     return;
   }
 
-  const sorted = sortTasksByPriority(_tasks);
+  const sorted = sortTasks(_tasks);
   sorted.forEach(t => {
     const swCls = getTaskSwatchClass(t);
     const dueCls = getTaskDueClass(t);
@@ -1009,6 +1079,7 @@ function renderTasks() {
       '<td style="padding:0 6px;"><div class="swatch ' + swCls + '"></div></td>' +
       '<td><span class="task-name-text" style="font-weight:600;">' + esc(t.name) + '</span></td>' +
       '<td>' + (t.done ? '<span style="color:var(--text-secondary);font-size:13px;">' + formatHoldDate(t.due) + '</span>' : '<span class="task-due-pill ' + dueCls + '">' + dueText + '</span>') + '</td>' +
+      '<td>' + (t.time ? '<span class="task-time-badge"><span class="clock-icon">\uD83D\uDD51</span> ' + fmtTimeDisplay(t.time) + '</span>' : '<span class="task-no-time">\u2014</span>') + '</td>' +
       '<td><span class="recur-pill ' + recurCls + '">' + recurLabel + '</span></td>' +
       '<td><div class="notes-cell"><div class="notes-truncated">' + esc(t.notes || '') + '</div></div></td>' +
       '<td onclick="event.stopPropagation()">' +
@@ -1028,7 +1099,7 @@ function renderTasks() {
     tbody.appendChild(row);
     const expRow = document.createElement('tr');
     expRow.className = 'expanded-row';
-    expRow.innerHTML = '<td colspan="9"><div class="expanded-content"><h3>Notes</h3><p>' + esc(t.notes || '') + '</p></div></td>';
+    expRow.innerHTML = '<td colspan="10"><div class="expanded-content"><h3>Notes</h3><p>' + esc(t.notes || '') + '</p></div></td>';
     tbody.appendChild(expRow);
   });
 }
@@ -1094,7 +1165,7 @@ function createNextOccurrence(task) {
     nextDate.setUTCDate(Math.min(targetDay, maxDay));
   }
   const dueStr = nextDate.getUTCFullYear() + '-' + String(nextDate.getUTCMonth()+1).padStart(2,'0') + '-' + String(nextDate.getUTCDate()).padStart(2,'0');
-  return {
+  var nextTask = {
     id: 'task_' + Date.now(),
     name: task.name,
     due: dueStr,
@@ -1105,6 +1176,8 @@ function createNextOccurrence(task) {
     priority: task.priority,
     done: false
   };
+  if (task.time) nextTask.time = task.time;
+  return nextTask;
 }
 
 function deleteCompletedTasks() {
@@ -1135,12 +1208,13 @@ function deleteTask(e, id) {
   renderReminders();
 }
 
-// ── Task Modal ──
+// \u2500\u2500 Task Modal \u2500\u2500
 function openTaskModal() {
   _editingTaskId = null;
   document.getElementById('taskModalHeader').textContent = 'Add New Task';
   document.getElementById('taskForm').reset();
   document.getElementById('taskFormDue').value = todayStr();
+  document.getElementById('taskFormTime').value = '';
   setRecurrence('once');
   _taskWeeklyDays = [];
   _taskMonthDay = 1;
@@ -1159,6 +1233,7 @@ function editTask(e, id) {
   document.getElementById('taskModalHeader').textContent = 'Edit Task';
   document.getElementById('taskFormName').value = t.name;
   document.getElementById('taskFormDue').value = t.due;
+  document.getElementById('taskFormTime').value = t.time || '';
   document.getElementById('taskFormNotes').value = t.notes || '';
   _taskWeeklyDays = t.weeklyDays ? t.weeklyDays.slice() : [];
   _taskMonthDay = t.monthDay || 1;
@@ -1220,6 +1295,7 @@ document.getElementById('taskForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const name = document.getElementById('taskFormName').value.trim();
   const due = document.getElementById('taskFormDue').value;
+  const time = document.getElementById('taskFormTime').value || null;
   const notes = document.getElementById('taskFormNotes').value.trim();
   if (!name || !due) return;
 
@@ -1233,6 +1309,7 @@ document.getElementById('taskForm').addEventListener('submit', function(e) {
     priority: 0,
     done: false
   };
+  if (time) entry.time = time;
 
   if (_editingTaskId !== null) {
     const idx = _tasks.findIndex(x => x.id === _editingTaskId);
@@ -1259,7 +1336,7 @@ document.getElementById('taskModal').addEventListener('click', function(e) {
   if (e.target.id === 'taskModal') closeTaskModal();
 });
 
-// ── Toast ──
+// \u2500\u2500 Toast \u2500\u2500
 function showReminderToast(msg) {
 const toast = document.getElementById('reminderToast');
 if (!toast) return;

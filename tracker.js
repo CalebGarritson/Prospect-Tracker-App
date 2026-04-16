@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE \u2014 tracker.js
+// CALEBRATE — tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -7,8 +7,8 @@
 // Description: Core application logic for Calebrate.
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
-//              validation. All data stored in the user\u2019s private
-//              GitHub repo \u2014 no server required.
+//              validation. All data stored in the user's private
+//              GitHub repo — no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -27,7 +27,7 @@ let _fSHA        = null;
 let _sSHA        = null;
 let _saveTimer   = null;
 let _focusSaveT  = null;
-// \u2500\u2500 Reminders \u2500\u2500
+// ── Reminders ──
 let _reminders = JSON.parse(localStorage.getItem('pt_reminders') || '{}');
 const MAX_REMINDERS = 3;
 let _pickerProspectId = null;
@@ -55,7 +55,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
+// ── Auto-setup: check if repo exists, create it + seed data files ──
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -302,6 +302,7 @@ function renderAll() {
 renderReminders();
 renderTable(prospects);
 renderFocus();
+renderTasks();
 }
 function renderTable(data) {
 const tbR = document.getElementById('tbodyReady');
@@ -669,14 +670,20 @@ return months[parseInt(p[1])-1] + ' ' + parseInt(p[2]);
 }
 function isToday(dateStr) { return dateStr === todayStr(); }
 function findProspectInfo(id) {
-const numId = typeof id === 'string' && !id.startsWith('df_') ? parseInt(id) : id;
+// Check if it's a task reminder (id starts with "task_")
+if (typeof id === 'string' && id.startsWith('task_')) {
+const actualId = id.replace(/^task_/, '');
+const t = _tasks.find(x => x.id === id || x.id === actualId);
+if (t) return { name: t.name, company: '', source: 'task' };
+}
+const numId = typeof id === 'string' && !id.startsWith('df_') && !id.startsWith('task_') ? parseInt(id) : id;
 const p = prospects.find(x => x.id === numId || x.id === id);
 if (p) return { name: p.contact, company: '', source: 'prospect' };
 const f = dailyFocus.find(x => x.id === id);
 if (f) return { name: f.name, company: f.company || '', source: 'focus' };
 return null;
 }
-// \u2500\u2500 Render Active Reminders list \u2500\u2500
+// ── Render Active Reminders list ──
 function renderReminders() {
 const list = document.getElementById('remindersList');
 const countEl = document.getElementById('reminderCount');
@@ -692,7 +699,7 @@ Object.keys(_reminders).forEach(id => {
 const info = findProspectInfo(id);
 if (!info) return;
 _reminders[id].forEach((r, idx) => {
-const sourceLabel = info.company || (info.source === 'focus' ? 'Daily Focus' : 'Prospects');
+const sourceLabel = info.company || (info.source === 'task' ? 'My Tasks' : info.source === 'focus' ? 'Daily Focus' : 'Prospects');
 all.push({ prospectId: id, idx, date: r.date, time: r.time, name: info.name, source: sourceLabel });
 });
 });
@@ -752,7 +759,7 @@ renderAll();
 document.getElementById('pickerOverlay').classList.add('active');
 showReminderToast('Editing reminder for ' + info.name + ' \u2014 pick a new time');
 }
-// \u2500\u2500 Time Picker \u2500\u2500
+// ── Time Picker ──
 function openTimePicker(id, type) {
 const strId = String(id);
 const info = findProspectInfo(type === 'focus' ? id : parseInt(id) || id);
@@ -840,7 +847,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// \u2500\u2500 Notification engine \u2014 checks every 15 seconds \u2500\u2500
+// ── Notification engine — checks every 15 seconds ──
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -871,7 +878,7 @@ if (_reminders[id] && _reminders[id].length === 0) delete _reminders[id];
 if (firedAny) { saveReminders(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
-// \u2500\u2500 Notification permission \u2500\u2500
+// ── Notification permission ──
 function updateNotifBanner() {
 const banner = document.getElementById('notifBanner');
 const text = document.getElementById('notifText');
@@ -896,7 +903,363 @@ updateNotifBanner();
 if (Notification.permission === 'granted') showReminderToast('Notifications enabled!');
 });
 }
-// \u2500\u2500 Toast \u2500\u2500
+// ============================================================
+// MY TASKS \u2014 recurring tasks, priority sorting, localStorage
+// ============================================================
+let _tasks = JSON.parse(localStorage.getItem('pt_tasks') || '[]');
+let _editingTaskId = null;
+let _taskRecurrence = 'once';
+let _taskWeeklyDays = [];
+let _taskMonthDay = 1;
+
+function saveTasks() { localStorage.setItem('pt_tasks', JSON.stringify(_tasks)); }
+
+function getTaskSwatchClass(task) {
+  if (task.done) return 'task-done';
+  const d = calculateDays(task.due + 'T00:00:00Z');
+  if (d < 0) return 'task-overdue';
+  if (d === 0) return 'task-today';
+  return 'task-upcoming';
+}
+
+function getTaskDueClass(task) {
+  if (task.done) return '';
+  const d = calculateDays(task.due + 'T00:00:00Z');
+  if (d < 0) return 'overdue';
+  if (d === 0) return 'today';
+  return 'upcoming';
+}
+
+function getTaskDueText(task) {
+  const d = calculateDays(task.due + 'T00:00:00Z');
+  if (d < 0) return d + 'd';
+  if (d === 0) return 'Today';
+  return '+' + d + 'd';
+}
+
+function getRecurLabel(task) {
+  if (task.recurrence === 'daily') return 'Daily';
+  if (task.recurrence === 'weekly') {
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const days = (task.weeklyDays || []).map(d => dayNames[d]).join(', ');
+    return 'Weekly' + (days ? ' \u00B7 ' + days : '');
+  }
+  if (task.recurrence === 'monthly') return 'Monthly \u00B7 ' + ordinal(task.monthDay || 1);
+  return 'Once';
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
+
+function getRecurPillClass(task) {
+  if (task.recurrence === 'daily') return 'daily';
+  if (task.recurrence === 'weekly') return 'weekly';
+  if (task.recurrence === 'monthly') return 'monthly';
+  return 'once';
+}
+
+function sortTasksByPriority(tasks) {
+  return tasks.slice().sort((a, b) => {
+    // Done tasks go to the bottom
+    if (a.done && !b.done) return 1;
+    if (!a.done && b.done) return -1;
+    // Higher priority first (3 > 2 > 1 > 0)
+    if (b.priority !== a.priority) return b.priority - a.priority;
+    // Same priority: sort by due date (earliest first)
+    return a.due.localeCompare(b.due);
+  });
+}
+
+function renderTasks() {
+  const tbody = document.getElementById('tbodyTasks');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const countEl = document.getElementById('countTasks');
+  const deleteBtn = document.getElementById('btnDeleteCompleted');
+  const active = _tasks.filter(t => !t.done);
+  const completed = _tasks.filter(t => t.done);
+  if (countEl) countEl.textContent = active.length;
+  if (deleteBtn) deleteBtn.disabled = completed.length === 0;
+
+  if (!_tasks.length) {
+    tbody.innerHTML = '<tr class="empty-state-row"><td colspan="9">No tasks yet. Click + Add Task to create one.</td></tr>';
+    return;
+  }
+
+  const sorted = sortTasksByPriority(_tasks);
+  sorted.forEach(t => {
+    const swCls = getTaskSwatchClass(t);
+    const dueCls = getTaskDueClass(t);
+    const dueText = getTaskDueText(t);
+    const recurCls = getRecurPillClass(t);
+    const recurLabel = getRecurLabel(t);
+    const pR = getReminders('task_' + t.id);
+    const hasR = pR.length > 0;
+    const countDot = hasR ? '<span class="reminder-count-dot">' + pR.length + '</span>' : '';
+    const row = document.createElement('tr');
+    row.className = 'prospect-row' + (t.done ? ' task-done-row' : '');
+    row.onclick = function() { toggleExpanded(row); };
+    row.innerHTML =
+      '<td style="text-align:center;" onclick="event.stopPropagation()">' +
+        '<div class="task-checkbox' + (t.done ? ' checked' : '') + '" onclick="toggleTaskDone(\'' + t.id + '\')"></div>' +
+      '</td>' +
+      '<td style="padding:0 6px;"><div class="swatch ' + swCls + '"></div></td>' +
+      '<td><span class="task-name-text" style="font-weight:600;">' + esc(t.name) + '</span></td>' +
+      '<td>' + (t.done ? '<span style="color:var(--text-secondary);font-size:13px;">' + formatHoldDate(t.due) + '</span>' : '<span class="task-due-pill ' + dueCls + '">' + dueText + '</span>') + '</td>' +
+      '<td><span class="recur-pill ' + recurCls + '">' + recurLabel + '</span></td>' +
+      '<td><div class="notes-cell"><div class="notes-truncated">' + esc(t.notes || '') + '</div></div></td>' +
+      '<td onclick="event.stopPropagation()">' +
+        '<div class="priority-dots">' +
+          '<div class="priority-dot ' + (t.priority >= 1 ? 'active-1' : '') + '" onclick="setTaskPriority(\'' + t.id + '\',1)"></div>' +
+          '<div class="priority-dot ' + (t.priority >= 2 ? 'active-2' : '') + '" onclick="setTaskPriority(\'' + t.id + '\',2)"></div>' +
+          '<div class="priority-dot ' + (t.priority >= 3 ? 'active-3' : '') + '" onclick="setTaskPriority(\'' + t.id + '\',3)"></div>' +
+        '</div>' +
+      '</td>' +
+      '<td onclick="event.stopPropagation()"><button class="reminder-btn ' + (hasR ? 'has-reminder' : '') + '" onclick="openTimePicker(\'task_' + t.id + '\',\'task\')" title="' + (hasR ? pR.length + ' reminder(s)' : 'Set reminder') + '">&#x1F514;' + countDot + '</button></td>' +
+      '<td onclick="event.stopPropagation()">' +
+        '<div class="actions">' +
+          '<button class="action-btn" onclick="editTask(event,\'' + t.id + '\')">Edit</button>' +
+          '<button class="action-btn delete" onclick="deleteTask(event,\'' + t.id + '\')">Delete</button>' +
+        '</div>' +
+      '</td>';
+    tbody.appendChild(row);
+    const expRow = document.createElement('tr');
+    expRow.className = 'expanded-row';
+    expRow.innerHTML = '<td colspan="9"><div class="expanded-content"><h3>Notes</h3><p>' + esc(t.notes || '') + '</p></div></td>';
+    tbody.appendChild(expRow);
+  });
+}
+
+function setTaskPriority(id, level) {
+  const t = _tasks.find(x => x.id === id);
+  if (!t) return;
+  t.priority = t.priority === level ? 0 : level;
+  saveTasks();
+  renderTasks();
+}
+
+function toggleTaskDone(id) {
+  const t = _tasks.find(x => x.id === id);
+  if (!t) return;
+  if (!t.done) {
+    t.done = true;
+    t.completedDate = todayStr();
+    // If recurring, auto-create next occurrence
+    if (t.recurrence && t.recurrence !== 'once') {
+      const next = createNextOccurrence(t);
+      _tasks.push(next);
+      showReminderToast('Task completed! Next occurrence created for ' + formatHoldDate(next.due));
+    } else {
+      showReminderToast('Task completed!');
+    }
+  } else {
+    t.done = false;
+    delete t.completedDate;
+  }
+  saveTasks();
+  renderTasks();
+  renderReminders();
+}
+
+function createNextOccurrence(task) {
+  const d = new Date(task.due + 'T00:00:00Z');
+  let nextDate;
+  if (task.recurrence === 'daily') {
+    nextDate = new Date(d);
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  } else if (task.recurrence === 'weekly') {
+    // Find next matching day of week
+    const days = task.weeklyDays || [];
+    if (days.length === 0) {
+      nextDate = new Date(d);
+      nextDate.setUTCDate(nextDate.getUTCDate() + 7);
+    } else {
+      nextDate = new Date(d);
+      nextDate.setUTCDate(nextDate.getUTCDate() + 1); // start from tomorrow
+      let safety = 0;
+      while (!days.includes(nextDate.getUTCDay()) && safety < 8) {
+        nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+        safety++;
+      }
+    }
+  } else if (task.recurrence === 'monthly') {
+    const targetDay = task.monthDay || d.getUTCDate();
+    nextDate = new Date(d);
+    nextDate.setUTCMonth(nextDate.getUTCMonth() + 1);
+    // Handle months with fewer days (e.g., target 31 in a 30-day month)
+    const maxDay = new Date(Date.UTC(nextDate.getUTCFullYear(), nextDate.getUTCMonth() + 1, 0)).getUTCDate();
+    nextDate.setUTCDate(Math.min(targetDay, maxDay));
+  }
+  const dueStr = nextDate.getUTCFullYear() + '-' + String(nextDate.getUTCMonth()+1).padStart(2,'0') + '-' + String(nextDate.getUTCDate()).padStart(2,'0');
+  return {
+    id: 'task_' + Date.now(),
+    name: task.name,
+    due: dueStr,
+    recurrence: task.recurrence,
+    weeklyDays: task.weeklyDays ? task.weeklyDays.slice() : [],
+    monthDay: task.monthDay,
+    notes: task.notes,
+    priority: task.priority,
+    done: false
+  };
+}
+
+function deleteCompletedTasks() {
+  const completed = _tasks.filter(t => t.done);
+  if (!completed.length) return;
+  if (!confirm('Delete ' + completed.length + ' completed task' + (completed.length > 1 ? 's' : '') + '? This cannot be undone.')) return;
+  // Also clean up any reminders for deleted tasks
+  completed.forEach(t => {
+    const remKey = 'task_' + t.id;
+    if (_reminders[remKey]) { delete _reminders[remKey]; }
+  });
+  saveReminders();
+  _tasks = _tasks.filter(t => !t.done);
+  saveTasks();
+  renderTasks();
+  renderReminders();
+  showReminderToast(completed.length + ' completed task' + (completed.length > 1 ? 's' : '') + ' deleted');
+}
+
+function deleteTask(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this task?')) return;
+  const remKey = 'task_' + id;
+  if (_reminders[remKey]) { delete _reminders[remKey]; saveReminders(); }
+  _tasks = _tasks.filter(t => t.id !== id);
+  saveTasks();
+  renderTasks();
+  renderReminders();
+}
+
+// ── Task Modal ──
+function openTaskModal() {
+  _editingTaskId = null;
+  document.getElementById('taskModalHeader').textContent = 'Add New Task';
+  document.getElementById('taskForm').reset();
+  document.getElementById('taskFormDue').value = todayStr();
+  setRecurrence('once');
+  _taskWeeklyDays = [];
+  _taskMonthDay = 1;
+  updateDayPicker();
+  populateMonthDaySelect();
+  document.getElementById('taskModal').classList.add('active');
+}
+
+function closeTaskModal() { document.getElementById('taskModal').classList.remove('active'); }
+
+function editTask(e, id) {
+  e.stopPropagation();
+  const t = _tasks.find(x => x.id === id);
+  if (!t) return;
+  _editingTaskId = id;
+  document.getElementById('taskModalHeader').textContent = 'Edit Task';
+  document.getElementById('taskFormName').value = t.name;
+  document.getElementById('taskFormDue').value = t.due;
+  document.getElementById('taskFormNotes').value = t.notes || '';
+  _taskWeeklyDays = t.weeklyDays ? t.weeklyDays.slice() : [];
+  _taskMonthDay = t.monthDay || 1;
+  populateMonthDaySelect();
+  document.getElementById('monthDaySelect').value = _taskMonthDay;
+  setRecurrence(t.recurrence || 'once');
+  updateDayPicker();
+  document.getElementById('taskModal').classList.add('active');
+}
+
+function setRecurrence(type) {
+  _taskRecurrence = type;
+  document.querySelectorAll('.recur-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-recur') === type);
+  });
+  document.getElementById('weeklyOptions').classList.toggle('visible', type === 'weekly');
+  document.getElementById('monthlyOptions').classList.toggle('visible', type === 'monthly');
+}
+
+function updateDayPicker() {
+  document.querySelectorAll('#dayPicker .day-btn').forEach(btn => {
+    const day = parseInt(btn.getAttribute('data-day'));
+    btn.classList.toggle('active', _taskWeeklyDays.includes(day));
+  });
+}
+
+function populateMonthDaySelect() {
+  const sel = document.getElementById('monthDaySelect');
+  if (!sel) return;
+  if (sel.options.length > 0) return; // already populated
+  for (let i = 1; i <= 31; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = ordinal(i);
+    sel.appendChild(opt);
+  }
+}
+
+// Day picker click handler
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('day-btn') && e.target.closest('#dayPicker')) {
+    const day = parseInt(e.target.getAttribute('data-day'));
+    const idx = _taskWeeklyDays.indexOf(day);
+    if (idx >= 0) _taskWeeklyDays.splice(idx, 1);
+    else _taskWeeklyDays.push(day);
+    _taskWeeklyDays.sort();
+    updateDayPicker();
+  }
+});
+
+// Month day select change handler
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'monthDaySelect') {
+    _taskMonthDay = parseInt(e.target.value);
+  }
+});
+
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const name = document.getElementById('taskFormName').value.trim();
+  const due = document.getElementById('taskFormDue').value;
+  const notes = document.getElementById('taskFormNotes').value.trim();
+  if (!name || !due) return;
+
+  const entry = {
+    name: name,
+    due: due,
+    recurrence: _taskRecurrence,
+    weeklyDays: _taskRecurrence === 'weekly' ? _taskWeeklyDays.slice() : [],
+    monthDay: _taskRecurrence === 'monthly' ? _taskMonthDay : null,
+    notes: notes,
+    priority: 0,
+    done: false
+  };
+
+  if (_editingTaskId !== null) {
+    const idx = _tasks.findIndex(x => x.id === _editingTaskId);
+    if (idx >= 0) {
+      entry.id = _editingTaskId;
+      entry.priority = _tasks[idx].priority;
+      entry.done = _tasks[idx].done;
+      if (_tasks[idx].completedDate) entry.completedDate = _tasks[idx].completedDate;
+      _tasks[idx] = entry;
+    }
+    _editingTaskId = null;
+  } else {
+    entry.id = 'task_' + Date.now();
+    _tasks.push(entry);
+  }
+
+  saveTasks();
+  renderTasks();
+  closeTaskModal();
+  showReminderToast('Task saved: ' + name);
+});
+
+document.getElementById('taskModal').addEventListener('click', function(e) {
+  if (e.target.id === 'taskModal') closeTaskModal();
+});
+
+// ── Toast ──
 function showReminderToast(msg) {
 const toast = document.getElementById('reminderToast');
 if (!toast) return;

@@ -522,6 +522,73 @@ z-index: 4000; display: none; animation: toastSlide .3s ease;
 .table-container.scroll-focus table { table-layout: fixed; width: 100%; }
 .focus-name-cell { overflow: hidden; text-overflow: ellipsis; }
 .focus-name-cell div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ── My Tasks Section ── */
+.tasks-wrapper { margin-top: 36px; }
+.tasks-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(45,212,191,.15), transparent); border: 1px solid var(--border-color); border-bottom: none; border-radius: 10px 10px 0 0; }
+.tasks-header-left { display: flex; align-items: center; gap: 12px; }
+.tasks-header-right { display: flex; align-items: center; gap: 10px; }
+.tasks-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #2dd4bf; }
+.tasks-count-badge { background: rgba(255,224,51,.12); color: #ffe033; border: 1px solid rgba(255,224,51,.25); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
+.btn-delete-completed {
+padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(248,113,113,.35);
+background: rgba(248,113,113,.08); color: #f87171;
+font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.btn-delete-completed:hover { background: rgba(248,113,113,.18); border-color: rgba(248,113,113,.5); }
+.btn-delete-completed:disabled { opacity: .35; cursor: default; }
+.table-container.scroll-tasks { max-height: 400px; }
+/* Task checkbox (teal circle) */
+.task-checkbox {
+width: 22px; height: 22px; border-radius: 50%; border: 2px solid #3a4060;
+background: transparent; cursor: pointer; transition: all .18s;
+display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.task-checkbox:hover { border-color: #2dd4bf; }
+.task-checkbox.checked { background: #2dd4bf; border-color: #2dd4bf; }
+.task-checkbox.checked::after { content: '\2713'; color: #0f1117; font-size: 13px; font-weight: 700; }
+.task-done-row { opacity: 0.45; }
+.task-done-row .task-name-text { text-decoration: line-through; }
+/* Recurrence pill */
+.recur-pill { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: white; white-space: nowrap; }
+.recur-pill.once    { background: #536878; }
+.recur-pill.daily   { background: #d97706; }
+.recur-pill.weekly  { background: #0d9488; }
+.recur-pill.monthly { background: #7c3aed; }
+/* Task swatch colors */
+.swatch.task-overdue  { background: linear-gradient(180deg, #dc2626, #f87171); }
+.swatch.task-today    { background: linear-gradient(180deg, #d97706, #fbbf24); }
+.swatch.task-upcoming { background: linear-gradient(180deg, #0d7a72, #2dd4bf); }
+.swatch.task-done     { background: linear-gradient(180deg, #374151, #6b7280); }
+/* Task due pill */
+.task-due-pill { display: inline-block; padding: 5px 11px; border-radius: 20px; font-size: 12px; font-weight: 700; color: white; white-space: nowrap; }
+.task-due-pill.overdue { background: #dc2626; }
+.task-due-pill.today   { background: #d97706; }
+.task-due-pill.upcoming { background: #536878; }
+/* ── Task Modal: Recurrence Buttons ── */
+.recur-btn-group { display: flex; gap: 8px; margin-top: 6px; }
+.recur-btn {
+flex: 1; padding: 9px 0; border-radius: 8px; border: 1px solid var(--border-color);
+background: rgba(255,255,255,.04); color: var(--text-secondary);
+font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; text-align: center;
+}
+.recur-btn:hover { border-color: #2dd4bf; color: #2dd4bf; }
+.recur-btn.active { background: rgba(45,212,191,.15); border-color: #2dd4bf; color: #2dd4bf; }
+.recur-sub-options { margin-top: 10px; display: none; }
+.recur-sub-options.visible { display: block; }
+.day-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+.day-btn {
+width: 38px; height: 34px; border-radius: 8px; border: 1px solid var(--border-color);
+background: rgba(255,255,255,.04); color: var(--text-secondary);
+font-size: 12px; font-weight: 600; cursor: pointer; transition: all .18s;
+}
+.day-btn:hover { border-color: #2dd4bf; color: #2dd4bf; }
+.day-btn.active { background: rgba(45,212,191,.15); border-color: #2dd4bf; color: #2dd4bf; }
+.month-day-select {
+width: 100%; padding: 9px 12px; background: rgba(255,255,255,.04);
+border: 1px solid var(--border-color); border-radius: 8px;
+color: var(--text-primary); font-size: 14px;
+}
+.month-day-select option { background: var(--bg-secondary); }
 </style>
 </head>
 <body>
@@ -670,6 +737,35 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </table>
 </div>
 </div>
+<!-- ── My Tasks Section ── -->
+<div class="tasks-wrapper">
+<div class="tasks-header">
+<div class="tasks-header-left">
+<span class="tasks-title">My Tasks</span>
+<span class="tasks-count-badge" id="countTasks">0</span>
+</div>
+<div class="tasks-header-right">
+<button class="btn-delete-completed" id="btnDeleteCompleted" onclick="deleteCompletedTasks()" disabled>&#x1F5D1; Delete Completed</button>
+<button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openTaskModal()">+ Add Task</button>
+</div>
+</div>
+<div class="table-container scrollable scroll-tasks has-section-header">
+<table>
+<thead><tr>
+<th style="width:40px"></th>
+<th style="width:14px"></th>
+<th>Task</th>
+<th>Due</th>
+<th>Recurrence</th>
+<th>Notes</th>
+<th>Priority</th>
+<th style="width:44px">Remind</th>
+<th>Actions</th>
+</tr></thead>
+<tbody id="tbodyTasks"></tbody>
+</table>
+</div>
+</div>
 <div class="archive-wrapper">
 <div class="archive-header" onclick="toggleArchive()">
 <div class="archive-header-left">
@@ -773,6 +869,55 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <div class="modal-buttons">
 <button type="button" class="btn-secondary" onclick="closeFocusModal()">Cancel</button>
 <button type="submit" class="btn-primary" style="flex:1;">Save Lead</button>
+</div>
+</form>
+</div>
+</div>
+<!-- ── Task Modal (Add / Edit) ── -->
+<div class="modal" id="taskModal">
+<div class="modal-card">
+<h2 id="taskModalHeader">Add New Task</h2>
+<form id="taskForm">
+<div class="form-group">
+<label>Task Name <span style="color:#f87171;">*</span></label>
+<input type="text" id="taskFormName" placeholder="e.g. Submit payroll hours" required>
+</div>
+<div class="form-group">
+<label>Due Date <span style="color:#f87171;">*</span></label>
+<input type="date" id="taskFormDue" required>
+</div>
+<div class="form-group">
+<label>Recurrence</label>
+<div class="recur-btn-group">
+<button type="button" class="recur-btn active" data-recur="once" onclick="setRecurrence('once')">Once</button>
+<button type="button" class="recur-btn" data-recur="daily" onclick="setRecurrence('daily')">Daily</button>
+<button type="button" class="recur-btn" data-recur="weekly" onclick="setRecurrence('weekly')">Weekly</button>
+<button type="button" class="recur-btn" data-recur="monthly" onclick="setRecurrence('monthly')">Monthly</button>
+</div>
+<div class="recur-sub-options" id="weeklyOptions">
+<label style="font-size:11px;color:var(--text-secondary);margin:8px 0 6px;display:block;">Repeat on:</label>
+<div class="day-picker" id="dayPicker">
+<button type="button" class="day-btn" data-day="0">Sun</button>
+<button type="button" class="day-btn" data-day="1">Mon</button>
+<button type="button" class="day-btn" data-day="2">Tue</button>
+<button type="button" class="day-btn" data-day="3">Wed</button>
+<button type="button" class="day-btn" data-day="4">Thu</button>
+<button type="button" class="day-btn" data-day="5">Fri</button>
+<button type="button" class="day-btn" data-day="6">Sat</button>
+</div>
+</div>
+<div class="recur-sub-options" id="monthlyOptions">
+<label style="font-size:11px;color:var(--text-secondary);margin:8px 0 6px;display:block;">Day of month:</label>
+<select class="month-day-select" id="monthDaySelect"></select>
+</div>
+</div>
+<div class="form-group">
+<label>Notes</label>
+<textarea id="taskFormNotes" placeholder="Details, links, context&#x2026;"></textarea>
+</div>
+<div class="modal-buttons">
+<button type="button" class="btn-secondary" onclick="closeTaskModal()">Cancel</button>
+<button type="submit" class="btn-primary" style="flex:1;">Save Task</button>
 </div>
 </form>
 </div>

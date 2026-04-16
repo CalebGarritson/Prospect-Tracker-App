@@ -668,6 +668,35 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </div>
 </div>
 </div>
+<!-- ── My Tasks Section ── -->
+<div class="tasks-wrapper">
+<div class="tasks-header">
+<div class="tasks-header-left">
+<span class="tasks-title">My Tasks</span>
+<span class="tasks-count-badge" id="countTasks">0</span>
+</div>
+<div class="tasks-header-right">
+<button class="btn-delete-completed" id="btnDeleteCompleted" onclick="deleteCompletedTasks()" disabled>&#x1F5D1; Delete Completed</button>
+<button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openTaskModal()">+ Add Task</button>
+</div>
+</div>
+<div class="table-container scrollable scroll-tasks has-section-header">
+<table>
+<thead><tr>
+<th style="width:40px"></th>
+<th style="width:14px"></th>
+<th>Task</th>
+<th>Due</th>
+<th>Recurrence</th>
+<th>Notes</th>
+<th>Priority</th>
+<th style="width:44px">Remind</th>
+<th>Actions</th>
+</tr></thead>
+<tbody id="tbodyTasks"></tbody>
+</table>
+</div>
+</div>
 <div style="margin-top:24px;">
 <div class="section-header section-header-ready">
 <span class="section-title">Ready to Call</span>
@@ -734,35 +763,6 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <th style="width:130px">Actions</th>
 </tr></thead>
 <tbody id="tbodyFocus"></tbody>
-</table>
-</div>
-</div>
-<!-- ── My Tasks Section ── -->
-<div class="tasks-wrapper">
-<div class="tasks-header">
-<div class="tasks-header-left">
-<span class="tasks-title">My Tasks</span>
-<span class="tasks-count-badge" id="countTasks">0</span>
-</div>
-<div class="tasks-header-right">
-<button class="btn-delete-completed" id="btnDeleteCompleted" onclick="deleteCompletedTasks()" disabled>&#x1F5D1; Delete Completed</button>
-<button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openTaskModal()">+ Add Task</button>
-</div>
-</div>
-<div class="table-container scrollable scroll-tasks has-section-header">
-<table>
-<thead><tr>
-<th style="width:40px"></th>
-<th style="width:14px"></th>
-<th>Task</th>
-<th>Due</th>
-<th>Recurrence</th>
-<th>Notes</th>
-<th>Priority</th>
-<th style="width:44px">Remind</th>
-<th>Actions</th>
-</tr></thead>
-<tbody id="tbodyTasks"></tbody>
 </table>
 </div>
 </div>

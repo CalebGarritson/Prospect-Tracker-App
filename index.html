@@ -589,6 +589,22 @@ border: 1px solid var(--border-color); border-radius: 8px;
 color: var(--text-primary); font-size: 14px;
 }
 .month-day-select option { background: var(--bg-secondary); }
+/* ── Task Sort Toggle ── */
+.sort-toggle-th { cursor: pointer; user-select: none; transition: color .2s; }
+.sort-toggle-th:hover { color: #2dd4bf; }
+.sort-toggle-th .sort-label { display: inline-flex; align-items: center; gap: 5px; }
+.sort-toggle-th .sort-arrow { font-size: 10px; opacity: .6; }
+.sort-toggle-th.active-sort { color: #2dd4bf; }
+.sort-toggle-th.active-sort .sort-arrow { opacity: 1; }
+.sort-mode-indicator { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-left: 8px; vertical-align: middle; }
+.sort-mode-indicator.priority { background: rgba(167,139,250,.15); color: #a78bfa; border: 1px solid rgba(167,139,250,.25); }
+.sort-mode-indicator.due-date { background: rgba(45,212,191,.15); color: #2dd4bf; border: 1px solid rgba(45,212,191,.25); }
+/* ── Task Time Badge ── */
+.task-time-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(45,212,191,.12); color: #2dd4bf; border: 1px solid rgba(45,212,191,.25); white-space: nowrap; }
+.task-time-badge .clock-icon { font-size: 12px; }
+.task-no-time { font-size: 11px; color: var(--text-secondary); opacity: 0.4; }
+/* ── Auto-Reminder Tag ── */
+.reminder-auto-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; background: rgba(45,212,191,.15); color: #2dd4bf; border: 1px solid rgba(45,212,191,.25); margin-left: 6px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -674,6 +690,7 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <div class="tasks-header-left">
 <span class="tasks-title">My Tasks</span>
 <span class="tasks-count-badge" id="countTasks">0</span>
+<span class="sort-mode-indicator priority" id="sortModeLabel">Sorted by Priority</span>
 </div>
 <div class="tasks-header-right">
 <button class="btn-delete-completed" id="btnDeleteCompleted" onclick="deleteCompletedTasks()" disabled>&#x1F5D1; Delete Completed</button>
@@ -686,7 +703,8 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <th style="width:40px"></th>
 <th style="width:14px"></th>
 <th>Task</th>
-<th>Due</th>
+<th class="sort-toggle-th" id="sortDueTh" onclick="toggleTaskSort()"><span class="sort-label">Due <span class="sort-arrow" id="sortDueArrow">&#x25B2;</span></span></th>
+<th>Time</th>
 <th>Recurrence</th>
 <th>Notes</th>
 <th>Priority</th>
@@ -885,6 +903,10 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <div class="form-group">
 <label>Due Date <span style="color:#f87171;">*</span></label>
 <input type="date" id="taskFormDue" required>
+</div>
+<div class="form-group">
+<label>Time <span style="font-weight:400;color:var(--text-secondary);text-transform:none;letter-spacing:0;">(optional &#x2014; auto-reminds you at this time)</span></label>
+<input type="time" id="taskFormTime">
 </div>
 <div class="form-group">
 <label>Recurrence</label>

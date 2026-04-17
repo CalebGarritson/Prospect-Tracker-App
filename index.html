@@ -18,6 +18,7 @@
 <title>Calebrate</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
+:root { color-scheme: dark; }
 :root {
 --bg-primary:    #0f1117;
 --bg-secondary:  #1a1d2e;
@@ -344,7 +345,7 @@ box-shadow: 0 24px 64px rgba(0,0,0,.6); max-height: 90vh; overflow-y: auto;
 .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
 .form-group input, .form-group textarea, .form-group select {
 width: 100%; padding: 11px 14px;
-background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
+background: var(--bg-primary); border: 1px solid var(--border-color);
 border-radius: 8px; color: var(--text-primary); font-size: 14px; transition: border-color .2s;
 }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent-blue); background: rgba(88,166,255,.05); }

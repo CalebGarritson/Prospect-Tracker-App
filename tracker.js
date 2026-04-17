@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE \u2014 tracker.js
+// CALEBRATE — tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -8,7 +8,7 @@
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
-//              GitHub repo \u2014 no server required.
+//              GitHub repo — no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -27,7 +27,7 @@ let _fSHA        = null;
 let _sSHA        = null;
 let _saveTimer   = null;
 let _focusSaveT  = null;
-// \u2500\u2500 Reminders \u2500\u2500
+// ── Reminders ──
 let _reminders = JSON.parse(localStorage.getItem('pt_reminders') || '{}');
 const MAX_REMINDERS = 3;
 let _pickerProspectId = null;
@@ -55,7 +55,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
+// ── Auto-setup: check if repo exists, create it + seed data files ──
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -211,6 +211,7 @@ localStorage.setItem('pt_owner', owner);
 localStorage.setItem('pt_token', token);
 hideSetupScreen();
 renderAll();
+setGreeting();
 } catch (err) {
 hideStatus();
 errEl.textContent = '\u274C ' + err.message + ' \u2014 Check your username and token, then try again.';
@@ -404,13 +405,13 @@ document.getElementById('countFocus').textContent = active.length;
 const today = new Date().toLocaleDateString('en-US', { timeZone: 'America/Denver', month:'short', day:'numeric' });
 document.getElementById('focusUpdated').textContent = `Updated ${today}`;
 if (!dailyFocus.length) {
-tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-secondary)">No prospects in today\'s focus. Leads from Gmail scan will appear here.</td></tr>';
+tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-secondary)">No hot leads yet. Leads from your Gmail scan will appear here.</td></tr>';
 return;
 }
 dailyFocus.forEach(p => {
 let swatchCls, pillCls, pillLabel;
 if      (p.status === 'new')    { swatchCls = 'focus-new';    pillCls = 'new-lead'; pillLabel = 'New Lead'; }
-else if (p.status === 'hold')   { swatchCls = 'focus-hold';   pillCls = 'hold';     pillLabel = p.holdUntil ? `Hold until ${formatHoldDate(p.holdUntil)}` : 'On Hold'; }
+else if (p.status === 'hold')   { swatchCls = 'focus-hold';   pillCls = 'hold';     pillLabel = p.holdUntil ? `Hold \u00B7 ${formatHoldDate(p.holdUntil)}` : 'On Hold'; }
 else if (p.status === 'called') { swatchCls = 'focus-called'; pillCls = 'called';   pillLabel = 'Called'; }
 else if (p.status === 'done')   { swatchCls = 'archived';     pillCls = 'done';     pillLabel = 'Done'; }
 else                            { swatchCls = 'focus-active'; pillCls = 'active';   pillLabel = 'Active'; }
@@ -575,7 +576,7 @@ document.getElementById('focusModal').classList.add('active');
 }
 function deleteFocusProspect(e, id) {
 e.stopPropagation();
-if (!confirm('Remove this lead from Daily Focus?')) return;
+if (!confirm('Remove this lead from Hot Leads?')) return;
 dailyFocus = dailyFocus.filter(x => x.id !== id);
 renderFocus();
 scheduleFocusSave();
@@ -626,6 +627,7 @@ appSettings.gmailQuery   = document.getElementById('settingGmailQuery').value.tr
 appSettings.leadKeywords = document.getElementById('settingKeywords').value.trim();
 appSettings.scanSchedule = document.getElementById('settingScanSchedule').value;
 doSaveSettings();
+setGreeting();
 }
 document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
 function validateSalesforceOwnership(leadOwnerId) {
@@ -685,7 +687,7 @@ const f = dailyFocus.find(x => x.id === id);
 if (f) return { name: f.name, company: f.company || '', source: 'focus' };
 return null;
 }
-// \u2500\u2500 Render Active Reminders list \u2500\u2500
+// ── Render Active Reminders list ──
 function renderReminders() {
 const list = document.getElementById('remindersList');
 const countEl = document.getElementById('reminderCount');
@@ -696,7 +698,7 @@ Object.keys(_reminders).forEach(id => {
 const info = findProspectInfo(id);
 if (!info) return;
 _reminders[id].forEach((r, idx) => {
-const sourceLabel = info.company || (info.source === 'task' ? 'My Tasks' : info.source === 'focus' ? 'Daily Focus' : 'Prospects');
+const sourceLabel = info.company || (info.source === 'task' ? 'My Tasks' : info.source === 'focus' ? 'Hot Leads' : 'Prospects');
 all.push({ prospectId: id, idx, date: r.date, time: r.time, name: info.name, source: sourceLabel, isAuto: false });
 });
 });
@@ -786,7 +788,7 @@ renderAll();
 document.getElementById('pickerOverlay').classList.add('active');
 showReminderToast('Editing reminder for ' + info.name + ' \u2014 pick a new time');
 }
-// \u2500\u2500 Time Picker \u2500\u2500
+// ── Time Picker ──
 function openTimePicker(id, type) {
 const strId = String(id);
 const info = findProspectInfo(type === 'focus' ? id : parseInt(id) || id);
@@ -874,7 +876,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// \u2500\u2500 Notification engine \u2014 checks every 15 seconds \u2500\u2500
+// ── Notification engine — checks every 15 seconds ──
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -921,7 +923,7 @@ showReminderToast('Task reminder: ' + t.name + '!');
 if (firedAny) { saveReminders(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
-// \u2500\u2500 Notification permission \u2500\u2500
+// ── Notification permission ──
 function updateNotifBanner() {
 const banner = document.getElementById('notifBanner');
 const text = document.getElementById('notifText');
@@ -1208,7 +1210,7 @@ function deleteTask(e, id) {
   renderReminders();
 }
 
-// \u2500\u2500 Task Modal \u2500\u2500
+// ── Task Modal ──
 function openTaskModal() {
   _editingTaskId = null;
   document.getElementById('taskModalHeader').textContent = 'Add New Task';
@@ -1336,7 +1338,18 @@ document.getElementById('taskModal').addEventListener('click', function(e) {
   if (e.target.id === 'taskModal') closeTaskModal();
 });
 
-// \u2500\u2500 Toast \u2500\u2500
+// ── Greeting ──
+function setGreeting() {
+  const fullName = (appSettings && appSettings.displayName) || '';
+  const first = fullName.split(' ')[0] || 'there';
+  const h = new Date().getHours();
+  let g = 'Good evening';
+  if (h < 12) g = 'Good morning';
+  else if (h < 17) g = 'Good afternoon';
+  const el = document.getElementById('greetingLine');
+  if (el) el.textContent = g + ', ' + first + '!';
+}
+// ── Toast ──
 function showReminderToast(msg) {
 const toast = document.getElementById('reminderToast');
 if (!toast) return;
@@ -1355,6 +1368,7 @@ try {
 await loadAll();
 hideSetupScreen();
 renderAll();
+setGreeting();
 updateNotifBanner();
 } catch (err) {
 showSetupScreen();

@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE — tracker.js
+// CALEBRATE \u2014 tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -8,7 +8,7 @@
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
-//              GitHub repo — no server required.
+//              GitHub repo \u2014 no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -876,7 +876,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// ── Notification engine — checks every 15 seconds ──
+// ── Notification engine \u2014 checks every 15 seconds ──
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -923,6 +923,11 @@ showReminderToast('Task reminder: ' + t.name + '!');
 if (firedAny) { saveReminders(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
+// ── Auto-refresh when date changes (fixes stale tab) ──
+const _loadDate = new Date().getDate();
+setInterval(() => {
+if (new Date().getDate() !== _loadDate) location.reload();
+}, 60000);
 // ── Notification permission ──
 function updateNotifBanner() {
 const banner = document.getElementById('notifBanner');

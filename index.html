@@ -290,6 +290,31 @@ td:last-child { padding-right: 24px; }
 .focus-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #e879f9; }
 .focus-count-badge { background: rgba(255,224,51,.12); color: #ffe033; border: 1px solid rgba(255,224,51,.25); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
 .focus-updated { font-size: 11px; color: var(--text-secondary); opacity: .6; }
+/* ── Lead Score Badge ── */
+.lead-score-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; min-width: 36px; justify-content: center; }
+.lead-score-badge.score-high { background: rgba(255,224,51,.18); color: #ffe033; border: 1px solid rgba(255,224,51,.25); }
+.lead-score-badge.score-medium { background: rgba(232,121,249,.15); color: #e879f9; border: 1px solid rgba(232,121,249,.25); }
+.lead-score-badge.score-low { background: rgba(255,255,255,.06); color: var(--text-secondary); border: 1px solid rgba(255,255,255,.08); }
+/* ── Score Tooltip ── */
+.score-breakdown { position: relative; display: inline-block; }
+.score-breakdown .score-tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 16px; min-width: 220px; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.5); font-size: 12px; }
+.score-breakdown:hover .score-tooltip { display: block; }
+.score-tooltip-title { font-weight: 700; color: var(--text-primary); margin-bottom: 8px; font-size: 13px; }
+.score-tooltip-row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--text-secondary); }
+.score-tooltip-row .score-val { font-weight: 700; color: var(--text-primary); }
+.score-tooltip-row .score-val.positive { color: #ffe033; }
+.score-tooltip-row .score-val.negative { color: #f87171; }
+.score-tooltip-divider { border-top: 1px solid var(--border-color); margin: 6px 0; }
+.score-tooltip-total { font-weight: 700; color: #ffe033; font-size: 14px; }
+/* ── Focus Sort Toggle ── */
+.focus-sort-toggle-th { cursor: pointer; user-select: none; transition: color .2s; }
+.focus-sort-toggle-th:hover { color: #e879f9; }
+.focus-sort-toggle-th .sort-label { display: inline-flex; align-items: center; gap: 5px; }
+.focus-sort-toggle-th .sort-arrow { font-size: 10px; opacity: .6; }
+.focus-sort-toggle-th.active-sort { color: #e879f9; }
+.focus-sort-toggle-th.active-sort .sort-arrow { opacity: 1; }
+.sort-mode-indicator.received { background: rgba(232,121,249,.15); color: #e879f9; border: 1px solid rgba(232,121,249,.25); }
+.sort-mode-indicator.score { background: rgba(255,224,51,.15); color: #ffe033; border: 1px solid rgba(255,224,51,.25); }
 /* ── Archive Section ── */
 .archive-wrapper { margin-top: 36px; }
 .archive-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: linear-gradient(90deg, rgba(38,208,124,.10), transparent); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: background .2s; }
@@ -766,6 +791,7 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <div class="focus-header">
 <div class="focus-header-left">
 <span class="focus-title">Hot Leads</span>
+<span class="sort-mode-indicator received" id="focusSortLabel">Sorted by Received</span>
 <span class="focus-updated" id="focusUpdated"></span>
 </div>
 <div class="focus-header-right">
@@ -777,13 +803,14 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <table>
 <thead><tr>
 <th style="width:14px"></th>
-<th style="width:22%">Name / Company</th>
-<th style="width:10%">Received</th>
-<th style="width:14%">Status</th>
-<th style="width:14%">Notes</th>
+<th style="width:20%">Name / Company</th>
+<th class="focus-sort-toggle-th active-sort" style="width:10%" id="focusSortReceivedTh" onclick="toggleFocusSort('received')"><span class="sort-label">Received <span class="sort-arrow" id="focusSortReceivedArrow">&#x25BC;</span></span></th>
+<th style="width:12%">Status</th>
+<th class="focus-sort-toggle-th" style="width:7%" id="focusSortScoreTh" onclick="toggleFocusSort('score')"><span class="sort-label">Score <span class="sort-arrow" id="focusSortScoreArrow">&#x25B2;</span></span></th>
+<th style="width:12%">Notes</th>
 <th style="width:7%">Priority</th>
 <th style="width:50px">Remind</th>
-<th style="width:130px">Actions</th>
+<th style="width:120px">Actions</th>
 </tr></thead>
 <tbody id="tbodyFocus"></tbody>
 </table>

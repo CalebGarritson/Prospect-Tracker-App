@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE \u2014 tracker.js
+// CALEBRATE — tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -8,7 +8,7 @@
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
-//              GitHub repo \u2014 no server required.
+//              GitHub repo — no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -48,6 +48,111 @@ if (!str) return '\u2014';
 const [y,m,d] = str.split('-');
 return `${parseInt(m)}/${parseInt(d)}/${y}`;
 }
+// ── Lead Scoring ──
+const HIGH_INTENT_KW = ['demo', 'pricing', 'switching', 'quote', 'interested'];
+const MED_INTENT_KW  = ['payroll', 'run payroll', 'payroll provider', 'gusto', 'benefits', 'hr solution', 'onboarding', 'referral'];
+const LOW_INTENT_KW  = ['employees', 'small business', 'direct deposit', 'contractors', 'hiring'];
+const GENERIC_DOMAINS = ['gmail.com','yahoo.com','hotmail.com','outlook.com','icloud.com','me.com','aol.com','live.com','msn.com'];
+let _focusSortMode = 'received';
+
+function calculateLeadScore(lead) {
+const b = { keywords: 0, keywordList: [], company: 0, recency: 0, priority: 0, hold: 0 };
+// Check matchedKeywords if available (set by Code.gs), else scan notes
+if (lead.matchedKeywords && lead.matchedKeywords.length) {
+  lead.matchedKeywords.forEach(function(mk) {
+    var pts = mk.tier === 'high' ? 3 : mk.tier === 'medium' ? 2 : 1;
+    b.keywords += pts;
+    b.keywordList.push({ kw: mk.kw, pts: pts });
+  });
+} else {
+  var text = ((lead.notes || '') + ' ' + (lead.subject || '')).toLowerCase();
+  HIGH_INTENT_KW.forEach(function(kw) { if (text.includes(kw)) { b.keywords += 3; b.keywordList.push({ kw: kw, pts: 3 }); } });
+  MED_INTENT_KW.forEach(function(kw) { if (text.includes(kw)) { b.keywords += 2; b.keywordList.push({ kw: kw, pts: 2 }); } });
+  LOW_INTENT_KW.forEach(function(kw) { if (text.includes(kw)) { b.keywords += 1; b.keywordList.push({ kw: kw, pts: 1 }); } });
+}
+if (lead.email) {
+  var domain = (lead.email.split('@')[1] || '').toLowerCase();
+  if (domain && !GENERIC_DOMAINS.includes(domain)) b.company = 2;
+}
+if (lead.receivedDate) {
+  var age = -calculateDays(lead.receivedDate);
+  if (age <= 1) b.recency = 2;
+  else if (age <= 3) b.recency = 1;
+}
+b.priority = lead.priority || 0;
+if (lead.status === 'hold') b.hold = -2;
+var total = b.keywords + b.company + b.recency + b.priority + b.hold;
+return { total: Math.max(total, 0), breakdown: b };
+}
+
+function getScoreBadgeClass(score) {
+return score >= 8 ? 'score-high' : score >= 4 ? 'score-medium' : 'score-low';
+}
+
+function buildScoreTooltip(lead) {
+var b = lead._scoreBreakdown;
+if (!b) return '';
+var h = '<div class="score-tooltip"><div class="score-tooltip-title">' + esc(lead.name) + '</div>';
+if (b.keywordList.length > 0) {
+  b.keywordList.forEach(function(k) {
+    h += '<div class="score-tooltip-row"><span>"' + esc(k.kw) + '"</span><span class="score-val positive">+' + k.pts + '</span></div>';
+  });
+} else {
+  h += '<div class="score-tooltip-row"><span>No keywords matched</span><span class="score-val">0</span></div>';
+}
+if (b.company > 0) h += '<div class="score-tooltip-row"><span>Company domain</span><span class="score-val positive">+' + b.company + '</span></div>';
+if (b.recency > 0) h += '<div class="score-tooltip-row"><span>Recent (' + (b.recency === 2 ? '0\u20131d' : '2\u20133d') + ')</span><span class="score-val positive">+' + b.recency + '</span></div>';
+if (b.priority > 0) h += '<div class="score-tooltip-row"><span>Priority (' + b.priority + ' dot' + (b.priority > 1 ? 's' : '') + ')</span><span class="score-val positive">+' + b.priority + '</span></div>';
+if (b.hold < 0) h += '<div class="score-tooltip-row"><span>On hold</span><span class="score-val negative">' + b.hold + '</span></div>';
+h += '<div class="score-tooltip-divider"></div>';
+h += '<div class="score-tooltip-row"><span><strong>Total</strong></span><span class="score-tooltip-total">' + (lead._score || 0) + '</span></div>';
+h += '</div>';
+return h;
+}
+
+function sortFocusLeads(leads) {
+var sorted = leads.slice();
+if (_focusSortMode === 'score') {
+  sorted.sort(function(a, b) {
+    if (b._score !== a._score) return b._score - a._score;
+    return (b.receivedDate || '').localeCompare(a.receivedDate || '');
+  });
+} else {
+  sorted.sort(function(a, b) {
+    var dc = (b.receivedDate || '').localeCompare(a.receivedDate || '');
+    if (dc !== 0) return dc;
+    return b._score - a._score;
+  });
+}
+return sorted;
+}
+
+function toggleFocusSort(col) {
+_focusSortMode = (_focusSortMode === col) ? 'received' : col;
+var recTh = document.getElementById('focusSortReceivedTh');
+var scoreTh = document.getElementById('focusSortScoreTh');
+var label = document.getElementById('focusSortLabel');
+var recArrow = document.getElementById('focusSortReceivedArrow');
+var scoreArrow = document.getElementById('focusSortScoreArrow');
+if (_focusSortMode === 'score') {
+  recTh.classList.remove('active-sort');
+  scoreTh.classList.add('active-sort');
+  label.textContent = 'Sorted by Score';
+  label.className = 'sort-mode-indicator score';
+  recArrow.innerHTML = '\u25B2';
+  scoreArrow.innerHTML = '\u25BC';
+} else {
+  scoreTh.classList.remove('active-sort');
+  recTh.classList.add('active-sort');
+  label.textContent = 'Sorted by Received';
+  label.className = 'sort-mode-indicator received';
+  recArrow.innerHTML = '\u25BC';
+  scoreArrow.innerHTML = '\u25B2';
+}
+renderFocus();
+showReminderToast('Hot Leads sorted by ' + (_focusSortMode === 'score' ? 'lead score' : 'received date'));
+}
+
 function getDaysClass(days) {
 if (days <= -90) return 'archived';
 if (days  <   0) return 'overdue';
@@ -405,10 +510,18 @@ document.getElementById('countFocus').textContent = active.length;
 const today = new Date().toLocaleDateString('en-US', { timeZone: 'America/Denver', month:'short', day:'numeric' });
 document.getElementById('focusUpdated').textContent = `Updated ${today}`;
 if (!dailyFocus.length) {
-tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-secondary)">No hot leads yet. Leads from your Gmail scan will appear here.</td></tr>';
+tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-secondary)">No hot leads yet. Leads from your Gmail scan will appear here.</td></tr>';
 return;
 }
+// Calculate scores
 dailyFocus.forEach(p => {
+const result = calculateLeadScore(p);
+p._score = result.total;
+p._scoreBreakdown = result.breakdown;
+});
+// Sort
+const sorted = sortFocusLeads(dailyFocus);
+sorted.forEach(p => {
 let swatchCls, pillCls, pillLabel;
 if      (p.status === 'new')    { swatchCls = 'focus-new';    pillCls = 'new-lead'; pillLabel = 'New Lead'; }
 else if (p.status === 'hold')   { swatchCls = 'focus-hold';   pillCls = 'hold';     pillLabel = p.holdUntil ? `Hold \u00B7 ${formatHoldDate(p.holdUntil)}` : 'On Hold'; }
@@ -418,6 +531,8 @@ else                            { swatchCls = 'focus-active'; pillCls = 'active'
 const pR = getReminders(p.id);
 const hasR = pR.length > 0;
 const countDot = hasR ? `<span class="reminder-count-dot">${pR.length}</span>` : '';
+const scoreCls = getScoreBadgeClass(p._score);
+const tooltip = buildScoreTooltip(p);
 const row = document.createElement('tr');
 row.className = 'prospect-row';
 row.onclick = () => toggleExpanded(row);
@@ -430,6 +545,7 @@ row.innerHTML = `
 </td>
 <td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '\u2014'}</td>
 <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
+<td onclick="event.stopPropagation()"><div class="score-breakdown"><span class="lead-score-badge ${scoreCls}">${p._score}</span>${tooltip}</div></td>
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
 <td onclick="event.stopPropagation()">
 <div class="priority-dots">
@@ -448,7 +564,7 @@ row.innerHTML = `
 tbody.appendChild(row);
 const expRow = document.createElement('tr');
 expRow.className = 'expanded-row';
-expRow.innerHTML = `<td colspan="8"><div class="expanded-content"><h3>Notes</h3><p>${esc(p.notes||'')}</p></div></td>`;
+expRow.innerHTML = `<td colspan="9"><div class="expanded-content"><h3>Notes</h3><p>${esc(p.notes||'')}</p></div></td>`;
 tbody.appendChild(expRow);
 });
 }
@@ -876,7 +992,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// ── Notification engine \u2014 checks every 15 seconds ──
+// ── Notification engine — checks every 15 seconds ──
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');

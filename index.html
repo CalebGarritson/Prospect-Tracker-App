@@ -221,8 +221,6 @@ overflow: hidden;
 .table-container.has-section-header { border-radius: 0 0 12px 12px; }
 .table-container.scrollable { overflow-y: auto; overflow-x: hidden; }
 .table-container.scrollable thead th { position: sticky; top: 0; z-index: 2; background: var(--bg-header); }
-.table-container.scroll-ready  { max-height: 432px; }
-.table-container.scroll-future { max-height: 216px; }
 .table-container.scrollable::-webkit-scrollbar { width: 6px; }
 .table-container.scrollable::-webkit-scrollbar-track { background: transparent; }
 .table-container.scrollable::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
@@ -544,7 +542,6 @@ z-index: 4000; display: none; animation: toastSlide .3s ease;
 .reminder-toast-text { font-size: 13px; color: var(--text-primary); }
 @keyframes toastSlide { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 /* ── Hot Leads Scroll ── */
-.table-container.scroll-focus { max-height: 340px; }
 .table-container.scroll-focus table { table-layout: fixed; width: 100%; }
 .table-container.scroll-focus td { overflow: hidden; text-overflow: ellipsis; }
 .focus-name-cell { overflow: hidden; text-overflow: ellipsis; }
@@ -563,7 +560,6 @@ font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
 }
 .btn-delete-completed:hover { background: rgba(248,113,113,.18); border-color: rgba(248,113,113,.5); }
 .btn-delete-completed:disabled { opacity: .35; cursor: default; }
-.table-container.scroll-tasks { max-height: 400px; }
 /* Task checkbox (teal circle) */
 .task-checkbox {
 width: 22px; height: 22px; border-radius: 50%; border: 2px solid #3a4060;
@@ -632,6 +628,122 @@ color: var(--text-primary); font-size: 14px;
 .task-no-time { font-size: 11px; color: var(--text-secondary); opacity: 0.4; }
 /* ── Auto-Reminder Tag ── */
 .reminder-auto-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; background: rgba(45,212,191,.15); color: #2dd4bf; border: 1px solid rgba(45,212,191,.25); margin-left: 6px; vertical-align: middle; }
+
+/* ── Pages / Navigation ── */
+.pages-wrapper { position: relative; overflow: hidden; }
+.page { padding: 0; }
+.page.hidden-right { display: none; }
+.page.hidden-left { display: none; }
+.page.active { display: block; animation: fadeSlideIn 0.3s ease; }
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Search Bar ── */
+.search-bar-wrapper { padding: 0 0 16px; position: relative; z-index: 50; }
+.search-wrapper { position: relative; }
+.search-input {
+width: 100%; padding: 11px 16px 11px 40px;
+background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
+border-radius: 10px; color: var(--text-primary); font-size: 14px; font-family: inherit; outline: none;
+transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.search-input::placeholder { color: rgba(168,178,193,.35); }
+.search-input:focus { border-color: rgba(88,166,255,.4); background: rgba(255,255,255,.06); box-shadow: 0 0 0 3px rgba(88,166,255,.08); }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); opacity: .4; font-size: 15px; pointer-events: none; }
+.search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); font-size: 16px; cursor: pointer; opacity: 0; transition: opacity .2s; padding: 4px; }
+.search-clear.visible { opacity: .6; }
+.search-clear:hover { opacity: 1; }
+.search-dropdown { display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.5); max-height: 380px; overflow-y: auto; z-index: 60; }
+.search-dropdown.open { display: block; }
+.search-dropdown::-webkit-scrollbar { width: 6px; }
+.search-dropdown::-webkit-scrollbar-track { background: transparent; }
+.search-dropdown::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+.search-result-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background .2s; }
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: rgba(88,166,255,.06); }
+.search-result-swatch { width: 4px; border-radius: 2px; align-self: stretch; min-height: 36px; flex-shrink: 0; }
+.search-result-info { flex: 1; min-width: 0; }
+.search-result-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.search-result-name mark { background: rgba(255,224,51,.25); color: #ffe033; border-radius: 2px; padding: 0 1px; }
+.search-result-detail { font-size: 12px; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-result-badge { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.search-badge-ready { background: rgba(129,140,248,.15); color: #818cf8; }
+.search-badge-upcoming { background: rgba(34,211,238,.15); color: #22d3ee; }
+.search-badge-hotleads { background: rgba(217,70,239,.15); color: #d946ef; }
+.search-badge-archived { background: rgba(148,163,184,.12); color: #94a3b8; }
+.search-badge-tasks { background: rgba(250,204,21,.14); color: #facc15; }
+.search-empty { text-align: center; padding: 40px 24px; color: var(--text-secondary); font-size: 14px; }
+.search-count { font-size: 12px; color: var(--text-secondary); padding: 10px 18px; border-bottom: 1px solid var(--border-color); }
+
+/* ── Section Cards (Home Page) ── */
+.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.section-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
+.section-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.3); }
+.section-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0; }
+/* Card colors - each unique */
+.section-card.card-reminders { background: linear-gradient(135deg, rgba(251,146,60,.18), var(--bg-secondary) 60%); }
+.section-card.card-reminders::before { background: linear-gradient(90deg, #fb923c, #f97316); }
+.section-card.card-reminders:hover { border-color: rgba(251,146,60,.45); background: linear-gradient(135deg, rgba(251,146,60,.28), var(--bg-secondary) 60%); }
+.section-card.card-hotleads { background: linear-gradient(135deg, rgba(217,70,239,.16), var(--bg-secondary) 60%); }
+.section-card.card-hotleads::before { background: linear-gradient(90deg, #d946ef, #c026d3); }
+.section-card.card-hotleads:hover { border-color: rgba(217,70,239,.45); background: linear-gradient(135deg, rgba(217,70,239,.25), var(--bg-secondary) 60%); }
+.section-card.card-ready { background: linear-gradient(135deg, rgba(129,140,248,.18), var(--bg-secondary) 60%); }
+.section-card.card-ready::before { background: linear-gradient(90deg, #818cf8, #6366f1); }
+.section-card.card-ready:hover { border-color: rgba(129,140,248,.45); background: linear-gradient(135deg, rgba(129,140,248,.28), var(--bg-secondary) 60%); }
+.section-card.card-tasks { background: linear-gradient(135deg, rgba(250,204,21,.14), var(--bg-secondary) 60%); }
+.section-card.card-tasks::before { background: linear-gradient(90deg, #facc15, #eab308); }
+.section-card.card-tasks:hover { border-color: rgba(250,204,21,.4); background: linear-gradient(135deg, rgba(250,204,21,.22), var(--bg-secondary) 60%); }
+.section-card.card-upcoming { background: linear-gradient(135deg, rgba(34,211,238,.15), var(--bg-secondary) 60%); }
+.section-card.card-upcoming::before { background: linear-gradient(90deg, #22d3ee, #06b6d4); }
+.section-card.card-upcoming:hover { border-color: rgba(34,211,238,.45); background: linear-gradient(135deg, rgba(34,211,238,.24), var(--bg-secondary) 60%); }
+.section-card.card-archived { background: linear-gradient(135deg, rgba(148,163,184,.12), var(--bg-secondary) 60%); }
+.section-card.card-archived::before { background: linear-gradient(90deg, #94a3b8, #64748b); }
+.section-card.card-archived:hover { border-color: rgba(148,163,184,.4); background: linear-gradient(135deg, rgba(148,163,184,.2), var(--bg-secondary) 60%); }
+.card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.card-title { font-size: 16px; font-weight: 700; }
+.card-reminders .card-title { color: #fb923c; }
+.card-hotleads .card-title { color: #d946ef; }
+.card-ready .card-title { color: #818cf8; }
+.card-tasks .card-title { color: #facc15; }
+.card-upcoming .card-title { color: #22d3ee; }
+.card-archived .card-title { color: #94a3b8; }
+.card-count { font-size: 28px; font-weight: 800; color: #ffe033; line-height: 1; }
+.card-subtitle { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.card-arrow { color: var(--text-secondary); font-size: 18px; opacity: .5; transition: all .25s; }
+.section-card:hover .card-arrow { opacity: 1; transform: translateX(4px); }
+.card-preview { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+.preview-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; }
+.preview-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.preview-name { color: var(--text-primary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview-meta { color: var(--text-secondary); font-size: 11px; margin-left: auto; white-space: nowrap; }
+.preview-more { font-size: 12px; color: var(--text-secondary); opacity: .6; margin-top: 6px; text-align: center; }
+
+/* ── Detail Page Header ── */
+.detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.back-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; }
+.back-btn:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); transform: translateX(-2px); }
+.detail-title-area { flex: 1; }
+.detail-title { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+.detail-count { background: rgba(255,224,51,.12); color: #ffe033; border: 1px solid rgba(255,224,51,.25); font-size: 13px; font-weight: 800; padding: 3px 12px; border-radius: 20px; }
+.detail-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.detail-actions { display: flex; gap: 10px; align-items: center; }
+
+/* ── Legend ── */
+.legend-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 12px; cursor: pointer; transition: all .2s; user-select: none; }
+.legend-toggle:hover { background: rgba(255,255,255,.08); color: var(--text-primary); border-color: rgba(255,255,255,.15); }
+.legend-toggle .legend-q { width: 18px; height: 18px; border-radius: 50%; background: rgba(88,166,255,.12); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--accent-blue); flex-shrink: 0; }
+.legend-toggle .legend-chevron { font-size: 10px; transition: transform .25s; opacity: .5; }
+.legend-toggle.open .legend-chevron { transform: rotate(180deg); }
+.legend-panel { display: none; margin-top: 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px 24px; animation: fadeSlideIn .25s ease; }
+.legend-panel.open { display: block; }
+.legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+.legend-item { display: flex; align-items: flex-start; gap: 10px; }
+.legend-swatch { width: 4px; border-radius: 2px; min-height: 32px; flex-shrink: 0; margin-top: 2px; }
+.legend-item-title { font-size: 13px; font-weight: 700; }
+.legend-item-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-top: 1px; }
+
+/* ── Keyboard hint ── */
+.key-hint { position: fixed; bottom: 24px; left: 24px; background: rgba(255,255,255,.04); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 14px; font-size: 11px; color: var(--text-secondary); z-index: 10; display: none; }
+.key-hint kbd { background: rgba(255,255,255,.08); border: 1px solid var(--border-color); border-radius: 4px; padding: 1px 6px; font-family: inherit; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -680,7 +792,33 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </form>
 </div>
 </div>
-<div class="container" id="mainApp" style="display:none;">
+<div id="mainApp" style="display:none;">
+
+<!-- Notification Banner (visible on all pages) -->
+<div class="container">
+<div class="notif-banner" id="notifBanner">
+<span class="notif-banner-text" id="notifText">Notifications are needed for reminders to pop up on your screen.</span>
+<button class="notif-banner-btn" id="notifBtn" onclick="requestNotifPermission()">Enable Notifications</button>
+</div>
+</div>
+
+<!-- Search Bar (persistent, above pages) -->
+<div class="container">
+<div class="search-bar-wrapper">
+<div class="search-wrapper">
+<span class="search-icon">&#x1F50D;</span>
+<input class="search-input" id="searchInput" type="text" placeholder="Search prospects, leads, tasks..." autocomplete="off">
+<button class="search-clear" id="searchClear" onclick="clearSearch()">&times;</button>
+<div class="search-dropdown" id="searchDropdown"></div>
+</div>
+</div>
+</div>
+
+<div class="pages-wrapper">
+
+<!-- HOME PAGE -->
+<div class="page active" id="pageHome">
+<div class="container">
 <header>
 <div class="header-top">
 <div>
@@ -697,9 +835,72 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </div>
 </div>
 </header>
-<div class="notif-banner" id="notifBanner">
-<span class="notif-banner-text" id="notifText">Notifications are needed for reminders to pop up on your screen.</span>
-<button class="notif-banner-btn" id="notifBtn" onclick="requestNotifPermission()">Enable Notifications</button>
+<div class="cards-grid" id="cardsGrid"></div>
+<div style="margin-top:20px;">
+<button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">
+<span class="legend-q">?</span>
+What do these sections mean?
+<span class="legend-chevron">&#x25BC;</span>
+</button>
+<div class="legend-panel" id="legendPanel">
+<div class="legend-grid">
+<div class="legend-item">
+<div class="legend-swatch" style="background:linear-gradient(180deg,#fb923c,#f97316);"></div>
+<div>
+<div class="legend-item-title" style="color:#fb923c;">Active Reminders</div>
+<div class="legend-item-desc">Call reminders you've set using the bell icon, plus auto-reminders from tasks with a time.</div>
+</div>
+</div>
+<div class="legend-item">
+<div class="legend-swatch" style="background:linear-gradient(180deg,#d946ef,#c026d3);"></div>
+<div>
+<div class="legend-item-title" style="color:#d946ef;">Hot Leads</div>
+<div class="legend-item-desc">Leads pulled automatically from your Gmail every morning. Scored by keyword intent, company domain, and recency.</div>
+</div>
+</div>
+<div class="legend-item">
+<div class="legend-swatch" style="background:linear-gradient(180deg,#818cf8,#6366f1);"></div>
+<div>
+<div class="legend-item-title" style="color:#818cf8;">Ready to Call</div>
+<div class="legend-item-desc">Prospects whose re-engagement date has arrived or passed.</div>
+</div>
+</div>
+<div class="legend-item">
+<div class="legend-swatch" style="background:linear-gradient(180deg,#facc15,#eab308);"></div>
+<div>
+<div class="legend-item-title" style="color:#facc15;">My Tasks</div>
+<div class="legend-item-desc">Your personal to-do list with one-time, daily, weekly, and monthly recurring tasks.</div>
+</div>
+</div>
+<div class="legend-item">
+<div class="legend-swatch" style="background:linear-gradient(180deg,#22d3ee,#06b6d4);"></div>
+<div>
+<div class="legend-item-title" style="color:#22d3ee;">Upcoming</div>
+<div class="legend-item-desc">Prospects with a future re-engagement date. They move to Ready to Call when the date arrives.</div>
+</div>
+</div>
+<div class="legend-item">
+<div class="legend-swatch" style="background:linear-gradient(180deg,#94a3b8,#64748b);"></div>
+<div>
+<div class="legend-item-title" style="color:#94a3b8;">Archived</div>
+<div class="legend-item-desc">Prospects older than 90 days that went cold or chose a competitor.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- REMINDERS PAGE -->
+<div class="page hidden-right" id="pageReminders">
+<div class="container">
+<div class="detail-header">
+<button class="back-btn" onclick="goHome()">&#x2190;</button>
+<div class="detail-title-area">
+<div class="detail-title" style="color:#fb923c;">Active Reminders <span class="detail-count" id="detailCountReminders">0</span></div>
+<div class="detail-subtitle">Your upcoming call reminders and task auto-reminders</div>
+</div>
 </div>
 <div id="remindersSection">
 <div class="section-header section-header-reminders">
@@ -714,8 +915,22 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </div>
 </div>
 </div>
-<!-- ── My Tasks Section ── -->
-<div class="tasks-wrapper">
+</div>
+</div>
+
+<!-- TASKS PAGE -->
+<div class="page hidden-right" id="pageTasks">
+<div class="container">
+<div class="detail-header">
+<button class="back-btn" onclick="goHome()">&#x2190;</button>
+<div class="detail-title-area">
+<div class="detail-title" style="color:#facc15;">My Tasks <span class="detail-count" id="detailCountTasks">0</span></div>
+<div class="detail-subtitle">Personal task list with recurring task support</div>
+</div>
+<div class="detail-actions">
+<button class="btn-primary" style="font-size:13px;padding:8px 16px;" onclick="openTaskModal()">+ Add Task</button>
+</div>
+</div>
 <div class="tasks-header">
 <div class="tasks-header-left">
 <span class="tasks-title">My Tasks</span>
@@ -727,7 +942,7 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <button class="btn-primary" style="font-size:13px;padding:7px 14px;" onclick="openTaskModal()">+ Add Task</button>
 </div>
 </div>
-<div class="table-container scrollable scroll-tasks has-section-header">
+<div class="table-container scrollable has-section-header">
 <table>
 <thead><tr>
 <th style="width:40px"></th>
@@ -745,12 +960,26 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </table>
 </div>
 </div>
-<div style="margin-top:24px;">
+</div>
+
+<!-- READY TO CALL PAGE -->
+<div class="page hidden-right" id="pageReady">
+<div class="container">
+<div class="detail-header">
+<button class="back-btn" onclick="goHome()">&#x2190;</button>
+<div class="detail-title-area">
+<div class="detail-title" style="color:#818cf8;">Ready to Call <span class="detail-count" id="detailCountReady">0</span></div>
+<div class="detail-subtitle">Prospects whose re-engagement date has arrived or passed</div>
+</div>
+<div class="detail-actions">
+<button class="btn-primary" style="font-size:13px;padding:8px 16px;" onclick="openAddModal()">+ Add Prospect</button>
+</div>
+</div>
 <div class="section-header section-header-ready">
 <span class="section-title">Ready to Call</span>
 <span class="section-count-badge" id="countReady">0</span>
 </div>
-<div class="table-container scrollable scroll-ready has-section-header">
+<div class="table-container scrollable has-section-header">
 <table>
 <thead><tr>
 <th style="width:14px"></th>
@@ -766,12 +995,26 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </table>
 </div>
 </div>
-<div style="margin-top:24px;">
+</div>
+
+<!-- UPCOMING PAGE -->
+<div class="page hidden-right" id="pageUpcoming">
+<div class="container">
+<div class="detail-header">
+<button class="back-btn" onclick="goHome()">&#x2190;</button>
+<div class="detail-title-area">
+<div class="detail-title" style="color:#22d3ee;">Upcoming <span class="detail-count" id="detailCountUpcoming">0</span></div>
+<div class="detail-subtitle">Prospects with future re-engagement dates</div>
+</div>
+<div class="detail-actions">
+<button class="btn-primary" style="font-size:13px;padding:8px 16px;" onclick="openAddModal()">+ Add Prospect</button>
+</div>
+</div>
 <div class="section-header section-header-future">
 <span class="section-title">Upcoming</span>
 <span class="section-count-badge" id="countFuture">0</span>
 </div>
-<div class="table-container scrollable scroll-future has-section-header">
+<div class="table-container scrollable has-section-header">
 <table>
 <thead><tr>
 <th style="width:14px"></th>
@@ -787,7 +1030,21 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </table>
 </div>
 </div>
-<div class="focus-wrapper">
+</div>
+
+<!-- HOT LEADS PAGE -->
+<div class="page hidden-right" id="pageHotLeads">
+<div class="container">
+<div class="detail-header">
+<button class="back-btn" onclick="goHome()">&#x2190;</button>
+<div class="detail-title-area">
+<div class="detail-title" style="color:#d946ef;">Hot Leads <span class="detail-count" id="detailCountHotLeads">0</span></div>
+<div class="detail-subtitle">Leads from your Gmail scanner, scored by intent</div>
+</div>
+<div class="detail-actions">
+<button class="btn-primary" style="font-size:13px;padding:8px 16px;" onclick="openFocusModal()">+ Add Lead</button>
+</div>
+</div>
 <div class="focus-header">
 <div class="focus-header-left">
 <span class="focus-title">Hot Leads</span>
@@ -816,7 +1073,21 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </table>
 </div>
 </div>
-<div class="archive-wrapper">
+</div>
+
+<!-- ARCHIVED PAGE -->
+<div class="page hidden-right" id="pageArchived">
+<div class="container">
+<div class="detail-header">
+<button class="back-btn" onclick="goHome()">&#x2190;</button>
+<div class="detail-title-area">
+<div class="detail-title" style="color:#94a3b8;">Archived <span class="detail-count" id="detailCountArchived">0</span></div>
+<div class="detail-subtitle">Prospects older than 90 days</div>
+</div>
+<div class="detail-actions">
+<button class="btn-primary" style="font-size:13px;padding:8px 16px;background:linear-gradient(135deg,#f87171,#ef4444);" onclick="deleteAllArchived()">Delete All Archived</button>
+</div>
+</div>
 <div class="archive-header" onclick="toggleArchive()">
 <div class="archive-header-left">
 <span class="section-title archive-title">Archived</span>
@@ -849,6 +1120,13 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </div>
 </div>
 </div>
+
+</div><!-- end pages-wrapper -->
+
+<!-- Keyboard hint -->
+<div class="key-hint" id="keyHint"><kbd>Esc</kbd> to go back</div>
+
+</div><!-- end mainApp -->
 <!-- ── Add / Edit Prospect Modal ── -->
 <div class="modal" id="addModal">
 <div class="modal-card">
@@ -1080,7 +1358,7 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 </div>
 </div>
 <!-- ── Time Picker Modal ── -->
-<div class="picker-overlay" id="pickerOverlay" onclick="if(event.target===this)closeTimePicker()">
+<div class="picker-overlay" id="pickerOverlay">
 <div class="picker-card">
 <h3>Set Call Reminder</h3>
 <div class="prospect-label" id="pickerLabel">for Prospect</div>

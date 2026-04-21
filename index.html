@@ -64,18 +64,232 @@ background: var(--bg-secondary);
 border: 1px solid var(--border-color);
 border-radius: 16px;
 padding: 40px;
-max-width: 480px;
+max-width: 520px;
 width: 90%;
 box-shadow: 0 24px 64px rgba(0,0,0,.6);
+max-height: 90vh;
+overflow-y: auto;
 }
-.setup-card h2 { font-size: 22px; font-weight: 700; color: #ffe033; margin-bottom: 8px; }
-.setup-card p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.7; }
+.setup-card h2 { font-size: 24px; font-weight: 700; color: #ffe033; margin-bottom: 8px; text-align: center; }
+.setup-card p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.7; text-align: center; }
 .setup-card .setup-link { color: var(--accent-blue); text-decoration: none; }
 .setup-card .setup-link:hover { text-decoration: underline; }
 .setup-status { color: #ffe033; font-size: 13px; margin-top: 12px; text-align: center; animation: pulse-text 1.5s ease-in-out infinite; }
 @keyframes pulse-text { 0%,100%{opacity:.7} 50%{opacity:1} }
 .setup-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
 .setup-error.visible { display: block; }
+/* ── Setup Progress Steps ── */
+.setup-progress {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0;
+margin-bottom: 28px;
+}
+.setup-step {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 8px 16px;
+border-radius: 20px;
+font-size: 12px;
+font-weight: 700;
+color: var(--text-secondary);
+background: rgba(255,255,255,.04);
+border: 1px solid var(--border-color);
+transition: all .3s;
+}
+.setup-step.active {
+color: #ffe033;
+background: rgba(255,224,51,.1);
+border-color: rgba(255,224,51,.3);
+}
+.setup-step.completed {
+color: #6ee7b7;
+background: rgba(110,231,183,.08);
+border-color: rgba(110,231,183,.3);
+}
+.setup-step.active[data-color="purple"] { color: #a78bfa; background: rgba(167,139,250,.18); border-color: rgba(167,139,250,.5); box-shadow: 0 0 16px rgba(167,139,250,.15); }
+.setup-step.active[data-color="blue"]   { color: #60a5fa; background: rgba(96,165,250,.18); border-color: rgba(96,165,250,.5); box-shadow: 0 0 16px rgba(96,165,250,.15); }
+.setup-step.active[data-color="teal"]   { color: #34d399; background: rgba(52,211,153,.18); border-color: rgba(52,211,153,.5); box-shadow: 0 0 16px rgba(52,211,153,.15); }
+.setup-step.completed[data-color="purple"] { color: #a78bfa; background: rgba(167,139,250,.12); border-color: rgba(167,139,250,.4); }
+.setup-step.completed[data-color="blue"]   { color: #60a5fa; background: rgba(96,165,250,.12); border-color: rgba(96,165,250,.4); }
+.setup-step.completed[data-color="teal"]   { color: #34d399; background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.4); }
+.setup-step-num {
+width: 22px;
+height: 22px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 11px;
+font-weight: 800;
+background: rgba(255,255,255,.08);
+}
+.setup-step.active .setup-step-num { background: rgba(255,255,255,.12); }
+.setup-step.completed .setup-step-num { background: rgba(255,255,255,.1); }
+.setup-step.active[data-color="purple"] .setup-step-num { background: rgba(167,139,250,.3); }
+.setup-step.active[data-color="blue"] .setup-step-num   { background: rgba(96,165,250,.3); }
+.setup-step.active[data-color="teal"] .setup-step-num   { background: rgba(52,211,153,.3); }
+.setup-step.completed[data-color="purple"] .setup-step-num { background: rgba(167,139,250,.25); }
+.setup-step.completed[data-color="blue"] .setup-step-num   { background: rgba(96,165,250,.25); }
+.setup-step.completed[data-color="teal"] .setup-step-num   { background: rgba(52,211,153,.25); }
+.setup-step-connector {
+width: 32px;
+height: 2px;
+background: var(--border-color);
+margin: 0 4px;
+}
+.setup-step-connector.done-purple { background: #a78bfa; }
+.setup-step-connector.done-blue { background: #60a5fa; }
+/* ── Setup Form Groups (overrides for setup card) ── */
+.setup-card .form-group { margin-bottom: 14px; }
+.setup-card .form-group label {
+display: block;
+font-size: 13px;
+font-weight: 600;
+color: var(--text-secondary);
+margin-bottom: 6px;
+}
+.setup-card .form-group input {
+width: 100%;
+padding: 11px 14px;
+background: var(--bg-primary);
+border: 1px solid var(--border-color);
+border-radius: 10px;
+color: var(--text-primary);
+font-size: 14px;
+font-family: inherit;
+transition: border-color .2s, box-shadow .2s;
+outline: none;
+}
+.setup-card .form-group input::placeholder { color: rgba(168,178,193,.4); }
+.setup-card .form-group input:focus {
+border-color: rgba(88,166,255,.5);
+box-shadow: 0 0 0 3px rgba(88,166,255,.1);
+}
+.setup-section-label {
+font-size: 13px;
+font-weight: 700;
+color: var(--accent-blue);
+margin-bottom: 12px;
+margin-top: 8px;
+text-transform: uppercase;
+letter-spacing: .06em;
+text-align: center;
+}
+/* ── Gmail Guide Modal ── */
+#gmailGuideModal {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,.85);
+z-index: 2500;
+align-items: center;
+justify-content: center;
+}
+#gmailGuideModal.active { display: flex; }
+.gmail-guide-card {
+background: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: 16px;
+padding: 36px;
+max-width: 560px;
+width: 92%;
+box-shadow: 0 24px 64px rgba(0,0,0,.6);
+max-height: 90vh;
+overflow-y: auto;
+}
+.gmail-guide-card h2 { font-size: 22px; font-weight: 700; color: #ffe033; margin-bottom: 6px; }
+.gmail-guide-card .guide-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+.guide-step {
+display: flex;
+gap: 14px;
+margin-bottom: 20px;
+padding: 16px;
+background: rgba(255,255,255,.03);
+border: 1px solid var(--border-color);
+border-radius: 12px;
+transition: border-color .2s;
+}
+.guide-step:hover { border-color: rgba(88,166,255,.3); }
+.guide-step-num {
+flex-shrink: 0;
+width: 32px;
+height: 32px;
+border-radius: 50%;
+background: linear-gradient(135deg, rgba(88,166,255,.2), rgba(121,192,255,.15));
+border: 1px solid rgba(88,166,255,.3);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 14px;
+font-weight: 800;
+color: var(--accent-blue);
+}
+.guide-step-content { flex: 1; }
+.guide-step-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.guide-step-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.guide-step-detail code {
+background: rgba(88,166,255,.1);
+color: var(--accent-blue);
+padding: 1px 6px;
+border-radius: 4px;
+font-size: 12px;
+font-family: monospace;
+}
+.guide-step-detail a { color: var(--accent-blue); text-decoration: none; }
+.guide-step-detail a:hover { text-decoration: underline; }
+.guide-warning {
+background: rgba(248,113,113,.06);
+border: 1px solid rgba(248,113,113,.2);
+border-radius: 10px;
+padding: 12px 16px;
+font-size: 13px;
+color: #fca5a5;
+line-height: 1.6;
+margin: 16px 0;
+}
+.guide-tip {
+background: rgba(38,208,124,.06);
+border: 1px solid rgba(38,208,124,.2);
+border-radius: 10px;
+padding: 12px 16px;
+font-size: 13px;
+color: #6ee7b7;
+line-height: 1.6;
+margin: 16px 0;
+}
+.guide-video-link {
+display: flex;
+align-items: center;
+gap: 10px;
+background: rgba(255,224,51,.06);
+border: 1px solid rgba(255,224,51,.2);
+border-radius: 10px;
+padding: 14px 18px;
+margin: 20px 0;
+color: #ffe033;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all .2s;
+text-decoration: none;
+}
+.guide-video-link:hover { background: rgba(255,224,51,.12); }
+.guide-done-btn {
+width: 100%;
+padding: 14px 28px;
+border-radius: 10px;
+background: linear-gradient(135deg, #58a6ff, #79c0ff);
+color: var(--bg-primary);
+border: none;
+font-size: 15px;
+font-weight: 700;
+cursor: pointer;
+transition: transform .2s, box-shadow .2s;
+}
+.guide-done-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(88,166,255,.3); }
 /* ── SF Help Bubble ── */
 .sf-help-btn {
 display: inline-flex; align-items: center; justify-content: center;
@@ -749,11 +963,28 @@ transition: border-color .2s, background .2s, box-shadow .2s;
 <body>
 <div id="setupScreen">
 <div class="setup-card">
-<h2>&#x1F510; Welcome to Prospect Tracker</h2>
-<p>
-Fill in your info below to get started. Your prospect data is stored in your own private GitHub repository &#x2014; it's yours and no one else can see it.
-</p>
+<h2>&#x1F44B; Welcome to Calebrate</h2>
+<p>Your personal prospect tracker, built for the Gusto sales team. Let's get you set up!</p>
+
+<!-- Progress Steps -->
+<div class="setup-progress">
+<div class="setup-step active" id="progStep1" data-color="purple">
+<span class="setup-step-num">1</span> Your Info
+</div>
+<div class="setup-step-connector" id="progConn1"></div>
+<div class="setup-step" id="progStep2" data-color="blue">
+<span class="setup-step-num">2</span> GitHub
+</div>
+<div class="setup-step-connector" id="progConn2"></div>
+<div class="setup-step" id="progStep3" data-color="teal">
+<span class="setup-step-num">3</span> Email Scanner
+</div>
+</div>
+
 <form id="setupForm">
+<!-- Step 1: Your Info -->
+<div id="setupStep1">
+<div class="setup-section-label">&#x1F464; About You</div>
 <div class="form-group">
 <label>Full Name <span style="color:#f87171;">*</span></label>
 <input type="text" id="setupName" placeholder="e.g. Caleb Garritson" required>
@@ -763,19 +994,25 @@ Fill in your info below to get started. Your prospect data is stored in your own
 <input type="email" id="setupEmail" placeholder="you@gusto.com" required>
 </div>
 <div class="form-group">
-<label>
-Salesforce User ID <span style="color:#f87171;">*</span>
+<label>Salesforce User ID <span style="color:#f87171;">*</span>
 <button type="button" class="sf-help-btn" onclick="openSFHelp()" title="How to find this">?</button>
 </label>
 <input type="text" id="setupSalesforceId" placeholder="005XXXXXXXXXXXXXXX" required style="font-family:monospace;letter-spacing:.03em;">
 </div>
-<div style="border-top:1px solid var(--border-color);margin:20px 0 16px;"></div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
-<strong style="color:var(--text-primary);">Connect your GitHub repo</strong>
-<button type="button" class="sf-help-btn" onclick="openGHHelp()" title="How to set up GitHub" style="margin-left:6px;">?</button><br>
-Your data lives in a private repo &#x2014; we'll create it automatically. Just enter your username and a Personal Access Token.
-<span style="color:rgba(88,166,255,.6);font-size:12px;"> (Don't have one yet? Click <strong style="color:var(--accent-blue);">?</strong> above.)</span>
+<div class="modal-buttons" style="margin-top:24px;justify-content:center;">
+<button type="button" class="btn-primary" style="padding:12px 28px;" onclick="goToSetupStep(2)">Next &#x2192; Connect GitHub</button>
+</div>
+</div>
+
+<!-- Step 2: GitHub -->
+<div id="setupStep2" style="display:none;">
+<div class="setup-section-label">&#x1F419; Connect Your GitHub</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;text-align:center;">
+Your prospect data lives in a private GitHub repo that only you can see. We'll create it automatically &#x2014; you just need a free GitHub account and a Personal Access Token.
+<br><br>
+<strong style="color:var(--accent-blue);">Never used GitHub before?</strong> No worries! Click the button below for a step-by-step guide.
 </p>
+<button type="button" style="width:100%;padding:12px;border-radius:10px;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.25);color:var(--accent-blue);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:20px;transition:all .2s;" onclick="openGHHelp()" onmouseover="this.style.background='rgba(88,166,255,.15)'" onmouseout="this.style.background='rgba(88,166,255,.08)'">&#x1F4D6; Open GitHub Setup Guide</button>
 <div class="form-group">
 <label>GitHub Username <span style="color:#f87171;">*</span></label>
 <input type="text" id="setupOwner" placeholder="e.g. CalebGarritson" required>
@@ -784,11 +1021,27 @@ Your data lives in a private repo &#x2014; we'll create it automatically. Just e
 <label>Personal Access Token <span style="color:#f87171;">*</span></label>
 <input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
 </div>
-<div class="modal-buttons" style="margin-top:20px;">
-<button type="submit" class="btn-primary" style="flex:1;">Connect &amp; Launch Tracker</button>
+<div class="modal-buttons" style="margin-top:24px;gap:10px;justify-content:center;">
+<button type="button" class="btn-secondary" style="flex:0 0 auto;padding:10px 20px;" onclick="goToSetupStep(1)">&#x2190; Back</button>
+<button type="submit" class="btn-primary" style="padding:12px 28px;">Connect &amp; Launch &#x1F680;</button>
 </div>
 <div class="setup-status" id="setupStatus" style="display:none;"></div>
 <div class="setup-error" id="setupError"></div>
+</div>
+
+<!-- Step 3: Email Scanner (shown after successful connection) -->
+<div id="setupStep3Content" style="display:none;">
+<div class="setup-section-label">&#x2709;&#xFE0F; One Last Thing &#x2014; Email Scanner</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6;text-align:center;">
+Now let&#x2019;s set up the <strong style="color:var(--text-primary);">automatic email scanner</strong>. This scans your Gmail every morning and drops hot leads straight into your Hot Leads section &#x2014; no manual work needed.
+</p>
+<div style="text-align:center;">
+<button type="button" class="btn-primary" style="padding:12px 28px;" onclick="hideSetupScreen(); openGmailGuide();">&#x1F4E7; Set Up Email Scanner</button>
+<div style="margin-top:14px;">
+<button type="button" style="background:none;border:none;color:var(--text-secondary);font-size:13px;cursor:pointer;text-decoration:underline;opacity:.7;" onclick="hideSetupScreen();">Skip for now &#x2014; I'll do this later</button>
+</div>
+</div>
+</div>
 </form>
 </div>
 </div>
@@ -1357,6 +1610,120 @@ What do these sections mean?
 </div>
 </div>
 </div>
+<!-- ── Gmail Scanner Setup Guide Modal ── -->
+<div id="gmailGuideModal">
+<div class="gmail-guide-card">
+<h2>&#x1F4E7; Set Up Your Email Scanner</h2>
+<div class="guide-subtitle">This connects your Gmail to Calebrate so new leads appear in your Hot Leads automatically every morning.</div>
+
+<a class="guide-video-link" href="#" onclick="return false;">
+&#x1F3AC; Watch the video walkthrough (coming soon)
+</a>
+
+<div class="guide-step">
+<div class="guide-step-num">1</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Open Google Apps Script</div>
+<div class="guide-step-detail">Go to <a href="https://script.google.com" target="_blank">script.google.com</a> in your browser. Make sure you're signed in with your <strong>@gusto.com</strong> Google account (not a personal Gmail).</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">2</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Create a new project</div>
+<div class="guide-step-detail">Click the <strong>"New project"</strong> button in the top-left. You'll see a code editor with some placeholder text that starts with <code>function myFunction()</code>.</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">3</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Delete the placeholder code</div>
+<div class="guide-step-detail">Click inside the code editor, select everything (<strong>Cmd+A</strong>), and delete it so the editor is completely empty.</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">4</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Copy the scanner code from GitHub</div>
+<div class="guide-step-detail">Open this link in a new tab: <a href="https://github.com/CalebGarritson/Prospect-tracker/blob/main/Code.gs" target="_blank">Code.gs on GitHub</a>. Click the <strong>"Copy raw file"</strong> button (looks like two overlapping squares near the top-right of the code). Then go back to your Apps Script tab and <strong>paste</strong> it into the empty editor.</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">5</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Save the project</div>
+<div class="guide-step-detail">Press <strong>Cmd+S</strong> to save. You can rename the project to something like <strong>"Calebrate Email Scanner"</strong> by clicking "Untitled project" at the top.</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">6</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Tell the scanner your GitHub username</div>
+<div class="guide-step-detail">
+Scroll to the very bottom of the code and <strong>add these lines</strong> on a new line after everything else:
+<br><br>
+<code style="display:block;padding:10px;border-radius:6px;line-height:1.8;white-space:pre-wrap;">function setOwner() {
+  PropertiesService.getScriptProperties()
+    .setProperty('GITHUB_OWNER', 'YOUR_USERNAME');
+  Logger.log('Done!');
+}</code>
+<br>
+Replace <code>YOUR_USERNAME</code> with your actual GitHub username (the same one you entered when setting up the tracker). Then save again.
+</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">7</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Run the setOwner function</div>
+<div class="guide-step-detail">Near the top of the page, find the dropdown that says <strong>"checkGmailForLeads"</strong> and change it to <strong>"setOwner"</strong>. Then click the <strong>&#x25B6; Run</strong> button. Google will ask you to authorize the script &#x2014; click through the permission screens and allow it. You should see <strong>"Done!"</strong> in the log at the bottom.</div>
+</div>
+</div>
+
+<div class="guide-warning">
+&#x26A0;&#xFE0F; <strong>Permission screen looks scary?</strong> Google shows a warning because this is a custom script. Click <strong>"Advanced"</strong> then <strong>"Go to [project name] (unsafe)"</strong>. This is normal for personal scripts &#x2014; it's just your own code reading your own email.
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">8</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Test it</div>
+<div class="guide-step-detail">Change the dropdown back to <strong>"checkGmailForLeads"</strong> and click <strong>&#x25B6; Run</strong>. Wait about 30 seconds for it to finish. If there are no errors, it worked! Check your tracker &#x2014; any matching leads should appear in Hot Leads.</div>
+</div>
+</div>
+
+<div class="guide-step">
+<div class="guide-step-num">9</div>
+<div class="guide-step-content">
+<div class="guide-step-title">Set up the daily auto-scan</div>
+<div class="guide-step-detail">Click the <strong>clock icon</strong> (&#x23F0;) in the left sidebar &#x2014; it says "Triggers". Click <strong>"+ Add Trigger"</strong> in the bottom-right. Set it up like this:
+<br><br>
+&#x2022; Function: <strong>checkGmailForLeads</strong><br>
+&#x2022; Event source: <strong>Time-driven</strong><br>
+&#x2022; Type: <strong>Day timer</strong><br>
+&#x2022; Time: <strong>7am to 8am</strong>
+<br><br>
+Click <strong>Save</strong>. That's it &#x2014; your Gmail will be scanned every morning automatically!
+</div>
+</div>
+</div>
+
+<div class="guide-tip">
+&#x2705; <strong>You're all set!</strong> The scanner will check your Gmail every morning at 7am and add any new leads to your Hot Leads. You don't need to touch this again unless we tell you there's an update.
+</div>
+
+<div class="modal-buttons" style="margin-top:24px;justify-content:center;">
+<button type="button" class="guide-done-btn" onclick="closeGmailGuide()">&#x2713; Done &#x2014; Take Me to My Tracker</button>
+</div>
+</div>
+</div>
+
 <!-- ── Time Picker Modal ── -->
 <div class="picker-overlay" id="pickerOverlay">
 <div class="picker-card">
@@ -1388,4 +1755,3 @@ What do these sections mean?
 </div>
 <script src="tracker.js"></script>
 </body>
-</html>

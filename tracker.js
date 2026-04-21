@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE — tracker.js
+// CALEBRATE \u2014 tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -8,7 +8,7 @@
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
-//              GitHub repo — no server required.
+//              GitHub repo \u2014 no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -27,7 +27,7 @@ let _fSHA        = null;
 let _sSHA        = null;
 let _saveTimer   = null;
 let _focusSaveT  = null;
-// ── Reminders ──
+// \u2500\u2500 Reminders \u2500\u2500
 let _reminders = JSON.parse(localStorage.getItem('pt_reminders') || '{}');
 const MAX_REMINDERS = 3;
 let _pickerProspectId = null;
@@ -48,7 +48,7 @@ if (!str) return '\u2014';
 const [y,m,d] = str.split('-');
 return `${parseInt(m)}/${parseInt(d)}/${y}`;
 }
-// ── Lead Scoring ──
+// \u2500\u2500 Lead Scoring \u2500\u2500
 const HIGH_INTENT_KW = ['demo', 'pricing', 'switching', 'quote', 'interested'];
 const MED_INTENT_KW  = ['payroll', 'run payroll', 'payroll provider', 'gusto', 'benefits', 'hr solution', 'onboarding', 'referral'];
 const LOW_INTENT_KW  = ['employees', 'small business', 'direct deposit', 'contractors', 'hiring'];
@@ -160,7 +160,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// ── Auto-setup: check if repo exists, create it + seed data files ──
+// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -271,6 +271,32 @@ function hideSetupScreen() {
 document.getElementById('setupScreen').classList.remove('active');
 document.getElementById('mainApp').style.display = 'block';
 }
+function goToSetupStep(step) {
+  document.getElementById('setupStep1').style.display = step === 1 ? 'block' : 'none';
+  document.getElementById('setupStep2').style.display = step === 2 ? 'block' : 'none';
+  var step3 = document.getElementById('setupStep3Content');
+  if (step3) step3.style.display = step === 3 ? 'block' : 'none';
+  // Update progress indicators
+  var steps = [
+    { el: document.getElementById('progStep1'), conn: null },
+    { el: document.getElementById('progStep2'), conn: document.getElementById('progConn1') },
+    { el: document.getElementById('progStep3'), conn: document.getElementById('progConn2') }
+  ];
+  for (var i = 0; i < steps.length; i++) {
+    if (!steps[i].el) continue;
+    steps[i].el.classList.remove('active', 'completed');
+    if (i + 1 < step) {
+      steps[i].el.classList.add('completed');
+      if (steps[i].conn) steps[i].conn.classList.add('completed');
+    } else if (i + 1 === step) {
+      steps[i].el.classList.add('active');
+    }
+    if (steps[i].conn && i + 1 >= step) steps[i].conn.classList.remove('completed');
+  }
+  // Clear errors when switching steps
+  var errEl = document.getElementById('setupError');
+  if (errEl) errEl.classList.remove('visible');
+}
 document.getElementById('setupForm').addEventListener('submit', async (e) => {
 e.preventDefault();
 const owner       = document.getElementById('setupOwner').value.trim();
@@ -314,7 +340,7 @@ appSettings.salesforceId = sfId;
 await doSaveSettings();
 localStorage.setItem('pt_owner', owner);
 localStorage.setItem('pt_token', token);
-hideSetupScreen();
+goToSetupStep(3);
 renderAll();
 setGreeting();
 } catch (err) {
@@ -331,6 +357,8 @@ document.addEventListener('click', e => { if (e.target.id === 'sfHelpModal') clo
 function openGHHelp()  { document.getElementById('ghHelpModal').classList.add('active'); }
 function closeGHHelp() { document.getElementById('ghHelpModal').classList.remove('active'); }
 document.addEventListener('click', e => { if (e.target.id === 'ghHelpModal') closeGHHelp(); });
+function openGmailGuide() { document.getElementById('gmailGuideModal').classList.add('active'); }
+function closeGmailGuide() { document.getElementById('gmailGuideModal').classList.remove('active'); }
 function disconnectGitHub() {
 if (!confirm('Disconnect GitHub? You\'ll need to re-enter your token. Your data stays safe in GitHub.')) return;
 localStorage.removeItem('pt_token');
@@ -804,7 +832,7 @@ const f = dailyFocus.find(x => x.id === id);
 if (f) return { name: f.name, company: f.company || '', source: 'focus' };
 return null;
 }
-// ── Render Active Reminders list ──
+// \u2500\u2500 Render Active Reminders list \u2500\u2500
 function renderReminders() {
 const list = document.getElementById('remindersList');
 const countEl = document.getElementById('reminderCount');
@@ -905,7 +933,7 @@ renderAll();
 document.getElementById('pickerOverlay').classList.add('active');
 showReminderToast('Editing reminder for ' + info.name + ' \u2014 pick a new time');
 }
-// ── Time Picker ──
+// \u2500\u2500 Time Picker \u2500\u2500
 function openTimePicker(id, type) {
 const strId = String(id);
 const info = findProspectInfo(type === 'focus' ? id : parseInt(id) || id);
@@ -993,7 +1021,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// ── Notification engine \u2014 checks every 15 seconds ──
+// \u2500\u2500 Notification engine \u2014 checks every 15 seconds \u2500\u2500
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -1041,12 +1069,12 @@ showReminderToast('Task reminder: ' + t.name + '!');
 if (firedAny) { saveReminders(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
-// ── Auto-refresh when date changes (fixes stale tab) ──
+// \u2500\u2500 Auto-refresh when date changes (fixes stale tab) \u2500\u2500
 const _loadDate = new Date().getDate();
 setInterval(() => {
 if (new Date().getDate() !== _loadDate) location.reload();
 }, 60000);
-// ── Notification permission ──
+// \u2500\u2500 Notification permission \u2500\u2500
 function updateNotifBanner() {
 const banner = document.getElementById('notifBanner');
 const text = document.getElementById('notifText');
@@ -1333,7 +1361,7 @@ function deleteTask(e, id) {
   renderReminders();
 }
 
-// ── Task Modal ──
+// \u2500\u2500 Task Modal \u2500\u2500
 function openTaskModal() {
   _editingTaskId = null;
   document.getElementById('taskModalHeader').textContent = 'Add New Task';
@@ -1459,7 +1487,7 @@ document.getElementById('taskForm').addEventListener('submit', function(e) {
 
 // Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
 
-// ── Greeting ──
+// \u2500\u2500 Greeting \u2500\u2500
 function setGreeting() {
   const fullName = (appSettings && appSettings.displayName) || '';
   const first = fullName.split(' ')[0] || 'there';
@@ -1470,7 +1498,7 @@ function setGreeting() {
   const el = document.getElementById('greetingLine');
   if (el) el.textContent = g + ', ' + first + '!';
 }
-// ── Toast ──
+// \u2500\u2500 Toast \u2500\u2500
 function showReminderToast(msg) {
 const toast = document.getElementById('reminderToast');
 if (!toast) return;
@@ -1478,7 +1506,7 @@ document.getElementById('reminderToastText').textContent = msg;
 toast.classList.add('active');
 setTimeout(() => { toast.classList.remove('active'); }, 3500);
 }
-// ── Page Navigation ──
+// \u2500\u2500 Page Navigation \u2500\u2500
 let _currentPage = 'pageHome';
 function navigateTo(pageId) {
 const pages = document.querySelectorAll('.pages-wrapper .page');
@@ -1504,7 +1532,7 @@ if (e.key === 'Escape' && _currentPage !== 'pageHome') {
   goHome();
 }
 });
-// ── Home Cards ──
+// \u2500\u2500 Home Cards \u2500\u2500
 function renderHomeCards() {
 var grid = document.getElementById('cardsGrid');
 if (!grid) return;
@@ -1555,7 +1583,7 @@ dc = document.getElementById('detailCountTasks'); if (dc) dc.textContent = taskC
 dc = document.getElementById('detailCountUpcoming'); if (dc) dc.textContent = upcomingList.length;
 dc = document.getElementById('detailCountArchived'); if (dc) dc.textContent = archivedList.length;
 }
-// ── Legend Toggle ──
+// \u2500\u2500 Legend Toggle \u2500\u2500
 function toggleLegend() {
 var toggle = document.getElementById('legendToggle');
 var panel = document.getElementById('legendPanel');
@@ -1563,7 +1591,7 @@ if (!toggle || !panel) return;
 toggle.classList.toggle('open');
 panel.classList.toggle('open');
 }
-// ── Search ──
+// \u2500\u2500 Search \u2500\u2500
 let _searchTimer = null;
 function clearSearch() {
 var input = document.getElementById('searchInput');

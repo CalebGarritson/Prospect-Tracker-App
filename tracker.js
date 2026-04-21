@@ -409,6 +409,7 @@ renderReminders();
 renderTable(prospects);
 renderFocus();
 renderTasks();
+renderHomeCards();
 }
 function renderTable(data) {
 const tbR = document.getElementById('tbodyReady');
@@ -625,7 +626,7 @@ renderTable(prospects);
 scheduleSave();
 closeAddModal();
 });
-document.getElementById('addModal').addEventListener('click', e => { if (e.target.id === 'addModal') closeAddModal(); });
+// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
 function toggleArchive() {
 document.getElementById('archiveBody').classList.toggle('open');
 document.getElementById('archiveChevron').classList.toggle('open');
@@ -725,7 +726,7 @@ renderFocus();
 scheduleFocusSave();
 closeFocusModal();
 });
-document.getElementById('focusModal').addEventListener('click', e => { if (e.target.id === 'focusModal') closeFocusModal(); });
+// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
 function openSettings() {
 document.getElementById('settingName').value         = appSettings.displayName  || '';
 document.getElementById('settingEmail').value        = appSettings.workEmail    || '';
@@ -745,7 +746,7 @@ appSettings.scanSchedule = document.getElementById('settingScanSchedule').value;
 doSaveSettings();
 setGreeting();
 }
-document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
+// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
 function validateSalesforceOwnership(leadOwnerId) {
 const trackerOwner = appSettings.salesforceId || '';
 if (!trackerOwner) {
@@ -992,7 +993,7 @@ next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// ── Notification engine — checks every 15 seconds ──
+// ── Notification engine \u2014 checks every 15 seconds ──
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -1022,7 +1023,7 @@ if (_reminders[id] && _reminders[id].length === 0) delete _reminders[id];
 });
 // Auto-reminders from tasks with time set
 _tasks.forEach(t => {
-if (t.done || !t.time) return;
+if (t.done || !t.time || t.notified) return;
 if (t.due < currentDate || (t.due === currentDate && t.time <= currentTime)) {
 if ('Notification' in window && Notification.permission === 'granted') {
 const notif = new Notification('Calebrate \u2014 Task Reminder', {
@@ -1032,6 +1033,7 @@ tag: 'calebrate-task-' + t.id
 });
 notif.onclick = function() { window.focus(); notif.close(); };
 }
+t.notified = true;
 firedAny = true;
 showReminderToast('Task reminder: ' + t.name + '!');
 }
@@ -1455,9 +1457,7 @@ document.getElementById('taskForm').addEventListener('submit', function(e) {
   showReminderToast('Task saved: ' + name);
 });
 
-document.getElementById('taskModal').addEventListener('click', function(e) {
-  if (e.target.id === 'taskModal') closeTaskModal();
-});
+// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
 
 // ── Greeting ──
 function setGreeting() {
@@ -1478,6 +1478,171 @@ document.getElementById('reminderToastText').textContent = msg;
 toast.classList.add('active');
 setTimeout(() => { toast.classList.remove('active'); }, 3500);
 }
+// ── Page Navigation ──
+let _currentPage = 'pageHome';
+function navigateTo(pageId) {
+const pages = document.querySelectorAll('.pages-wrapper .page');
+pages.forEach(p => { p.classList.remove('active'); p.classList.add('hidden-right'); });
+const target = document.getElementById(pageId);
+if (target) { target.classList.remove('hidden-right','hidden-left'); target.classList.add('active'); }
+_currentPage = pageId;
+const hint = document.getElementById('keyHint');
+if (hint) hint.style.display = (pageId === 'pageHome') ? 'none' : 'block';
+}
+function goHome() {
+navigateTo('pageHome');
+clearSearch();
+}
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Escape' && _currentPage !== 'pageHome') {
+  // Don\u2019t go home if a modal is open
+  var modals = ['addModal','focusModal','settingsModal','taskModal','pickerOverlay','sfHelpModal','ghHelpModal','gmailGuideModal','helpPanel'];
+  for (var i = 0; i < modals.length; i++) {
+    var m = document.getElementById(modals[i]);
+    if (m && (m.classList.contains('active') || m.style.display === 'flex')) return;
+  }
+  goHome();
+}
+});
+// ── Home Cards ──
+function renderHomeCards() {
+var grid = document.getElementById('cardsGrid');
+if (!grid) return;
+// Count reminders
+var rCount = 0;
+Object.keys(_reminders).forEach(function(id) { rCount += (_reminders[id] || []).length; });
+_tasks.forEach(function(t) { if (!t.done && t.time && !t.notified) rCount++; });
+// Count prospects by bucket
+var readyList = [], upcomingList = [], archivedList = [];
+prospects.forEach(function(p) {
+  var days = calculateDays(p.date);
+  if (days <= 0) readyList.push(p);
+  else if (days <= 90) upcomingList.push(p);
+  else archivedList.push(p);
+});
+var focusCount = dailyFocus.length;
+var taskCount = _tasks.filter(function(t) { return !t.done; }).length;
+// Build cards
+var cards = [
+  { id: 'pageReminders', cls: 'card-reminders', title: 'Active Reminders', count: rCount, sub: 'Call reminders & task auto-reminders', color: '#fb923c', items: [] },
+  { id: 'pageHotLeads', cls: 'card-hotleads', title: 'Hot Leads', count: focusCount, sub: 'Gmail leads scored by intent', color: '#d946ef', items: dailyFocus.slice(0,3).map(function(l) { return { name: l.name || l.email, meta: l.company || '' }; }) },
+  { id: 'pageReady', cls: 'card-ready', title: 'Ready to Call', count: readyList.length, sub: 'Re-engagement date arrived', color: '#818cf8', items: readyList.slice(0,3).map(function(p) { return { name: p.contact, meta: Math.abs(calculateDays(p.date)) + 'd ago' }; }) },
+  { id: 'pageTasks', cls: 'card-tasks', title: 'My Tasks', count: taskCount, sub: 'Personal to-do list', color: '#facc15', items: _tasks.filter(function(t){return !t.done;}).slice(0,3).map(function(t) { return { name: t.name, meta: t.due || '' }; }) },
+  { id: 'pageUpcoming', cls: 'card-upcoming', title: 'Upcoming', count: upcomingList.length, sub: 'Future re-engagement dates', color: '#22d3ee', items: upcomingList.slice(0,3).map(function(p) { return { name: p.contact, meta: 'in ' + calculateDays(p.date) + 'd' }; }) },
+  { id: 'pageArchived', cls: 'card-archived', title: 'Archived', count: archivedList.length, sub: 'Prospects older than 90 days', color: '#94a3b8', items: [] }
+];
+var h = '';
+cards.forEach(function(c) {
+  h += '<div class="section-card ' + c.cls + '" onclick="navigateTo(\'' + c.id + '\')">'; 
+  h += '<div class="card-top"><div class="card-title">' + esc(c.title) + '</div><span class="card-arrow">\u2192</span></div>';
+  h += '<div style="display:flex;align-items:baseline;gap:12px;"><span class="card-count">' + c.count + '</span><span class="card-subtitle">' + esc(c.sub) + '</span></div>';
+  if (c.items.length > 0) {
+    h += '<div class="card-preview">';
+    c.items.forEach(function(it) {
+      h += '<div class="preview-item"><span class="preview-dot" style="background:' + c.color + ';"></span><span class="preview-name">' + esc(it.name) + '</span><span class="preview-meta">' + esc(it.meta) + '</span></div>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+});
+grid.innerHTML = h;
+// Update detail page counts
+var dc;
+dc = document.getElementById('detailCountReminders'); if (dc) dc.textContent = rCount;
+dc = document.getElementById('detailCountHotLeads'); if (dc) dc.textContent = focusCount;
+dc = document.getElementById('detailCountReady'); if (dc) dc.textContent = readyList.length;
+dc = document.getElementById('detailCountTasks'); if (dc) dc.textContent = taskCount;
+dc = document.getElementById('detailCountUpcoming'); if (dc) dc.textContent = upcomingList.length;
+dc = document.getElementById('detailCountArchived'); if (dc) dc.textContent = archivedList.length;
+}
+// ── Legend Toggle ──
+function toggleLegend() {
+var toggle = document.getElementById('legendToggle');
+var panel = document.getElementById('legendPanel');
+if (!toggle || !panel) return;
+toggle.classList.toggle('open');
+panel.classList.toggle('open');
+}
+// ── Search ──
+let _searchTimer = null;
+function clearSearch() {
+var input = document.getElementById('searchInput');
+var dropdown = document.getElementById('searchDropdown');
+var clearBtn = document.getElementById('searchClear');
+if (input) input.value = '';
+if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.remove('open'); }
+if (clearBtn) clearBtn.classList.remove('visible');
+}
+function runSearch(query) {
+var dropdown = document.getElementById('searchDropdown');
+if (!dropdown) return;
+if (!query || query.length < 1) { dropdown.innerHTML = ''; dropdown.classList.remove('open'); return; }
+var q = query.toLowerCase();
+var results = [];
+// Search prospects
+prospects.forEach(function(p) {
+  var text = ((p.contact || '') + ' ' + (p.email || '') + ' ' + (p.notes || '')).toLowerCase();
+  if (text.includes(q)) {
+    var days = calculateDays(p.date);
+    var section = days <= 0 ? 'ready' : days <= 90 ? 'upcoming' : 'archived';
+    var labels = { ready: 'Ready to Call', upcoming: 'Upcoming', archived: 'Archived' };
+    var pages = { ready: 'pageReady', upcoming: 'pageUpcoming', archived: 'pageArchived' };
+    results.push({ name: p.contact || p.email, detail: (p.email || '') + (p.notes ? ' \u00B7 ' + p.notes : ''), section: labels[section], badge: 'search-badge-' + section, page: pages[section], swatch: section === 'ready' ? '#818cf8' : section === 'upcoming' ? '#22d3ee' : '#94a3b8' });
+  }
+});
+// Search hot leads
+dailyFocus.forEach(function(l) {
+  var text = ((l.name || '') + ' ' + (l.email || '') + ' ' + (l.company || '') + ' ' + (l.notes || '')).toLowerCase();
+  if (text.includes(q)) {
+    results.push({ name: l.name || l.email, detail: (l.company || '') + (l.email ? ' \u00B7 ' + l.email : ''), section: 'Hot Leads', badge: 'search-badge-hotleads', page: 'pageHotLeads', swatch: '#d946ef' });
+  }
+});
+// Search tasks
+_tasks.forEach(function(t) {
+  var text = ((t.name || '') + ' ' + (t.notes || '')).toLowerCase();
+  if (text.includes(q)) {
+    results.push({ name: t.name, detail: (t.due || 'No date') + (t.notes ? ' \u00B7 ' + t.notes : ''), section: 'My Tasks', badge: 'search-badge-tasks', page: 'pageTasks', swatch: '#facc15' });
+  }
+});
+if (results.length === 0) {
+  dropdown.innerHTML = '<div class="search-empty">No matches found</div>';
+  dropdown.classList.add('open');
+  return;
+}
+// Highlight matches
+var regex = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+var h = '<div class="search-count">' + results.length + ' result' + (results.length !== 1 ? 's' : '') + '</div>';
+results.slice(0, 20).forEach(function(r) {
+  h += '<div class="search-result-item" onclick="navigateTo(\'' + r.page + '\');clearSearch();">';
+  h += '<div class="search-result-swatch" style="background:' + r.swatch + ';"></div>';
+  h += '<div class="search-result-info"><div class="search-result-name">' + esc(r.name).replace(regex, '<mark>$1</mark>') + '</div><div class="search-result-detail">' + esc(r.detail) + '</div></div>';
+  h += '<span class="search-result-badge ' + r.badge + '">' + esc(r.section) + '</span>';
+  h += '</div>';
+});
+if (results.length > 20) h += '<div class="search-empty">' + (results.length - 20) + ' more results\u2026</div>';
+dropdown.innerHTML = h;
+dropdown.classList.add('open');
+}
+(function() {
+var input = document.getElementById('searchInput');
+var clearBtn = document.getElementById('searchClear');
+if (input) {
+  input.addEventListener('input', function() {
+    var val = input.value.trim();
+    if (clearBtn) clearBtn.classList.toggle('visible', val.length > 0);
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(function() { runSearch(val); }, 150);
+  });
+}
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  var wrapper = document.querySelector('.search-wrapper');
+  var dropdown = document.getElementById('searchDropdown');
+  if (wrapper && dropdown && !wrapper.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+})();
 (async () => {
 if (!_token || !_owner) {
 showSetupScreen();

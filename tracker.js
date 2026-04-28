@@ -1,5 +1,5 @@
 // ============================================================
-// CALEBRATE \u2014 tracker.js
+// CALEBRATE — tracker.js
 // Created by:  Caleb Garritson
 // Email:       caleb.garritson@gusto.com
 // GitHub:      github.com/CalebGarritson/Prospect-tracker
@@ -8,7 +8,7 @@
 //              Handles GitHub API sync, prospect/focus rendering,
 //              settings management, and Salesforce ownership
 //              validation. All data stored in the user's private
-//              GitHub repo \u2014 no server required.
+//              GitHub repo — no server required.
 // ============================================================
 const REPO   = 'Prospect-tracker';
 const BRANCH = 'main';
@@ -27,7 +27,7 @@ let _fSHA        = null;
 let _sSHA        = null;
 let _saveTimer   = null;
 let _focusSaveT  = null;
-// \u2500\u2500 Reminders \u2500\u2500
+// ── Reminders ──
 let _reminders = JSON.parse(localStorage.getItem('pt_reminders') || '{}');
 const MAX_REMINDERS = 3;
 let _pickerProspectId = null;
@@ -44,11 +44,11 @@ const d = date instanceof Date ? date : new Date(date);
 return `${d.getUTCMonth()+1}/${d.getUTCDate()}/${d.getUTCFullYear()}`;
 }
 function formatHoldDate(str) {
-if (!str) return '\u2014';
+if (!str) return '—';
 const [y,m,d] = str.split('-');
 return `${parseInt(m)}/${parseInt(d)}/${y}`;
 }
-// \u2500\u2500 Lead Scoring \u2500\u2500
+// ── Lead Scoring ──
 const HIGH_INTENT_KW = ['demo', 'pricing', 'switching', 'quote', 'interested'];
 const MED_INTENT_KW  = ['payroll', 'run payroll', 'payroll provider', 'gusto', 'benefits', 'hr solution', 'onboarding', 'referral'];
 const LOW_INTENT_KW  = ['employees', 'small business', 'direct deposit', 'contractors', 'hiring'];
@@ -101,7 +101,7 @@ if (b.keywordList.length > 0) {
   h += '<div class="score-tooltip-row"><span>No keywords matched</span><span class="score-val">0</span></div>';
 }
 if (b.company > 0) h += '<div class="score-tooltip-row"><span>Company domain</span><span class="score-val positive">+' + b.company + '</span></div>';
-if (b.recency > 0) h += '<div class="score-tooltip-row"><span>Recent (' + (b.recency === 2 ? '0\u20131d' : '2\u20133d') + ')</span><span class="score-val positive">+' + b.recency + '</span></div>';
+if (b.recency > 0) h += '<div class="score-tooltip-row"><span>Recent (' + (b.recency === 2 ? '0–1d' : '2–3d') + ')</span><span class="score-val positive">+' + b.recency + '</span></div>';
 if (b.priority > 0) h += '<div class="score-tooltip-row"><span>Priority (' + b.priority + ' dot' + (b.priority > 1 ? 's' : '') + ')</span><span class="score-val positive">+' + b.priority + '</span></div>';
 if (b.hold < 0) h += '<div class="score-tooltip-row"><span>On hold</span><span class="score-val negative">' + b.hold + '</span></div>';
 h += '<div class="score-tooltip-divider"></div>';
@@ -139,15 +139,15 @@ if (_focusSortMode === 'score') {
   scoreTh.classList.add('active-sort');
   label.textContent = 'Sorted by Score';
   label.className = 'sort-mode-indicator score';
-  recArrow.innerHTML = '\u25B2';
-  scoreArrow.innerHTML = '\u25BC';
+  recArrow.innerHTML = '▲';
+  scoreArrow.innerHTML = '▼';
 } else {
   scoreTh.classList.remove('active-sort');
   recTh.classList.add('active-sort');
   label.textContent = 'Sorted by Received';
   label.className = 'sort-mode-indicator received';
-  recArrow.innerHTML = '\u25BC';
-  scoreArrow.innerHTML = '\u25B2';
+  recArrow.innerHTML = '▼';
+  scoreArrow.innerHTML = '▲';
 }
 renderFocus();
 showReminderToast('Hot Leads sorted by ' + (_focusSortMode === 'score' ? 'lead score' : 'received date'));
@@ -160,7 +160,7 @@ if (days === 0)  return 'today';
 if (days <=  7)  return 'upcoming-soon';
 return 'upcoming-later';
 }
-// \u2500\u2500 Auto-setup: check if repo exists, create it + seed data files \u2500\u2500
+// ── Auto-setup: check if repo exists, create it + seed data files ──
 async function checkRepoExists() {
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}`,
@@ -170,7 +170,7 @@ return res.ok;
 }
 async function bootstrapRepo(statusCb) {
 // 1) Create private repo
-statusCb('Creating your private data repo\u2026');
+statusCb('Creating your private data repo…');
 const createRes = await fetch('https://api.github.com/user/repos', {
 method: 'POST',
 headers: {
@@ -198,7 +198,7 @@ const seeds = [
 { path: PATHS.settings,  data: { initialScanStartDate: null },  msg: 'Seed settings.json' }
 ];
 for (const seed of seeds) {
-statusCb(`Creating ${seed.path}\u2026`);
+statusCb(`Creating ${seed.path}…`);
 const content = btoa(unescape(encodeURIComponent(JSON.stringify(seed.data, null, 2))));
 const res = await fetch(
 `https://api.github.com/repos/${_owner}/${REPO}/contents/${seed.path}`,
@@ -217,7 +217,7 @@ const txt = await res.text();
 throw new Error(`Failed to create ${seed.path}: ${txt}`);
 }
 }
-statusCb('Setup complete \u2014 loading tracker\u2026');
+statusCb('Setup complete — loading tracker…');
 }
 async function ghRead(path) {
 const res = await fetch(
@@ -308,13 +308,13 @@ const errEl       = document.getElementById('setupError');
 errEl.classList.remove('visible');
 // Validate @gusto.com email
 if (!workEmail.toLowerCase().endsWith('@gusto.com')) {
-errEl.textContent = '\u274C Please use your @gusto.com work email address.';
+errEl.textContent = '❌ Please use your @gusto.com work email address.';
 errEl.classList.add('visible');
 return;
 }
 // Validate Salesforce ID format (starts with 005, 15 or 18 chars)
 if (!/^005[a-zA-Z0-9]{12,15}$/.test(sfId)) {
-errEl.textContent = '\u274C Salesforce User ID should start with "005" and be 15\u201318 characters. Click the ? for help finding it.';
+errEl.textContent = '❌ Salesforce User ID should start with "005" and be 15–18 characters. Click the ? for help finding it.';
 errEl.classList.add('visible');
 return;
 }
@@ -325,7 +325,7 @@ const showStatus = (msg) => { if (statusEl) { statusEl.textContent = msg; status
 const hideStatus = ()    => { if (statusEl) { statusEl.style.display = 'none'; } };
 try {
 // Check whether the data repo already exists
-showStatus('Checking GitHub connection\u2026');
+showStatus('Checking GitHub connection…');
 const repoExists = await checkRepoExists();
 if (!repoExists) {
 // Auto-create repo + seed files for first-time users
@@ -345,7 +345,7 @@ renderAll();
 setGreeting();
 } catch (err) {
 hideStatus();
-errEl.textContent = '\u274C ' + err.message + ' \u2014 Check your username and token, then try again.';
+errEl.textContent = '❌ ' + err.message + ' — Check your username and token, then try again.';
 errEl.classList.add('visible');
 _owner = '';
 _token = '';
@@ -366,7 +366,7 @@ localStorage.removeItem('pt_owner');
 location.reload();
 }
 async function loadAll() {
-setSyncStatus('saving', 'Loading\u2026');
+setSyncStatus('saving', 'Loading…');
 const [p, f, s] = await Promise.all([
 ghRead(PATHS.prospects),
 ghRead(PATHS.focus),
@@ -378,7 +378,7 @@ dailyFocus  = f.data;
 _fSHA       = f.sha;
 appSettings = { ...defaultSettings(), ...s.data };
 _sSHA       = s.sha;
-setSyncStatus('saved', 'Synced \u2713');
+setSyncStatus('saved', 'Synced ✓');
 }
 function normalizeProspect(p) {
 return { ...p, date: new Date(p.date + 'T00:00:00Z'), priority: p.priority || 0 };
@@ -394,12 +394,12 @@ salesforceId:  ''
 };
 }
 function scheduleSave() {
-setSyncStatus('saving', 'Saving\u2026');
+setSyncStatus('saving', 'Saving…');
 clearTimeout(_saveTimer);
 _saveTimer = setTimeout(doSaveProspects, 2000);
 }
 function scheduleFocusSave() {
-setSyncStatus('saving', 'Saving\u2026');
+setSyncStatus('saving', 'Saving…');
 clearTimeout(_focusSaveT);
 _focusSaveT = setTimeout(doSaveFocus, 2000);
 }
@@ -410,9 +410,9 @@ const serialized = prospects.map(p => ({
 date: p.date.toISOString().split('T')[0]
 }));
 _pSHA = await ghWrite(PATHS.prospects, serialized, _pSHA, 'Update prospects');
-setSyncStatus('saved', 'Saved \u2713');
+setSyncStatus('saved', 'Saved ✓');
 } catch (err) {
-setSyncStatus('error', '\u26A0 Save failed \u2014 click to retry');
+setSyncStatus('error', '⚠ Save failed — click to retry');
 document.getElementById('syncBadge').onclick = doSaveProspects;
 console.error(err);
 }
@@ -420,9 +420,9 @@ console.error(err);
 async function doSaveFocus() {
 try {
 _fSHA = await ghWrite(PATHS.focus, dailyFocus, _fSHA, 'Update daily focus');
-setSyncStatus('saved', 'Saved \u2713');
+setSyncStatus('saved', 'Saved ✓');
 } catch (err) {
-setSyncStatus('error', '\u26A0 Save failed \u2014 click to retry');
+setSyncStatus('error', '⚠ Save failed — click to retry');
 document.getElementById('syncBadge').onclick = doSaveFocus;
 console.error(err);
 }
@@ -553,7 +553,7 @@ const sorted = sortFocusLeads(dailyFocus);
 sorted.forEach(p => {
 let swatchCls, pillCls, pillLabel;
 if      (p.status === 'new')    { swatchCls = 'focus-new';    pillCls = 'new-lead'; pillLabel = 'New Lead'; }
-else if (p.status === 'hold')   { swatchCls = 'focus-hold';   pillCls = 'hold';     pillLabel = p.holdUntil ? `Hold \u00B7 ${formatHoldDate(p.holdUntil)}` : 'On Hold'; }
+else if (p.status === 'hold')   { swatchCls = 'focus-hold';   pillCls = 'hold';     pillLabel = p.holdUntil ? `Hold · ${formatHoldDate(p.holdUntil)}` : 'On Hold'; }
 else if (p.status === 'called') { swatchCls = 'focus-called'; pillCls = 'called';   pillLabel = 'Called'; }
 else if (p.status === 'done')   { swatchCls = 'archived';     pillCls = 'done';     pillLabel = 'Done'; }
 else                            { swatchCls = 'focus-active'; pillCls = 'active';   pillLabel = 'Active'; }
@@ -570,9 +570,9 @@ row.innerHTML = `
 <td style="padding:0 6px;"><div class="swatch ${swatchCls}"></div></td>
 <td class="focus-name-cell">
 <div style="font-weight:600;">${esc(p.name)}</div>
-<div style="font-size:11px;color:var(--text-secondary);">${esc(p.company||'')} ${p.email ? '\u00B7 ' + esc(p.email) : ''}</div>
+<div style="font-size:11px;color:var(--text-secondary);">${esc(p.company||'')} ${p.email ? '· ' + esc(p.email) : ''}</div>
 </td>
-<td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '\u2014'}</td>
+<td style="color:var(--text-secondary);font-size:13px;">${p.receivedDate ? formatHoldDate(p.receivedDate) : '—'}</td>
 <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
 <td onclick="event.stopPropagation()"><div class="score-breakdown"><span class="lead-score-badge ${scoreCls}">${p._score}</span>${tooltip}</div></td>
 <td><div class="notes-cell"><div class="notes-truncated">${esc(p.notes||'')}</div></div></td>
@@ -654,7 +654,7 @@ renderTable(prospects);
 scheduleSave();
 closeAddModal();
 });
-// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
+// Modal lock: click-outside-to-close removed — use Cancel/Submit buttons
 function toggleArchive() {
 document.getElementById('archiveBody').classList.toggle('open');
 document.getElementById('archiveChevron').classList.toggle('open');
@@ -754,7 +754,7 @@ renderFocus();
 scheduleFocusSave();
 closeFocusModal();
 });
-// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
+// Modal lock: click-outside-to-close removed — use Cancel/Submit buttons
 function openSettings() {
 document.getElementById('settingName').value         = appSettings.displayName  || '';
 document.getElementById('settingEmail').value        = appSettings.workEmail    || '';
@@ -774,7 +774,7 @@ appSettings.scanSchedule = document.getElementById('settingScanSchedule').value;
 doSaveSettings();
 setGreeting();
 }
-// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
+// Modal lock: click-outside-to-close removed — use Cancel/Submit buttons
 function validateSalesforceOwnership(leadOwnerId) {
 const trackerOwner = appSettings.salesforceId || '';
 if (!trackerOwner) {
@@ -783,7 +783,7 @@ return { allowed: false, reason: 'No Salesforce ID configured for this tracker. 
 if (trackerOwner.toLowerCase() !== (leadOwnerId || '').toLowerCase()) {
 return {
 allowed: false,
-reason: `\u26A0 Ownership mismatch: this tracker belongs to "${trackerOwner}" but the Salesforce lead is owned by "${leadOwnerId}". Task creation blocked.`
+reason: `⚠ Ownership mismatch: this tracker belongs to "${trackerOwner}" but the Salesforce lead is owned by "${leadOwnerId}". Task creation blocked.`
 };
 }
 return { allowed: true, reason: 'Ownership verified.' };
@@ -793,7 +793,7 @@ function esc(str) {
 return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 // ============================================================
-// REMINDERS \u2014 bell icon, time picker, notifications
+// REMINDERS — bell icon, time picker, notifications
 // ============================================================
 function getReminders(id) { return _reminders[id] || []; }
 function getTotalReminderCount() {
@@ -832,7 +832,7 @@ const f = dailyFocus.find(x => x.id === id);
 if (f) return { name: f.name, company: f.company || '', source: 'focus' };
 return null;
 }
-// \u2500\u2500 Render Active Reminders list \u2500\u2500
+// ── Render Active Reminders list ──
 function renderReminders() {
 const list = document.getElementById('remindersList');
 const countEl = document.getElementById('reminderCount');
@@ -876,7 +876,7 @@ item.innerHTML =
 '</div>' +
 '<div>' +
 '<div class="reminder-name">' + esc(r.name) + autoTag + '</div>' +
-'<div class="reminder-source">' + esc(r.source) + ' \u00B7 Recurring</div>' +
+'<div class="reminder-source">' + esc(r.source) + ' · Recurring</div>' +
 '</div>' +
 '</div>' +
 '<div class="reminder-actions">' +
@@ -919,7 +919,7 @@ if (!info) return;
 const type = info.source === 'focus' ? 'focus' : 'prospect';
 _pickerProspectId = String(prospectId);
 _pickerProspectType = type;
-const label = info.company ? info.name + ' \u2014 ' + info.company : info.name;
+const label = info.company ? info.name + ' — ' + info.company : info.name;
 document.getElementById('pickerLabel').textContent = 'for ' + label;
 document.getElementById('reminderDate').value = old.date;
 document.getElementById('reminderDate').min = todayStr();
@@ -931,16 +931,16 @@ saveReminders();
 updatePickerState();
 renderAll();
 document.getElementById('pickerOverlay').classList.add('active');
-showReminderToast('Editing reminder for ' + info.name + ' \u2014 pick a new time');
+showReminderToast('Editing reminder for ' + info.name + ' — pick a new time');
 }
-// \u2500\u2500 Time Picker \u2500\u2500
+// ── Time Picker ──
 function openTimePicker(id, type) {
 const strId = String(id);
 const info = findProspectInfo(type === 'focus' ? id : parseInt(id) || id);
 if (!info) return;
 _pickerProspectId = strId;
 _pickerProspectType = type;
-const label = info.company ? info.name + ' \u2014 ' + info.company : info.name;
+const label = info.company ? info.name + ' — ' + info.company : info.name;
 document.getElementById('pickerLabel').textContent = 'for ' + label;
 document.getElementById('reminderDate').value = todayStr();
 document.getElementById('reminderDate').min = todayStr();
@@ -964,7 +964,7 @@ pR.forEach((r, idx) => {
 const dateLabel = isToday(r.date) ? 'Today' : fmtDateShort(r.date);
 html += '<span class="existing-reminder-chip">' +
 '<span class="chip-text">' + dateLabel + ' at ' + fmtTimeDisplay(r.time) + '</span>' +
-'<button class="chip-remove" onclick="removeReminderFromPicker(' + idx + ')" title="Remove">\u00D7</button>' +
+'<button class="chip-remove" onclick="removeReminderFromPicker(' + idx + ')" title="Remove">×</button>' +
 '</span>';
 });
 html += '</div>';
@@ -1014,14 +1014,14 @@ const info = findProspectInfo(_pickerProspectId);
 const dateLabel = isToday(date) ? 'today' : fmtDateShort(date);
 updatePickerState();
 renderAll();
-showReminderToast('Reminder set for ' + info.name + ' \u2014 ' + dateLabel + ' at ' + fmtTimeDisplay(time));
+showReminderToast('Reminder set for ' + info.name + ' — ' + dateLabel + ' at ' + fmtTimeDisplay(time));
 // Advance time by 30 min for quick multi-add
 const next = new Date(date + 'T' + time);
 next.setMinutes(next.getMinutes() + 30);
 document.getElementById('reminderTime').value =
 String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
 }
-// \u2500\u2500 Notification engine \u2014 checks every 15 seconds \u2500\u2500
+// ── Notification engine — checks every 15 seconds ──
 function checkReminders() {
 const now = new Date();
 const currentDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -1035,7 +1035,7 @@ const r = _reminders[id][i];
 if (r.date < currentDate || (r.date === currentDate && r.time <= currentTime)) {
 if ('Notification' in window && Notification.permission === 'granted') {
 const dateLabel = isToday(r.date) ? '' : ' (' + fmtDateShort(r.date) + ')';
-const notif = new Notification('Calebrate \u2014 Time to Call' + dateLabel, {
+const notif = new Notification('Calebrate — Time to Call' + dateLabel, {
 body: info.name + (info.company ? ' at ' + info.company : ''),
 requireInteraction: true,
 tag: 'calebrate-' + id + '-' + i
@@ -1054,7 +1054,7 @@ _tasks.forEach(t => {
 if (t.done || !t.time || t.notified) return;
 if (t.due < currentDate || (t.due === currentDate && t.time <= currentTime)) {
 if ('Notification' in window && Notification.permission === 'granted') {
-const notif = new Notification('Calebrate \u2014 Task Reminder', {
+const notif = new Notification('Calebrate — Task Reminder', {
 body: t.name,
 requireInteraction: true,
 tag: 'calebrate-task-' + t.id
@@ -1069,12 +1069,12 @@ showReminderToast('Task reminder: ' + t.name + '!');
 if (firedAny) { saveReminders(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
-// \u2500\u2500 Auto-refresh when date changes (fixes stale tab) \u2500\u2500
+// ── Auto-refresh when date changes (fixes stale tab) ──
 const _loadDate = new Date().getDate();
 setInterval(() => {
 if (new Date().getDate() !== _loadDate) location.reload();
 }, 60000);
-// \u2500\u2500 Notification permission \u2500\u2500
+// ── Notification permission ──
 function updateNotifBanner() {
 const banner = document.getElementById('notifBanner');
 const text = document.getElementById('notifText');
@@ -1100,7 +1100,7 @@ if (Notification.permission === 'granted') showReminderToast('Notifications enab
 });
 }
 // ============================================================
-// MY TASKS \u2014 recurring tasks, priority sorting, localStorage
+// MY TASKS — recurring tasks, priority sorting, localStorage
 // ============================================================
 let _tasks = JSON.parse(localStorage.getItem('pt_tasks') || '[]');
 let _editingTaskId = null;
@@ -1139,9 +1139,9 @@ function getRecurLabel(task) {
   if (task.recurrence === 'weekly') {
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const days = (task.weeklyDays || []).map(d => dayNames[d]).join(', ');
-    return 'Weekly' + (days ? ' \u00B7 ' + days : '');
+    return 'Weekly' + (days ? ' · ' + days : '');
   }
-  if (task.recurrence === 'monthly') return 'Monthly \u00B7 ' + ordinal(task.monthDay || 1);
+  if (task.recurrence === 'monthly') return 'Monthly · ' + ordinal(task.monthDay || 1);
   return 'Once';
 }
 
@@ -1185,12 +1185,12 @@ function toggleTaskSort() {
     dueTh.classList.add('active-sort');
     label.textContent = 'Sorted by Due Date';
     label.className = 'sort-mode-indicator due-date';
-    arrow.textContent = '\u25BC';
+    arrow.textContent = '▼';
   } else {
     dueTh.classList.remove('active-sort');
     label.textContent = 'Sorted by Priority';
     label.className = 'sort-mode-indicator priority';
-    arrow.textContent = '\u25B2';
+    arrow.textContent = '▲';
   }
   renderTasks();
   showReminderToast('Tasks sorted by ' + (_taskSortMode === 'due' ? 'due date' : 'priority'));
@@ -1232,7 +1232,7 @@ function renderTasks() {
       '<td style="padding:0 6px;"><div class="swatch ' + swCls + '"></div></td>' +
       '<td><span class="task-name-text" style="font-weight:600;">' + esc(t.name) + '</span></td>' +
       '<td>' + (t.done ? '<span style="color:var(--text-secondary);font-size:13px;">' + formatHoldDate(t.due) + '</span>' : '<span class="task-due-pill ' + dueCls + '">' + dueText + '</span>') + '</td>' +
-      '<td>' + (t.time ? '<span class="task-time-badge"><span class="clock-icon">\uD83D\uDD51</span> ' + fmtTimeDisplay(t.time) + '</span>' : '<span class="task-no-time">\u2014</span>') + '</td>' +
+      '<td>' + (t.time ? '<span class="task-time-badge"><span class="clock-icon">🕑</span> ' + fmtTimeDisplay(t.time) + '</span>' : '<span class="task-no-time">—</span>') + '</td>' +
       '<td><span class="recur-pill ' + recurCls + '">' + recurLabel + '</span></td>' +
       '<td><div class="notes-cell"><div class="notes-truncated">' + esc(t.notes || '') + '</div></div></td>' +
       '<td onclick="event.stopPropagation()">' +
@@ -1361,7 +1361,7 @@ function deleteTask(e, id) {
   renderReminders();
 }
 
-// \u2500\u2500 Task Modal \u2500\u2500
+// ── Task Modal ──
 function openTaskModal() {
   _editingTaskId = null;
   document.getElementById('taskModalHeader').textContent = 'Add New Task';
@@ -1485,9 +1485,9 @@ document.getElementById('taskForm').addEventListener('submit', function(e) {
   showReminderToast('Task saved: ' + name);
 });
 
-// Modal lock: click-outside-to-close removed \u2014 use Cancel/Submit buttons
+// Modal lock: click-outside-to-close removed — use Cancel/Submit buttons
 
-// \u2500\u2500 Greeting \u2500\u2500
+// ── Greeting ──
 function setGreeting() {
   const fullName = (appSettings && appSettings.displayName) || '';
   const first = fullName.split(' ')[0] || 'there';
@@ -1498,7 +1498,7 @@ function setGreeting() {
   const el = document.getElementById('greetingLine');
   if (el) el.textContent = g + ', ' + first + '!';
 }
-// \u2500\u2500 Toast \u2500\u2500
+// ── Toast ──
 function showReminderToast(msg) {
 const toast = document.getElementById('reminderToast');
 if (!toast) return;
@@ -1506,7 +1506,7 @@ document.getElementById('reminderToastText').textContent = msg;
 toast.classList.add('active');
 setTimeout(() => { toast.classList.remove('active'); }, 3500);
 }
-// \u2500\u2500 Page Navigation \u2500\u2500
+// ── Page Navigation ──
 let _currentPage = 'pageHome';
 function navigateTo(pageId) {
 const pages = document.querySelectorAll('.pages-wrapper .page');
@@ -1523,7 +1523,7 @@ clearSearch();
 }
 document.addEventListener('keydown', function(e) {
 if (e.key === 'Escape' && _currentPage !== 'pageHome') {
-  // Don\u2019t go home if a modal is open
+  // Don’t go home if a modal is open
   var modals = ['addModal','focusModal','settingsModal','taskModal','pickerOverlay','sfHelpModal','ghHelpModal','gmailGuideModal','helpPanel'];
   for (var i = 0; i < modals.length; i++) {
     var m = document.getElementById(modals[i]);
@@ -1532,7 +1532,7 @@ if (e.key === 'Escape' && _currentPage !== 'pageHome') {
   goHome();
 }
 });
-// \u2500\u2500 Home Cards \u2500\u2500
+// ── Home Cards ──
 function renderHomeCards() {
 var grid = document.getElementById('cardsGrid');
 if (!grid) return;
@@ -1544,9 +1544,9 @@ _tasks.forEach(function(t) { if (!t.done && t.time && !t.notified) rCount++; });
 var readyList = [], upcomingList = [], archivedList = [];
 prospects.forEach(function(p) {
   var days = calculateDays(p.date);
-  if (days <= 0) readyList.push(p);
-  else if (days <= 90) upcomingList.push(p);
-  else archivedList.push(p);
+  if (days <= -90) archivedList.push(p);
+  else if (days <= 0) readyList.push(p);
+  else upcomingList.push(p);
 });
 var focusCount = dailyFocus.length;
 var taskCount = _tasks.filter(function(t) { return !t.done; }).length;
@@ -1562,7 +1562,7 @@ var cards = [
 var h = '';
 cards.forEach(function(c) {
   h += '<div class="section-card ' + c.cls + '" onclick="navigateTo(\'' + c.id + '\')">'; 
-  h += '<div class="card-top"><div class="card-title">' + esc(c.title) + '</div><span class="card-arrow">\u2192</span></div>';
+  h += '<div class="card-top"><div class="card-title">' + esc(c.title) + '</div><span class="card-arrow">→</span></div>';
   h += '<div style="display:flex;align-items:baseline;gap:12px;"><span class="card-count">' + c.count + '</span><span class="card-subtitle">' + esc(c.sub) + '</span></div>';
   if (c.items.length > 0) {
     h += '<div class="card-preview">';
@@ -1583,7 +1583,7 @@ dc = document.getElementById('detailCountTasks'); if (dc) dc.textContent = taskC
 dc = document.getElementById('detailCountUpcoming'); if (dc) dc.textContent = upcomingList.length;
 dc = document.getElementById('detailCountArchived'); if (dc) dc.textContent = archivedList.length;
 }
-// \u2500\u2500 Legend Toggle \u2500\u2500
+// ── Legend Toggle ──
 function toggleLegend() {
 var toggle = document.getElementById('legendToggle');
 var panel = document.getElementById('legendPanel');
@@ -1591,7 +1591,7 @@ if (!toggle || !panel) return;
 toggle.classList.toggle('open');
 panel.classList.toggle('open');
 }
-// \u2500\u2500 Search \u2500\u2500
+// ── Search ──
 let _searchTimer = null;
 function clearSearch() {
 var input = document.getElementById('searchInput');
@@ -1612,24 +1612,24 @@ prospects.forEach(function(p) {
   var text = ((p.contact || '') + ' ' + (p.email || '') + ' ' + (p.notes || '')).toLowerCase();
   if (text.includes(q)) {
     var days = calculateDays(p.date);
-    var section = days <= 0 ? 'ready' : days <= 90 ? 'upcoming' : 'archived';
+    var section = days <= -90 ? 'archived' : days <= 0 ? 'ready' : 'upcoming';
     var labels = { ready: 'Ready to Call', upcoming: 'Upcoming', archived: 'Archived' };
     var pages = { ready: 'pageReady', upcoming: 'pageUpcoming', archived: 'pageArchived' };
-    results.push({ name: p.contact || p.email, detail: (p.email || '') + (p.notes ? ' \u00B7 ' + p.notes : ''), section: labels[section], badge: 'search-badge-' + section, page: pages[section], swatch: section === 'ready' ? '#818cf8' : section === 'upcoming' ? '#22d3ee' : '#94a3b8' });
+    results.push({ name: p.contact || p.email, detail: (p.email || '') + (p.notes ? ' · ' + p.notes : ''), section: labels[section], badge: 'search-badge-' + section, page: pages[section], swatch: section === 'ready' ? '#818cf8' : section === 'upcoming' ? '#22d3ee' : '#94a3b8' });
   }
 });
 // Search hot leads
 dailyFocus.forEach(function(l) {
   var text = ((l.name || '') + ' ' + (l.email || '') + ' ' + (l.company || '') + ' ' + (l.notes || '')).toLowerCase();
   if (text.includes(q)) {
-    results.push({ name: l.name || l.email, detail: (l.company || '') + (l.email ? ' \u00B7 ' + l.email : ''), section: 'Hot Leads', badge: 'search-badge-hotleads', page: 'pageHotLeads', swatch: '#d946ef' });
+    results.push({ name: l.name || l.email, detail: (l.company || '') + (l.email ? ' · ' + l.email : ''), section: 'Hot Leads', badge: 'search-badge-hotleads', page: 'pageHotLeads', swatch: '#d946ef' });
   }
 });
 // Search tasks
 _tasks.forEach(function(t) {
   var text = ((t.name || '') + ' ' + (t.notes || '')).toLowerCase();
   if (text.includes(q)) {
-    results.push({ name: t.name, detail: (t.due || 'No date') + (t.notes ? ' \u00B7 ' + t.notes : ''), section: 'My Tasks', badge: 'search-badge-tasks', page: 'pageTasks', swatch: '#facc15' });
+    results.push({ name: t.name, detail: (t.due || 'No date') + (t.notes ? ' · ' + t.notes : ''), section: 'My Tasks', badge: 'search-badge-tasks', page: 'pageTasks', swatch: '#facc15' });
   }
 });
 if (results.length === 0) {
@@ -1647,7 +1647,7 @@ results.slice(0, 20).forEach(function(r) {
   h += '<span class="search-result-badge ' + r.badge + '">' + esc(r.section) + '</span>';
   h += '</div>';
 });
-if (results.length > 20) h += '<div class="search-empty">' + (results.length - 20) + ' more results\u2026</div>';
+if (results.length > 20) h += '<div class="search-empty">' + (results.length - 20) + ' more results…</div>';
 dropdown.innerHTML = h;
 dropdown.classList.add('open');
 }
@@ -1688,7 +1688,7 @@ updateNotifBanner();
 showSetupScreen();
 document.getElementById('setupOwner').value = _owner;
 const errEl = document.getElementById('setupError');
-errEl.textContent = '\u26A0 Session expired or token invalid. Please reconnect.';
+errEl.textContent = '⚠ Session expired or token invalid. Please reconnect.';
 errEl.classList.add('visible');
 }
 })();

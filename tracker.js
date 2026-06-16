@@ -1032,7 +1032,7 @@ const info = findProspectInfo(id);
 if (!info) return;
 for (let i = _reminders[id].length - 1; i >= 0; i--) {
 const r = _reminders[id][i];
-if (r.date < currentDate || (r.date === currentDate && r.time <= currentTime)) {
+if (r.date <= currentDate && r.time <= currentTime) {
 if ('Notification' in window && Notification.permission === 'granted') {
 const dateLabel = isToday(r.date) ? '' : ' (' + fmtDateShort(r.date) + ')';
 const notif = new Notification('Calebrate — Time to Call' + dateLabel, {
@@ -1052,7 +1052,7 @@ if (_reminders[id] && _reminders[id].length === 0) delete _reminders[id];
 // Auto-reminders from tasks with time set
 _tasks.forEach(t => {
 if (t.done || !t.time || t.notified) return;
-if (t.due < currentDate || (t.due === currentDate && t.time <= currentTime)) {
+if (t.due <= currentDate && t.time <= currentTime) {
 if ('Notification' in window && Notification.permission === 'granted') {
 const notif = new Notification('Calebrate — Task Reminder', {
 body: t.name,
@@ -1066,7 +1066,7 @@ firedAny = true;
 showReminderToast('Task reminder: ' + t.name + '!');
 }
 });
-if (firedAny) { saveReminders(); renderAll(); }
+if (firedAny) { saveReminders(); saveTasks(); renderAll(); }
 }
 setInterval(checkReminders, 15000);
 // ── Auto-refresh when date changes (fixes stale tab) ──

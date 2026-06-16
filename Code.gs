@@ -23,6 +23,11 @@
 //   Body-only keywords: Only match against fresh body (not subject line)
 //   Duplicate check:    Checks both email address AND contact name to prevent repeats
 //
+// MEETING CLEANUP:
+//   ChiliPiper:         Detects meeting booked/rescheduled emails and auto-removes
+//                       those prospects from Hot Leads. Cancelled meetings are ignored.
+//                       Only runs in daily mode (not during 14-day ramp-up).
+//
 // SETUP:
 //   1. Open this script in Apps Script
 //   2. Click the "Calebrate" menu at the top → "Initial Setup"
@@ -103,7 +108,12 @@ const BLOCKED_SENDERS = [
   'postmaster@*',
   '*@myworkday.com',
   'mailer-daemon@*',
-  '*@mail.notion.so'       // Internal Notion notifications (subject contains "Gusto" = company workspace name)
+  '*@mail.notion.so',      // Internal Notion notifications (subject contains "Gusto" = company workspace name)
+  '*@fireflies.ai',        // Fireflies meeting recap bot
+  '*@e.read.ai',           // Read AI meeting summary bot
+  '*@qualified.com',       // Qualified sales tool notifications
+  '*@*.atlassian.net',     // Confluence / Jira digest emails
+  '*@vimeo.com'            // Vimeo marketing emails
 ];
 
 // ── CUSTOM MENU ───────────────────────────────────────────────────────────────────
@@ -602,6 +612,14 @@ function checkGmailForLeads() {
       Logger.log('📅 Ramp-up day ' + (daysSinceStart + 1) + '/14 complete — ' + (13 - daysSinceStart) + ' days remaining before switching to daily mode.');
     }
 
+    // ── ChiliPiper meeting cleanup (daily mode only) ──
+    // After processing new leads, check for ChiliPiper meeting confirmations
+    // and auto-remove prospects who have a confirmed meeting.
+    // Skipped during ramp-up to avoid removing old prospects from months ago.
+    if (!isRampUp) {
+      removeBookedMeetings();
+    }
+
     const syncTime = new Date().toISOString();
     props.setProperty('LAST_GMAIL_SYNC', syncTime);
     Logger.log('Scan complete: ' + syncTime);
@@ -670,6 +688,120 @@ function parseLeadFromEmail(from, subject, date, msgId) {
   } catch (err) {
     Logger.log('Failed to parse email from "' + from + '": ' + err.message);
     return null;
+  }
+}
+
+// ── CHILIPIPER MEETING CLEANUP ────────────────────────────────────────────────────
+// After scanning for new leads, checks for ChiliPiper meeting confirmation emails.
+// If a meeting was booked or rescheduled → removes that prospect from Hot Leads.
+// If a meeting was cancelled → prospect stays on the list (still a lead).
+//
+// Smart handling: if someone has BOTH a "booked" and "cancelled" email within the
+// same 2-day window, only the most recent one counts. So if a meeting was booked
+// then cancelled, the prospect stays.
+//
+// Only runs during daily mode (not during the 14-day ramp-up scan).
+
+function removeBookedMeetings() {
+  Logger.log('--- ChiliPiper meeting cleanup ---');
+
+  // Search for ChiliPiper emails from the last 2 days
+  var threads = GmailApp.search('from:notifications@chilipiper.com newer_than:2d', 0, 50);
+  Logger.log('ChiliPiper emails found: ' + threads.length);
+
+  if (threads.length === 0) {
+    Logger.log('No ChiliPiper emails to process.');
+    return;
+  }
+
+  // Track the most recent status per guest email
+  // { "email@domain.com": { status: "booked"|"cancelled", date: Date, subject: "..." } }
+  var guestStatus = {};
+
+  threads.forEach(function(thread) {
+    thread.getMessages().forEach(function(message) {
+      var subject   = (message.getSubject() || '');
+      var plainBody = message.getPlainBody() || '';
+      var msgDate   = message.getDate();
+      var subjectLc = subject.toLowerCase();
+      var bodyLc    = plainBody.toLowerCase();
+
+      // Extract the Primary Guest email from the email body
+      // ChiliPiper format has "Primary Guest" label followed by name and email
+      var emailPattern = /Primary Guest[\s\S]*?([\w.\-+]+@[\w.\-]+\.\w+)/i;
+      var match = plainBody.match(emailPattern);
+      if (!match || !match[1]) return;
+
+      var guestEmail = match[1].toLowerCase().trim();
+
+      // Skip internal Gusto emails (those aren't prospects)
+      if (guestEmail.includes('gusto.com')) return;
+
+      // Determine the meeting status from this email
+      var status = null;
+      if (subjectLc.includes('canceled') || subjectLc.includes('cancelled') ||
+          bodyLc.includes('was canceled') || bodyLc.includes('was cancelled')) {
+        status = 'cancelled';
+      } else if (subjectLc.includes('meeting booked') || subjectLc.includes('rescheduled')) {
+        status = 'booked';
+      }
+
+      if (!status) return;
+
+      // Only keep the most recent event per guest email
+      if (!guestStatus[guestEmail] || msgDate > guestStatus[guestEmail].date) {
+        guestStatus[guestEmail] = { status: status, date: msgDate, subject: subject };
+      }
+    });
+  });
+
+  // Collect emails where the most recent status is "booked" (not cancelled)
+  var toRemove = [];
+  for (var email in guestStatus) {
+    if (guestStatus[email].status === 'booked') {
+      toRemove.push(email);
+      Logger.log('  Meeting confirmed: ' + email + ' (' + guestStatus[email].subject + ')');
+    } else {
+      Logger.log('  Meeting cancelled (keeping on list): ' + email);
+    }
+  }
+
+  if (toRemove.length === 0) {
+    Logger.log('No prospects to auto-remove (no confirmed meetings, or all were cancelled).');
+    return;
+  }
+
+  // Read focus.json and remove prospects whose meetings are confirmed
+  try {
+    var result     = githubRead(FOCUS_PATH);
+    var current    = result.data;
+    var currentSha = result.sha;
+
+    var removed   = [];
+    var remaining = current.filter(function(lead) {
+      var leadEmail = (lead.email || '').toLowerCase();
+      if (toRemove.indexOf(leadEmail) !== -1) {
+        removed.push(lead.name + ' <' + lead.email + '>');
+        return false;  // remove from list
+      }
+      return true;     // keep on list
+    });
+
+    if (removed.length > 0) {
+      var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+      githubWrite(
+        FOCUS_PATH,
+        remaining,
+        currentSha,
+        'Auto-removed ' + removed.length + ' prospect(s) with confirmed meetings — ' + today
+      );
+      Logger.log('✅ Removed ' + removed.length + ' prospect(s) with confirmed meetings:');
+      removed.forEach(function(r) { Logger.log('   • ' + r); });
+    } else {
+      Logger.log('No matching prospects found in Hot Leads — they may have already been removed.');
+    }
+  } catch (err) {
+    Logger.log('❌ ChiliPiper cleanup error: ' + err.message);
   }
 }
 

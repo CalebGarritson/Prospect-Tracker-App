@@ -681,6 +681,7 @@ function parseLeadFromEmail(from, subject, date, msgId) {
       status:       'new',
       holdUntil:    null,
       receivedDate: receivedDate,
+      dateAdded:    new Date().toISOString(),
       priority:     0,
       notes:        'Subject: ' + subject,
       source:       'gmail'

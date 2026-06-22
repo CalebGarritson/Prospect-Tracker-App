@@ -492,7 +492,7 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 tb.appendChild(row);
 const expRow = document.createElement('tr');
 expRow.className = 'expanded-row';
-expRow.innerHTML = `<td colspan="8"><div class="expanded-content"><h3>Full Notes</h3><p>${esc(p.notes||'')}</p></div></td>`;
+expRow.innerHTML = `<td colspan="8"><div class="expanded-content"><h3>Full Notes</h3><p>${esc(p.notes||'')}</p>${p.dateAdded ? '<div class="date-added-line">' + fmtDateAdded(p.dateAdded) + '</div>' : ''}</div></td>`;
 tb.appendChild(expRow);
 });
 });
@@ -526,7 +526,7 @@ ${p.email ? `<div style="font-size:11px;color:var(--text-secondary);">${esc(p.em
 tbA.appendChild(row);
 const expRow = document.createElement('tr');
 expRow.className = 'expanded-row';
-expRow.innerHTML = `<td colspan="8"><div class="expanded-content"><h3>Full Notes</h3><p>${esc(p.notes||'')}</p></div></td>`;
+expRow.innerHTML = `<td colspan="8"><div class="expanded-content"><h3>Full Notes</h3><p>${esc(p.notes||'')}</p>${p.dateAdded ? '<div class="date-added-line">' + fmtDateAdded(p.dateAdded) + '</div>' : ''}</div></td>`;
 tbA.appendChild(expRow);
 });
 updateToolbar();
@@ -593,7 +593,7 @@ row.innerHTML = `
 tbody.appendChild(row);
 const expRow = document.createElement('tr');
 expRow.className = 'expanded-row';
-expRow.innerHTML = `<td colspan="9"><div class="expanded-content"><h3>Notes</h3><p>${esc(p.notes||'')}</p></div></td>`;
+expRow.innerHTML = `<td colspan="9"><div class="expanded-content"><h3>Notes</h3><p>${esc(p.notes||'')}</p>${p.dateAdded ? '<div class="date-added-line">' + fmtDateAdded(p.dateAdded) + '</div>' : ''}</div></td>`;
 tbody.appendChild(expRow);
 });
 }
@@ -648,7 +648,7 @@ Object.assign(p, { contact, email, date, notes });
 _editingId = null;
 } else {
 const maxId = prospects.length ? Math.max(...prospects.map(p => p.id)) : 0;
-prospects.push({ id: maxId + 1, contact, email, priority: 0, date, notes });
+prospects.push({ id: maxId + 1, contact, email, priority: 0, date, notes, dateAdded: new Date().toISOString() });
 }
 renderTable(prospects);
 scheduleSave();
@@ -748,6 +748,7 @@ if (idx >= 0) dailyFocus[idx] = { ...dailyFocus[idx], ...entry };
 _editingFocusId = null;
 } else {
 entry.id = 'df_' + Date.now();
+entry.dateAdded = new Date().toISOString();
 dailyFocus.push(entry);
 }
 renderFocus();
@@ -789,6 +790,13 @@ reason: `⚠ Ownership mismatch: this tracker belongs to "${trackerOwner}" but t
 return { allowed: true, reason: 'Ownership verified.' };
 }
 window.__sfOwnerCheck = validateSalesforceOwnership;
+function fmtDateAdded(isoStr) {
+if (!isoStr) return '';
+var d = new Date(isoStr);
+if (isNaN(d.getTime())) return '';
+var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+return 'Added on ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
 function esc(str) {
 return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -1252,7 +1260,7 @@ function renderTasks() {
     tbody.appendChild(row);
     const expRow = document.createElement('tr');
     expRow.className = 'expanded-row';
-    expRow.innerHTML = '<td colspan="10"><div class="expanded-content"><h3>Notes</h3><p>' + esc(t.notes || '') + '</p></div></td>';
+    expRow.innerHTML = '<td colspan="10"><div class="expanded-content"><h3>Notes</h3><p>' + esc(t.notes || '') + '</p>' + (t.dateAdded ? '<div class="date-added-line">' + fmtDateAdded(t.dateAdded) + '</div>' : '') + '</div></td>';
     tbody.appendChild(expRow);
   });
 }
@@ -1329,6 +1337,7 @@ function createNextOccurrence(task) {
     priority: task.priority,
     done: false
   };
+  if (task.dateAdded) nextTask.dateAdded = task.dateAdded;
   if (task.time) nextTask.time = task.time;
   return nextTask;
 }
@@ -1471,11 +1480,13 @@ document.getElementById('taskForm').addEventListener('submit', function(e) {
       entry.priority = _tasks[idx].priority;
       entry.done = _tasks[idx].done;
       if (_tasks[idx].completedDate) entry.completedDate = _tasks[idx].completedDate;
+      if (_tasks[idx].dateAdded) entry.dateAdded = _tasks[idx].dateAdded;
       _tasks[idx] = entry;
     }
     _editingTaskId = null;
   } else {
     entry.id = 'task_' + Date.now();
+    entry.dateAdded = new Date().toISOString();
     _tasks.push(entry);
   }
 

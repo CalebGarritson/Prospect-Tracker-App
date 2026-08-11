@@ -28,11 +28,11 @@
 //                       those prospects from Hot Leads. Cancelled meetings are ignored.
 //                       Only runs in daily mode (not during 14-day ramp-up).
 //
-// SETUP:
-//   1. Open this script in Apps Script
-//   2. Click the "Calebrate" menu at the top → "Initial Setup"
-//   3. Enter your GitHub username and token in the popup
-//   4. Click "Save & Connect" — done!
+// SETUP (3 steps):
+//   1. Paste this code into a new Apps Script project
+//   2. Scroll down to the setup() function, replace YOUR_GITHUB_USERNAME
+//      and YOUR_GITHUB_TOKEN with your real values
+//   3. Select "setup" from the function dropdown at the top, click Run
 //
 // GITHUB TARGET:
 //   Repo  : Prospect-tracker (each user's own private repo)
@@ -112,9 +112,69 @@ const BLOCKED_SENDERS = [
   '*@fireflies.ai',        // Fireflies meeting recap bot
   '*@e.read.ai',           // Read AI meeting summary bot
   '*@qualified.com',       // Qualified sales tool notifications
-  '*@*.atlassian.net',     // Confluence / Jira digest emails
+  '*@*atlassian.net',      // Confluence / Jira digest emails
   '*@vimeo.com'            // Vimeo marketing emails
 ];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ██  SETUP — NEW USERS START HERE  ██
+//
+// Replace the two placeholder values below with your real GitHub username
+// and personal access token. Then select "setup" from the function dropdown
+// at the top of this page and click the ▶ Run button.
+//
+// Your username is the one in your GitHub profile URL: github.com/YourName
+// Your token starts with "ghp_" — you created it during tracker setup.
+//
+// IMPORTANT: Keep the quote marks around your values!
+//   CORRECT:   'janedoe'
+//   WRONG:     janedoe
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function setup() {
+  var MY_GITHUB_USERNAME = 'YOUR_GITHUB_USERNAME';   // ← Replace this
+  var MY_GITHUB_TOKEN    = '********';      // ← Replace this
+
+  // ── Nothing below this line needs to be changed ──
+
+  if (MY_GITHUB_USERNAME === 'YOUR_GITHUB_USERNAME' || MY_GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN') {
+    Logger.log('❌ You still have the placeholder values. Edit the two lines above with your real GitHub username and token, then run this again.');
+    return;
+  }
+
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty('GITHUB_OWNER', MY_GITHUB_USERNAME);
+  props.setProperty('GITHUB_TOKEN', MY_GITHUB_TOKEN);
+  Logger.log('✅ Credentials saved for: ' + MY_GITHUB_USERNAME);
+
+  // Test the connection
+  try {
+    var result = githubRead(FOCUS_PATH);
+    Logger.log('✅ Connected to GitHub! Found ' + result.data.length + ' leads in focus.json.');
+  } catch (err) {
+    Logger.log('❌ Connection failed: ' + err.message);
+    Logger.log('Double-check your username and token and try again.');
+    return;
+  }
+
+  // Create the daily 7am trigger (removes old ones first to avoid duplicates)
+  var triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(function(t) {
+    if (t.getHandlerFunction() === 'checkGmailForLeads') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  ScriptApp.newTrigger('checkGmailForLeads')
+    .timeBased()
+    .everyDays(1)
+    .atHour(7)
+    .create();
+
+  Logger.log('✅ Daily Gmail scan trigger set for 7:00 AM.');
+  Logger.log('✅ Setup complete! Your scanner will run automatically every morning.');
+  Logger.log('');
+  Logger.log('To test it now: select "checkGmailForLeads" from the dropdown and click Run.');
+}
 
 // ── CUSTOM MENU ───────────────────────────────────────────────────────────────────
 // Shows a "Calebrate" menu when the script editor is opened.
